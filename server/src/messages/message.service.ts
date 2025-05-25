@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { Message, Prisma } from '@prisma/generated'
+import { User } from '@types'
+
 import { PrismaService } from '../prisma.service'
 import { CreateMessageDto } from './dto/create-message.dto'
-import { UpdateMessageDto } from './dto/update-message.dto'
-import { User } from '@types'
 
 @Injectable()
 export class MessageService {
@@ -17,10 +17,31 @@ export class MessageService {
     })
   }
 
+  /**
+   * Get all messages from all users (admin only)
+   */
+  async getAllMessages(): Promise<Message[]> {
+    return this.prisma.message.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            username: true,
+            email: true,
+          },
+        },
+      },
+    })
+  }
+
   async createMessage(createMessageDto: CreateMessageDto, user: User): Promise<Message> {
     const data: Prisma.MessageCreateInput = {
       message: createMessageDto.message,
-      userId: user.sub,
+      user: {
+        connect: {
+          id: user.sub,
+        },
+      },
     }
     
     return this.prisma.message.create({
@@ -28,7 +49,7 @@ export class MessageService {
     })
   }
 
-  async updateMessage(id: number, updateMessageDto: UpdateMessageDto, user: User): Promise<Message> {
+  async updateMessage(id: number, updateMessageDto: CreateMessageDto, user: User): Promise<Message> {
     const message = await this.prisma.message.findUnique({
       where: { id },
     })

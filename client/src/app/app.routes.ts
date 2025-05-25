@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component'
-import { AboutComponent } from './about/about.component';
 import { canActivateAuthRole } from './core/auth/guards/auth.guard'
+import { canActivateAdminRole } from './core/auth/guards/admin.guard'
+import { AdminComponent } from './admin/admin.component'
 
 export const routes: Routes = [
     {
@@ -10,8 +11,9 @@ export const routes: Routes = [
         canActivate: [canActivateAuthRole]
     },
     {
-        path: 'about',
-        component: AboutComponent,
-        canActivate: [canActivateAuthRole]
+        path: 'admin',
+        component: AdminComponent,
+        canActivate: [canActivateAuthRole, canActivateAdminRole]
     }
 ]
+

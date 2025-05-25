@@ -14,10 +14,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                String    @id // Keycloak sub (user ID)
+  email             String    @unique
+  username          String    @unique
+  firstName         String?
+  lastName          String?
+  emailVerified     Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+  
+  // Relations
+  messages          Message[]
+  
+  @@map("users")
+}
+
 model Message {
   id        Int      @default(autoincrement()) @id
   message   String
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
 }

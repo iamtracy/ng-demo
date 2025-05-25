@@ -9,7 +9,6 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout'
 import { map, Observable, shareReplay } from 'rxjs'
 import Keycloak from 'keycloak-js'
 import { CommonModule } from '@angular/common'
-import { HasRolesDirective } from 'keycloak-angular'
 
 @Component({
   selector: 'app-root',
@@ -22,7 +21,7 @@ import { HasRolesDirective } from 'keycloak-angular'
     MatSidenavModule,
     MatListModule,
     MatIconModule,
-    HasRolesDirective,
+    // HasRolesDirective,
   ],
   template: `
     <mat-sidenav-container class="sidenav-container">
@@ -31,13 +30,15 @@ import { HasRolesDirective } from 'keycloak-angular'
           <span class="app-title">My App</span>
           <span class="spacer"></span>
           <nav class="nav-links">
-            <a mat-button href="/about" *kaHasRoles="['view-profile']">
-              <mat-icon>info</mat-icon>
-              About
-            </a>
-            <a mat-button href="/" *kaHasRoles="['view-profile']">
+            <!-- *kaHasRoles="['realm:user']" -->
+            <a mat-button href="/">
               <mat-icon>home</mat-icon>
               Home
+            </a>
+            <!-- *kaHasRoles="['realm:admin']" -->
+            <a mat-button href="/admin" *ngIf="hasAdminRole()">
+              <mat-icon>admin_panel_settings</mat-icon>
+              Admin
             </a>
           </nav>
           <button mat-flat-button color="warn" (click)="logout()">
@@ -89,7 +90,7 @@ import { HasRolesDirective } from 'keycloak-angular'
     }
   `]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   private breakpointObserver = inject(BreakpointObserver)
   private readonly keycloak = inject(Keycloak)
   realmRoles: string[] = []
@@ -100,14 +101,17 @@ export class AppComponent {
       shareReplay()
     )
 
-    async ngOnInit() {
-      try {
-        this.realmRoles = this.keycloak.realmAccess?.roles || []
-        console.log('Realm Roles:', this.realmRoles)
-      } catch (error) {
-        console.error('Error checking realm roles:', error)
-      }
+  async ngOnInit() {
+    try {
+      this.realmRoles = this.keycloak.realmAccess?.roles || []
+    } catch (error) {
+      console.error('Error checking realm roles:', error)
     }
+  }
+
+  hasAdminRole(): boolean {
+    return this.keycloak.hasRealmRole('admin')
+  }
 
   async logout() {
     try {

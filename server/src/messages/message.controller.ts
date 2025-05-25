@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common'
 import { User } from '@types'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { Roles } from 'nest-keycloak-connect'
 import { CurrentUser } from '@auth'
 import { Message } from '@prisma/generated'
 
 import { MessageService } from './message.service'
 import { CreateMessageDto } from './dto/create-message.dto'
-import { UpdateMessageDto } from './dto/update-message.dto'
 import { MessageDto } from './dto/message.dto'
 
 @ApiTags('messages')
@@ -34,6 +34,23 @@ export class MessageController {
   })
   async findAll(@CurrentUser() user: User): Promise<MessageDto[]> {
     const messages = await this.messageService.messages(user)
+    return messages.map(this.toMessageDto)
+  }
+
+  @Get('admin/all')
+  @Roles({ roles: ['realm:admin'] })
+  @ApiOperation({ summary: 'Get all messages from all users (admin only)' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'List of all messages',
+    type: [MessageDto]
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - Admin role required'
+  })
+  async findAllMessages(): Promise<MessageDto[]> {
+    const messages = await this.messageService.getAllMessages()
     return messages.map(this.toMessageDto)
   }
 
@@ -69,7 +86,7 @@ export class MessageController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateMessageDto: UpdateMessageDto,
+    @Body() updateMessageDto: CreateMessageDto,
     @CurrentUser() user: User
   ): Promise<MessageDto> {
     const message = await this.messageService.updateMessage(id, updateMessageDto, user)

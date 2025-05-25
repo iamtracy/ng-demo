@@ -1,6 +1,21 @@
-# Secure Message System
+# 🔐 Angular + NestJS + Keycloak Full Stack App
 
-A secure messaging application built with NestJS and Keycloak authentication.
+## 🧰 Tech Stack
+- **Frontend:** Angular w/ Lazy Modules
+- **Backend:** NestJS, Prisma, Postgres
+- **Auth:** Keycloak (RBAC with resource-level access control)
+- **ORM:** Prisma
+- **Dev:** Docker Compose, dev.sh automation
+- **Docs:** Swagger (OpenAPI)
+- **Tests:** Jest Unit Tests
+
+## 🏁 Features
+- Role-based access control with Keycloak
+- Users can only see their own data
+- Swagger API documentation
+- Secure API with JWT auth
+- Modular Angular and NestJS architecture
+- Dev automation with Docker + Shell Scripts
 
 ## Prerequisites
 

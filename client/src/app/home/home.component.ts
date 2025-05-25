@@ -80,6 +80,7 @@ export class HomeComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.homeService.getAllUsers().subscribe()
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
     this.homeService.getGreetings().subscribe()

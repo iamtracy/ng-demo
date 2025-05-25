@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { AuthGuard, PolicyEnforcementMode, TokenValidation, KeycloakConnectModule, RoleGuard, ResourceGuard } from 'nest-keycloak-connect'
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
+
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import * as dotenv from 'dotenv'
-import { AuthGuard, PolicyEnforcementMode, TokenValidation, KeycloakConnectModule } from 'nest-keycloak-connect'
-import { APP_GUARD } from '@nestjs/core'
 import { MessagesModule } from './messages/message.module'
+import { UserModule } from './user/user.module'
+import { UserSyncInterceptor } from './user/user-sync.interceptor'
+
+import * as dotenv from 'dotenv'
 
 dotenv.config({ path: '../.env' })
 
@@ -36,6 +40,7 @@ if (!KEYCLOAK_CONFIG.secret) {
       useNestLogger: true
     }),
     MessagesModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
@@ -43,6 +48,18 @@ if (!KEYCLOAK_CONFIG.secret) {
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ResourceGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UserSyncInterceptor,
     },
   ],
 })
