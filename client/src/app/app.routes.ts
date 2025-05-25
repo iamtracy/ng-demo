@@ -7,15 +7,11 @@ export const routes: Routes = [
     {
         path: '',
         component: HomeComponent,
-        canActivate: [canActivateAuthRole],
-        data: {
-            roles: ['user']
-        },
-        children: [
-            {
-                path: 'about',
-                component: AboutComponent,
-            }
-        ]
+        canActivate: [canActivateAuthRole]
+    },
+    {
+        path: 'about',
+        component: AboutComponent,
+        canActivate: [canActivateAuthRole]
     }
 ]

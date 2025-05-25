@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button'
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { MatFormFieldModule } from '@angular/material/form-field'
 import { MatInputModule } from '@angular/material/input'
+import { MatIconModule } from '@angular/material/icon'
 
 @Component({
   selector: 'app-home',
@@ -17,12 +18,13 @@ import { MatInputModule } from '@angular/material/input'
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     ReactiveFormsModule
   ],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt']
+  displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
   dataSource = new MatTableDataSource<any>([])
   greetings$: Observable<any[]> = of([])
 
@@ -39,7 +41,15 @@ export class HomeComponent implements OnInit {
     )
   }
 
+  deleteGreeting(id: number) {
+    this.homeService.deleteGreeting(id).subscribe()
+  }
+
   onSubmit() {
-    this.homeService.createGreeting(this.form.value.message as string).subscribe()
+    this.homeService.createGreeting(this.form.value.message as string)
+    .pipe(
+      tap((greetings) => this.form.reset())
+    )
+    .subscribe()
   }
 }

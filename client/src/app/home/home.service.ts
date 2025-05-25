@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import { BehaviorSubject, tap } from 'rxjs'
+import { BehaviorSubject, map, tap } from 'rxjs'
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,15 @@ export class HomeService {
 
   createGreeting(message: string) {
     return this.http.post('/api/greetings', { message }).pipe(
-      tap((response: any) => this._greetings$.next([response.data, ...this._greetings$.value as any]))
+      map((response: any) => [response.data, ...this._greetings$.value as any].sort((a: any, b: any) => a.id - b.id)),
+      tap((response: any) => this._greetings$.next(response))
+    )
+  }
+
+  deleteGreeting(id: number) {
+    return this.http.delete(`/api/greetings/${id}`).pipe(
+      map((_: any) => this._greetings$.value.filter((greeting: any) => greeting.id !== id)),
+      tap((response: any) => this._greetings$.next(response))
     )
   }
 }
