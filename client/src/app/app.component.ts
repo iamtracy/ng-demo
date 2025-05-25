@@ -24,8 +24,6 @@ import { AsyncPipe } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'my-app';
-
   private breakpointObserver = inject(BreakpointObserver);
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
