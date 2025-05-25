@@ -26,6 +26,8 @@ sleep 2
 # Start the server application in the background
 echo "🖥️  Starting Server Application..."
 cd ../server
+npm run prisma:generate
+npm run prisma:migrate
 npm run start:dev &
 
 # Keep the script running

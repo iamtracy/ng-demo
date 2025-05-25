@@ -1,76 +1,121 @@
-# My App
+# Secure Message System
 
-## Environment Setup
+A secure messaging application built with NestJS and Keycloak authentication.
 
-Create a `.env` file in the `server` directory with these values:
+## Prerequisites
 
+- Node.js (v22 or higher)
+- Docker and Docker Compose
+
+## Getting Started
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd my-app
+```
+
+2. Set up environment:
 ```env
-# Server Configuration
+.env
 PORT=3000
 NODE_ENV=development
-
-# Database Configuration
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=my_app_db
-
-# Keycloak Configuration
 KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
 KEYCLOAK_REALM=my-app
 KEYCLOAK_CLIENT_ID=my-app-client
 KEYCLOAK_CLIENT_SECRET=my-app-secret
 
-## Database Setup
+# server/.env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/messages?schema=public"
+```
 
-The application uses PostgreSQL as its database. Follow these steps to set up the database:
+3. Start the application:
+```bash
+# Start infrastructure (Keycloak & PostgreSQL)
+docker-compose up -d
 
-1. Make sure you have Docker and Docker Compose installed
+# Option 1: Quick start with dev script
+sh dev.sh
 
-2. Start the services:
-   ```bash
-   docker-compose up -d
+# Option 2: Manual setup
+cd server
+npm install
+npm run prisma:generate
+npm run prisma:migrate 
+npm run start:dev
+
+cd ../client
+npm install
+npm run dev
+```
+
+The application will be available at:
+- API & Swagger Docs: http://localhost:3000/api/docs
+- Keycloak Admin: http://localhost:8080
+
+## Authentication
+
+The application uses Keycloak for authentication. Default test users:
+- admin/admin123
+- user/user123
+- alice/alice123
+
+To make API requests:
+1. Obtain an access token from Keycloak
+2. Include the token in requests:
+   ```
+   Authorization: Bearer <your-access-token>
    ```
 
-3. The services will be available at:
-   - Frontend: http://localhost:4200
-   - Backend: http://localhost:3000
-   - Database: localhost:5432
-   - Keycloak: http://localhost:8080
+## API Endpoints
 
-## Keycloak Setup
+All endpoints require Bearer token authentication:
 
-1. Access Keycloak admin console at http://localhost:8080
-   - Username: admin
-   - Password: admin
-
-2. The realm "my-app" will be automatically created with:
-   - Client ID: my-app-client
-   - Client Secret: my-app-secret
-   - Configured roles: user, admin
-
-3. After first login, get the realm's public key from:
-   - Realm Settings > Keys > RS256 > Public Key
-   - Add this to your .env file as KEYCLOAK_PUBLIC_KEY
+### Messages
+- `GET /messages` - Get all messages for the current user
+- `POST /messages` - Create a new message
+- `PUT /messages/:id` - Update a message
+- `DELETE /messages/:id` - Delete a message
 
 ## Development
 
-To start the development servers:
+### Testing
+```bash
+cd server
+npm run test
+```
 
-1. Start all services:
-   ```bash
-   docker-compose up -d
-   ```
+### Linting
+```bash
+cd server
+npm run lint
+```
 
-2. Start the backend server:
-   ```bash
-   cd server
-   npm run start:dev
-   ```
+## Security Features
 
-3. Start the frontend server:
-   ```bash
-   cd client
-   npm run start
-   ``` 
+- JWT token authentication
+- User-specific message access
+- Ownership verification for updates and deletions
+- Input validation
+- Proper error handling
+- Environment-specific configurations
+
+## Error Codes
+
+- 200: Success
+- 201: Resource created
+- 204: Resource deleted
+- 400: Bad request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Resource not found
+- 500: Server error
+
+## License
+
+MIT
