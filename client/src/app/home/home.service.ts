@@ -12,27 +12,27 @@ export class HomeService {
   constructor(private http: HttpClient) {}
 
   getGreetings() {
-    return this.http.get('/api/greetings').pipe(
+    return this.http.get('/api/messages').pipe(
       tap((response: any) => this._greetings$.next(response.data))
     )
   }
 
   createGreeting(message: string) {
-    return this.http.post('/api/greetings', { message }).pipe(
+    return this.http.post('/api/messages', { message }).pipe(
       map((response: any) => [response.data, ...this._greetings$.value as any].sort((a: any, b: any) => a.id - b.id)),
       tap((response: any) => this._greetings$.next(response))
     )
   }
 
   updateGreeting(id: number, message: string) {
-    return this.http.put(`/api/greetings/${id}`, { message }).pipe(
+    return this.http.put(`/api/messages/${id}`, { message }).pipe(
       map((response: any) => this._greetings$.value.map((greeting: any) => greeting.id === id ? response.data : greeting)),
       tap((response: any) => this._greetings$.next(response))
     )
   }
 
   deleteGreeting(id: number) {
-    return this.http.delete(`/api/greetings/${id}`).pipe(
+    return this.http.delete(`/api/messages/${id}`).pipe(
       map((_: any) => this._greetings$.value.filter((greeting: any) => greeting.id !== id)),
       tap((response: any) => this._greetings$.next(response))
     )
