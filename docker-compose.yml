@@ -55,6 +55,13 @@ services:
       KC_CLIENT_SECRET: my-app-secret
       KC_CLIENT_ROLES: "user,admin"
       KC_REDIRECT_URIS: "http://localhost:4200/*"
+      # Development mode settings
+      KC_DEV: "true"
+      KC_FEATURES: "preview"
+      KC_LOG_LEVEL: DEBUG
+      KEYCLOAK_LOGLEVEL: DEBUG
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
     ports:
       - "8080:8080"
     command:

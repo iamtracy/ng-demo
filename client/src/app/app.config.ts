@@ -1,41 +1,51 @@
-import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http'
-import { KeycloakService } from 'keycloak-angular'
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core'
+import { provideRouter } from '@angular/router'
+import { provideHttpClient, withInterceptors } from '@angular/common/http'
+import {
+  AutoRefreshTokenService,
+  INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+  includeBearerTokenInterceptor,
+  provideKeycloak,
+  UserActivityService,
+  withAutoRefreshToken,
+} from 'keycloak-angular'
 
-import { routes } from './app.routes';
-
-function initializeKeycloak(keycloak: KeycloakService) {
-  
-  return () =>
-    keycloak.init({
-      config: {
-        url: 'http://localhost:8080',
-        realm: 'my-app',
-        clientId: 'my-app-client'
-      },
-      initOptions: {
-        onLoad: 'login-required',
-        token: '123',
-        checkLoginIframe: false
-      },
-      enableBearerInterceptor: true,
-      bearerPrefix: 'Bearer',
-      bearerExcludedUrls: []
-    })
-}
+import { routes } from './app.routes'
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideKeycloak({
+      config: {
+        url: 'http://localhost:8080',
+        realm: 'my-app',
+        clientId: 'my-app-client',
+      },
+      initOptions: {
+        onLoad: 'login-required',
+        checkLoginIframe: false,
+        pkceMethod: 'S256',
+        scope: 'openid profile email roles'
+      },
+      features: [
+        withAutoRefreshToken({
+          onInactivityTimeout: 'logout',
+          sessionTimeout: 60000
+        }),
+      ],
+      providers: [AutoRefreshTokenService, UserActivityService]
+    }),
+    {
+      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+      useValue: [
+        {
+          urlPattern: /^(?!http:\/\/localhost:8080).*$/i,
+          excludedUrlPattern: /\.(html|css|js|png|jpg|jpeg|gif|ico|json)$/i,
+          httpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+        }
+      ]
+    },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(),
-    KeycloakService,
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeKeycloak,
-      multi: true,
-      deps: [KeycloakService]
-    }
+    provideHttpClient(withInterceptors([includeBearerTokenInterceptor]))
   ]
 };

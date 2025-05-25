@@ -5,19 +5,23 @@
     {
       "clientId": "my-app-client",
       "enabled": true,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "my-app-secret",
+      "publicClient": true,
       "redirectUris": [
         "http://localhost:4200/*"
       ],
       "webOrigins": [
         "http://localhost:4200"
       ],
-      "publicClient": false,
       "protocol": "openid-connect",
-      "authorizationServicesEnabled": true,
-      "serviceAccountsEnabled": true,
-      "directAccessGrantsEnabled": true
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
     }
   ],
   "roles": {
@@ -53,13 +57,7 @@
       "realmRoles": [
         "admin",
         "user"
-      ],
-      "clientRoles": {
-        "my-app-client": [
-          "manage-account",
-          "view-profile"
-        ]
-      }
+      ]
     },
     {
       "username": "user",
@@ -77,12 +75,7 @@
       ],
       "realmRoles": [
         "user"
-      ],
-      "clientRoles": {
-        "my-app-client": [
-          "view-profile"
-        ]
-      }
+      ]
     }
   ]
 } 

@@ -5,16 +5,22 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { GreetingsModule } from './greetings/greetings.module'
 import * as dotenv from 'dotenv'
-import { AuthGuard, PolicyEnforcementMode } from 'nest-keycloak-connect'
-import { KeycloakConnectModule } from 'nest-keycloak-connect'
-import { TokenValidation } from 'nest-keycloak-connect'
+import { AuthGuard, PolicyEnforcementMode, TokenValidation, KeycloakConnectModule } from 'nest-keycloak-connect'
 import { APP_GUARD } from '@nestjs/core'
 
 dotenv.config({ path: '../.env' })
 
-if (!process.env.KEYCLOAK_REALM || !process.env.KEYCLOAK_CLIENT_ID || !process.env.KEYCLOAK_CLIENT_SECRET) {
-  throw new Error('Missing Keycloak configuration')
+const KEYCLOAK_CONFIG = {
+  authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL || 'http://localhost:8080',
+  realm: process.env.KEYCLOAK_REALM || 'my-app',
+  clientId: process.env.KEYCLOAK_CLIENT_ID || 'my-app-client',
+  secret: process.env.KEYCLOAK_CLIENT_SECRET,
 }
+
+if (!KEYCLOAK_CONFIG.secret) {
+  throw new Error('Missing Keycloak client secret')
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,10 +42,14 @@ if (!process.env.KEYCLOAK_REALM || !process.env.KEYCLOAK_CLIENT_ID || !process.e
       inject: [ConfigService],
     }),
     KeycloakConnectModule.register({
-      authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL,
-      realm: process.env.KEYCLOAK_REALM,
-      clientId: process.env.KEYCLOAK_CLIENT_ID,
-      secret: process.env.KEYCLOAK_CLIENT_SECRET,
+      authServerUrl: KEYCLOAK_CONFIG.authServerUrl,
+      realm: KEYCLOAK_CONFIG.realm,
+      clientId: KEYCLOAK_CONFIG.clientId,
+      secret: KEYCLOAK_CONFIG.secret,
+      policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
+      tokenValidation: TokenValidation.OFFLINE,
+      bearerOnly: false,
+      useNestLogger: true
     }),
     GreetingsModule,
   ],
