@@ -3,7 +3,6 @@ import { MessageService } from './message.service'
 import { MessageController } from './message.controller'
 import { PrismaService } from 'src/prisma.service'
 
-
 @Module({
   providers: [MessageService, PrismaService],
   controllers: [MessageController],
