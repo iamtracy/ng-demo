@@ -24,6 +24,13 @@ export class HomeService {
     )
   }
 
+  updateGreeting(id: number, message: string) {
+    return this.http.put(`/api/greetings/${id}`, { message }).pipe(
+      map((response: any) => this._greetings$.value.map((greeting: any) => greeting.id === id ? response.data : greeting)),
+      tap((response: any) => this._greetings$.next(response))
+    )
+  }
+
   deleteGreeting(id: number) {
     return this.http.delete(`/api/greetings/${id}`).pipe(
       map((_: any) => this._greetings$.value.filter((greeting: any) => greeting.id !== id)),

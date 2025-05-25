@@ -17,7 +17,28 @@
   
     <ng-container matColumnDef="message">
       <th mat-header-cell *matHeaderCellDef> Message </th>
-      <td mat-cell *matCellDef="let element"> {{element.message}} </td>
+      <td mat-cell *matCellDef="let element">
+        <ng-container *ngIf="!element.editing; else editMode">
+          <span (click)="startEdit(element)" class="editable-cell">
+            {{element.message}}
+            <mat-icon class="edit-icon">edit</mat-icon>
+          </span>
+        </ng-container>
+        <ng-template #editMode>
+          <mat-form-field appearance="outline" class="edit-form-field">
+            <input matInput [(ngModel)]="element.editMessage" 
+                   (keyup.enter)="saveEdit(element)"
+                   (keyup.escape)="cancelEdit(element)"
+                   #messageInput>
+            <button mat-icon-button matSuffix (click)="saveEdit(element)" color="primary">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button matSuffix (click)="cancelEdit(element)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+        </ng-template>
+      </td>
     </ng-container>
   
     <ng-container matColumnDef="createdAt">
