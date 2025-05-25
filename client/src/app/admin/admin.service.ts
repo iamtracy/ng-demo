@@ -31,8 +31,8 @@ export class AdminService {
   constructor(private http: HttpClient) { }
 
   getAllUsers() {
-    return this.http.get('/api/users').pipe(
-      tap((response: any) => this._users$.next(response.data))
+    return this.http.get<ApiResponse<User[]>>('/api/users').pipe(
+      tap((response) => this._users$.next(response.data))
     )
   }
 
@@ -56,10 +56,5 @@ export class AdminService {
         this.getAllUsers().subscribe()
       })
     )
-  }
-
-  // Get all messages from all users (admin only)
-  getAllMessages() {
-    return this.http.get<any[]>('/api/messages/admin/all')
   }
 }

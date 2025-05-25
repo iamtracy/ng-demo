@@ -11,12 +11,6 @@ export class HomeService {
 
   constructor(private http: HttpClient) {}
 
-  getAllUsers() {
-    return this.http.get('/api/users').pipe(
-      tap((response: any) => this._greetings$.next(response.data))
-    )
-  }
-
   getGreetings() {
     return this.http.get('/api/messages').pipe(
       tap((response: any) => this._greetings$.next(response.data))

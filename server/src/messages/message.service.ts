@@ -1,37 +1,34 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { Message, Prisma } from '@prisma/generated'
-import { User } from '@types'
-
 import { PrismaService } from '../prisma.service'
 import { CreateMessageDto } from './dto/create-message.dto'
+import { User } from '@types'
 
 @Injectable()
 export class MessageService {
   constructor(private prisma: PrismaService) {}
 
-  async messages(user: User): Promise<Message[]> {
-    return this.prisma.message.findMany({
-      where: {
-        userId: user.sub,
-      },
-    })
-  }
-
-  /**
-   * Get all messages from all users (admin only)
-   */
-  async getAllMessages(): Promise<Message[]> {
-    return this.prisma.message.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            username: true,
-            email: true,
+  async messages(user: User, isAdmin: boolean = false): Promise<Message[]> {
+    if (isAdmin) {
+      return this.prisma.message.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              username: true,
+              email: true,
+            },
           },
         },
-      },
-    })
+      })
+    } else {
+      return this.prisma.message.findMany({
+        where: {
+          userId: user.sub,
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+    }
   }
 
   async createMessage(createMessageDto: CreateMessageDto, user: User): Promise<Message> {

@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Req } from '@nestjs/common'
 import { User } from '@types'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { Roles } from 'nest-keycloak-connect'
 import { CurrentUser } from '@auth'
 import { Message } from '@prisma/generated'
+import { Request } from 'express'
 
 import { MessageService } from './message.service'
 import { CreateMessageDto } from './dto/create-message.dto'
@@ -26,31 +26,17 @@ export class MessageController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all messages for the current user' })
+  @ApiOperation({ summary: 'Get messages - all messages for admins, own messages for users' })
   @ApiResponse({ 
     status: 200, 
     description: 'List of messages',
     type: [MessageDto]
   })
-  async findAll(@CurrentUser() user: User): Promise<MessageDto[]> {
-    const messages = await this.messageService.messages(user)
-    return messages.map(this.toMessageDto)
-  }
-
-  @Get('admin/all')
-  @Roles({ roles: ['realm:admin'] })
-  @ApiOperation({ summary: 'Get all messages from all users (admin only)' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of all messages',
-    type: [MessageDto]
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden - Admin role required'
-  })
-  async findAllMessages(): Promise<MessageDto[]> {
-    const messages = await this.messageService.getAllMessages()
+  async findAll(@CurrentUser() user: User, @Req() request: Request): Promise<MessageDto[]> {
+    const requestUser = (request as any).user
+    const isAdmin = requestUser?.realm_access?.roles?.includes('admin') || false
+    
+    const messages = await this.messageService.messages(user, isAdmin)
     return messages.map(this.toMessageDto)
   }
 
