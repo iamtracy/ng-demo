@@ -5,11 +5,34 @@
 /tmp
 /out-tsc
 /bazel-out
+/build
+/client/dist
+/client/build
+/server/dist
+/server/build
 
-# Node
+# Dependencies
 /node_modules
-npm-debug.log
-yarn-error.log
+/client/node_modules
+/server/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+/client/logs
+/server/logs
+
+# Testing
+/coverage
+/.nyc_output
+testem.log
+/client/coverage
+/server/coverage
 
 # IDEs and editors
 .idea/
@@ -28,15 +51,52 @@ yarn-error.log
 !.vscode/extensions.json
 .history/*
 
-# Miscellaneous
+# Angular specific
 /.angular/cache
+/client/.angular/cache
+
+# Miscellaneous
 .sass-cache/
 /connect.lock
-/coverage
 /libpeerconnection.log
-testem.log
 /typings
+/client/.sass-cache/
+/server/.sass-cache/
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+/client/.env
+/client/.env.local
+/client/.env.development.local
+/client/.env.test.local
+/client/.env.production.local
+/server/.env
+/server/.env.local
+/server/.env.development.local
+/server/.env.test.local
+/server/.env.production.local
+
+# Temporary files
+.temp
+.tmp
+/client/.temp
+/client/.tmp
+/server/.temp
+/server/.tmp
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
