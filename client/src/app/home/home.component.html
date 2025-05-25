@@ -7,31 +7,24 @@
 
     <button mat-raised-button color="primary" type="submit">Submit</button>
 </form>
-<div *ngIf="data$ | async as data">
+<div *ngIf="greetings$ | async as greetings">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-    <!--- Note that these columns can be defined in any order.
-          The actual rendered columns are set as a property on the row definition" -->
-  
-    <!-- Position Column -->
+      
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef> ID </th>
       <td mat-cell *matCellDef="let element"> {{element.id}} </td>
     </ng-container>
   
-    <!-- Name Column -->
     <ng-container matColumnDef="message">
       <th mat-header-cell *matHeaderCellDef> Message </th>
       <td mat-cell *matCellDef="let element"> {{element.message}} </td>
     </ng-container>
   
-    <!-- Weight Column -->
     <ng-container matColumnDef="createdAt">
       <th mat-header-cell *matHeaderCellDef> Created At </th>
       <td mat-cell *matCellDef="let element"> {{element.createdAt | date:'dd/MM/yyyy HH:mm'}} </td>
     </ng-container>
   
-    <!-- Symbol Column -->
     <ng-container matColumnDef="updatedAt">
       <th mat-header-cell *matHeaderCellDef> Updated At </th>
       <td mat-cell *matCellDef="let element"> {{element.updatedAt | date:'dd/MM/yyyy HH:mm'}} </td>
