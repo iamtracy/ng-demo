@@ -1,18 +1,15 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn
-} from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm'
 
-@Entity('greetings')
+@Entity()
 export class Greeting {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ type: 'text', nullable: false })
+  @Column()
   message: string
+
+  @Column()
+  userId: string
 
   @CreateDateColumn()
   createdAt: Date

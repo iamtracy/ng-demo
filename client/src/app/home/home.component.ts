@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core'
+import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HomeService } from './home.service'
 import { MatTableDataSource, MatTableModule } from '@angular/material/table'
@@ -10,12 +10,14 @@ import { MatInputModule } from '@angular/material/input'
 import { MatIconModule } from '@angular/material/icon'
 import { FormsModule } from '@angular/forms'
 import { MatPaginator } from '@angular/material/paginator'
+import Keycloak from 'keycloak-js'
 
 interface Message {
   id: number;
   message: string;
   createdAt: Date;
   updatedAt: Date;
+  userId: string;
   editing?: boolean;
   editMessage?: string;
 }
@@ -53,6 +55,10 @@ interface Message {
     .editable-cell:hover .edit-icon {
       opacity: 0.5;
     }
+    .not-owner {
+      cursor: not-allowed;
+      color: rgba(0, 0, 0, 0.5);
+    }
   `]
 })
 export class HomeComponent implements OnInit {
@@ -62,33 +68,50 @@ export class HomeComponent implements OnInit {
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
   dataSource = new MatTableDataSource<Message>([])
   greetings$: Observable<any[]> = of([])
+  currentUserId: string = ''
+  keycloak = inject(Keycloak)
 
   form = new FormGroup({
     message: new FormControl('')
   })
 
-  constructor(private homeService: HomeService) {}
+  constructor(
+    private homeService: HomeService,
+  ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
+    
     this.homeService.getGreetings().subscribe()
     this.greetings$ = this.homeService.greetings$.pipe(
       tap((greetings) => this.dataSource.data = greetings)
     )
   }
 
+  canEdit(element: Message): boolean {
+    return element.userId === this.currentUserId;
+  }
+
   deleteGreeting(id: number) {
-    this.homeService.deleteGreeting(id).subscribe()
+    const greeting = this.dataSource.data.find(g => g.id === id);
+    if (greeting && this.canEdit(greeting)) {
+      this.homeService.deleteGreeting(id).subscribe()
+    }
   }
 
   onSubmit() {
-    this.homeService.createGreeting(this.form.value.message as string)
+    if (!this.form.value.message) return;
+    
+    this.homeService.createGreeting(this.form.value.message)
     .pipe(
-      tap((greetings) => this.form.reset())
+      tap(() => this.form.reset())
     )
     .subscribe()
   }
 
   startEdit(element: Message): void {
+    if (!this.canEdit(element)) return;
+
     // Cancel any other editing
     this.dataSource.data.forEach(item => {
       if (item !== element && item.editing) {
@@ -107,6 +130,8 @@ export class HomeComponent implements OnInit {
   }
 
   async saveEdit(element: Message): Promise<void> {
+    if (!this.canEdit(element)) return;
+
     try {
       this.homeService.updateGreeting(element.id, element.editMessage!).subscribe()
       element.message = element.editMessage!;
