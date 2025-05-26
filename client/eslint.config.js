@@ -6,7 +6,7 @@ const importPlugin = require("eslint-plugin-import")
 
 module.exports = tseslint.config(
   {
-    ignores: ["**/src/api/**/*"],
+    ignores: ["**/src/app/api/**/*"],
   },
   {
     files: ["**/*.ts"],
