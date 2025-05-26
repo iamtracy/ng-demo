@@ -49,23 +49,30 @@ async function bootstrap() {
 
   const serverBanner = `
       ${chalk.hex('#26A7DE')(`
-        ____                           
-        / ___|  ___ _ ____   _____ _ __ 
-        \\___ \\ / _ \\ '__\\ \\ / / _ \\ '__|
-        ___) |  __/ |   \\ V /  __/ |   
-        |____/ \\___|_|    \\_/ \\___|_|   
+         ____    ___   _   _ _ _____ 
+        |  _ \\  / _ \\ | \\ | ( )_   _|
+        | | | || | | ||  \\| |/  | |  
+        | |_| || |_| || |\\  |   | |  
+        |____/  \\___/ |_| \\_|   |_|  
+         ____   _    _   _ ___ ____ 
+        |  _ \\ / \\  | \\ | |_ _/ ___|
+        | |_) / _ \\ |  \\| || | |    
+        |  __/ ___ \\| |\\  || | |___ 
+        |_|/_/   \\_\\_| \\_|___\\____|
       `)}
-      ${chalk.hex('#26A7DE')('=========================================================')}
-      ${chalk.hex('#FFD700')('🚀 Server Status:    ')} ${chalk.hex('#FFFFFF')('Online')}
-      ${chalk.hex('#FFD700')('🔥 Environment:      ')} ${chalk.hex('#FFFFFF')(process.env.NODE_ENV ?? 'development')}
-      ${process.env.NODE_ENV !== 'production' ? chalk.hex('#FFD700')('🎯 UI Dev Server:    ') + ' ' + chalk.hex('#FFFFFF')('http://localhost:4200') : ''}
-      ${chalk.hex('#FFD700')('🌍 API Server:       ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}`)}
-      ${chalk.hex('#FFD700')('📚 OpenAPI Docs:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs`)}
-      ${chalk.hex('#FFD700')('📄 Swagger JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs-json`)}
-      ${chalk.hex('#26A7DE')('=========================================================')}
+      ${chalk.hex('#26A7DE')('═══════════════════════ SYSTEM STATUS ══════════════════════════════════════════════')}
+      ${chalk.hex('#FFD700')('🚀 Improbability Drive: ')} ${chalk.hex('#00FF00')('Engaged')}
+      ${chalk.hex('#FFD700')('🐋 Infinite Universe:   ')} ${chalk.hex('#FFFFFF')(process.env.NODE_ENV ?? 'mostly harmless')}
+      ${process.env.NODE_ENV !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')('http://localhost:4200') + chalk.hex('#FFD700')(' (Share & Enjoy™)') : ''}
+      ${chalk.hex('#FFD700')('🌌 Space-Time Port:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}`)}
+      ${chalk.hex('#FFD700')('📖 Guide Entry:         ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs`)}
+      ${chalk.hex('#FFD700')('🐬 Babel Fish JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs-json`)}
+      ${chalk.hex('#26A7DE')('════════════════════════════════════════════════════════════════════════════════════')}
+      ${chalk.hex('#FFD700')('🤖 Deep Thought:        ')} ${chalk.hex('#FFFFFF')('Computing ultimate answer... 42 milliseconds response time')}
+      ${chalk.hex('#26A7DE')('════════════════════════════════════════════════════════════════════════════════════')}
+      ${chalk.hex('#FFD700')('Note:')} ${chalk.hex('#FFFFFF')("In case of server panic, DON'T PANIC!")}
     `
+
   await app.listen(port)
-
-
   Logger.log(serverBanner)
 }
