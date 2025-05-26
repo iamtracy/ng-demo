@@ -21,6 +21,7 @@ model User {
   firstName         String?
   lastName          String?
   emailVerified     Boolean   @default(false)
+  roles             String[]  @default([]) // User roles from Keycloak
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   lastLoginAt       DateTime?

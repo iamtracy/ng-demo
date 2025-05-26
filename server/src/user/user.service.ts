@@ -10,6 +10,10 @@ export class UserService {
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Sync user data from Keycloak token to local database
+   * This should be called on every login/token refresh
+   */
   async syncUserFromKeycloak(keycloakUser: KeycloakUser): Promise<User> {
     const syncData: SyncUserDto = {
       id: keycloakUser.sub,
@@ -18,11 +22,15 @@ export class UserService {
       firstName: keycloakUser.given_name,
       lastName: keycloakUser.family_name,
       emailVerified: keycloakUser.email_verified,
+      roles: keycloakUser.realm_access?.roles || [], // Extract roles from Keycloak token
     }
 
     return this.syncUser(syncData)
   }
 
+  /**
+   * Sync user data to local database (upsert operation)
+   */
   async syncUser(syncUserDto: SyncUserDto): Promise<User> {
     try {
       const user = await this.prisma.user.upsert({
@@ -33,6 +41,7 @@ export class UserService {
           firstName: syncUserDto.firstName,
           lastName: syncUserDto.lastName,
           emailVerified: syncUserDto.emailVerified,
+          roles: syncUserDto.roles,
           lastLoginAt: new Date(),
           updatedAt: new Date(),
         },
@@ -43,11 +52,12 @@ export class UserService {
           firstName: syncUserDto.firstName,
           lastName: syncUserDto.lastName,
           emailVerified: syncUserDto.emailVerified,
+          roles: syncUserDto.roles,
           lastLoginAt: new Date(),
         },
       })
 
-      this.logger.log(`User synced: ${user.username} (${user.id})`)
+      this.logger.log(`User synced: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`)
       return user
     } catch (error) {
       this.logger.error(`Failed to sync user ${syncUserDto.username}:`, error)

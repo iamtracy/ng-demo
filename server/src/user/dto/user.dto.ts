@@ -40,6 +40,13 @@ export class UserDto {
   emailVerified: boolean
 
   @ApiProperty({
+    description: 'User roles from Keycloak',
+    example: ['user', 'admin'],
+    type: [String]
+  })
+  roles: string[]
+
+  @ApiProperty({
     description: 'When the user was created',
     example: '2024-03-20T10:30:00Z'
   })

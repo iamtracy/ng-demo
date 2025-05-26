@@ -13,6 +13,7 @@ interface User {
   firstName: string
   lastName: string
   emailVerified: boolean
+  roles: string[]
   createdAt: string
   updatedAt: string
   lastLoginAt: string
@@ -30,7 +31,7 @@ interface User {
   styleUrl: './admin.component.css'
 })
 export class AdminComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'username', 'email', 'firstName', 'lastName', 'emailVerified', 'lastLoginAt']
+  displayedColumns: string[] = ['id', 'username', 'email', 'firstName', 'lastName', 'roles', 'emailVerified', 'lastLoginAt']
   dataSource = new MatTableDataSource<User>([])
   users$: Observable<User[]> = of([])
   currentUserId: string = ''

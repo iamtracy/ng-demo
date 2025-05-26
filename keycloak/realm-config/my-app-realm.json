@@ -50,7 +50,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "admin123",
+          "value": "Password!23",
           "temporary": false
         }
       ],
@@ -69,7 +69,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "user123",
+          "value": "Password!23",
           "temporary": false
         }
       ],
@@ -87,7 +87,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "user123",
+          "value": "Password!23",
           "temporary": false
         }
       ],

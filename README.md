@@ -76,9 +76,9 @@ The application will be available at:
 ## Authentication
 
 The application uses Keycloak for authentication. Default test users:
-- admin/admin123
-- user/user123
-- alice/alice123
+- admin/Password!23
+- user/Password!23
+- alice/Password!23
 
 To make API requests:
 1. Obtain an access token from Keycloak

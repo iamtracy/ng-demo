@@ -5,6 +5,9 @@ interface User {
   email_verified: boolean
   given_name: string
   family_name: string
+  realm_access?: {
+    roles: string[]
+  }
 }
 
 export type { User }

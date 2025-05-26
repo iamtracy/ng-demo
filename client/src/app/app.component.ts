@@ -27,19 +27,18 @@ import { CommonModule } from '@angular/common'
     <mat-sidenav-container class="sidenav-container">
       <mat-sidenav-content>
         <mat-toolbar color="primary">
-          <span class="app-title">My App</span>
+          <!-- *kaHasRoles="['realm:user']" -->
+          <a mat-button href="/">
+            <mat-icon>home</mat-icon>
+            Home
+          </a>
+          <!-- *kaHasRoles="['realm:admin']" -->
+          <a mat-button href="/admin" *ngIf="hasAdminRole()">
+            <mat-icon>admin_panel_settings</mat-icon>
+            Admin
+          </a>
           <span class="spacer"></span>
           <nav class="nav-links">
-            <!-- *kaHasRoles="['realm:user']" -->
-            <a mat-button href="/">
-              <mat-icon>home</mat-icon>
-              Home
-            </a>
-            <!-- *kaHasRoles="['realm:admin']" -->
-            <a mat-button href="/admin" *ngIf="hasAdminRole()">
-              <mat-icon>admin_panel_settings</mat-icon>
-              Admin
-            </a>
           </nav>
           <button mat-flat-button color="warn" (click)="logout()">
             <mat-icon>logout</mat-icon>

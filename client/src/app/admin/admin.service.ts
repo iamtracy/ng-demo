@@ -10,6 +10,7 @@ interface User {
   firstName: string
   lastName: string
   emailVerified: boolean
+  roles: string[]
   createdAt: string
   updatedAt: string
   lastLoginAt: string

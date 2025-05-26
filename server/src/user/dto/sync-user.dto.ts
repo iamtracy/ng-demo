@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsBoolean, IsOptional } from 'class-validator'
+import { IsString, IsEmail, IsBoolean, IsOptional, IsArray } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class SyncUserDto {
@@ -47,4 +47,13 @@ export class SyncUserDto {
   })
   @IsBoolean()
   emailVerified: boolean
+
+  @ApiProperty({
+    description: 'User roles from Keycloak',
+    example: ['user', 'admin'],
+    type: [String]
+  })
+  @IsArray()
+  @IsString({ each: true })
+  roles: string[]
 } 

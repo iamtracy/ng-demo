@@ -20,6 +20,7 @@ export class UserController {
       firstName: user.firstName,
       lastName: user.lastName,
       emailVerified: user.emailVerified,
+      roles: user.roles || [],
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLoginAt: user.lastLoginAt,
