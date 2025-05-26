@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { User as PrismaUser } from '@prisma/generated'
+import { User as PrismaUser } from '@prisma/client'
 import { User as KeycloakUser } from '@types'
 
 import { UserController } from './user.controller'

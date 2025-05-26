@@ -6,6 +6,7 @@ CREATE TABLE "users" (
     "firstName" TEXT,
     "lastName" TEXT,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "roles" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "lastLoginAt" TIMESTAMP(3),

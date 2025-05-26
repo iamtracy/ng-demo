@@ -3,13 +3,13 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: my-app-postgres
+    container_name: ng-demo-postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: my_app_db
+      POSTGRES_DB: ng_demo_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -50,9 +50,9 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: true
-      KC_REALM: my-app
-      KC_CLIENT_ID: my-app-client
-      KC_CLIENT_SECRET: my-app-secret
+      KC_REALM: ng-demo
+      KC_CLIENT_ID: ng-demo-client
+      KC_CLIENT_SECRET: ng-demo-secret
       KC_CLIENT_ROLES: "user,admin"
       KC_REDIRECT_URIS: "http://localhost:4200/*"
       # Development mode settings

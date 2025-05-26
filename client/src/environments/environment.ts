@@ -3,7 +3,7 @@ export const environment = {
   apiUrl: 'http://localhost:3000',
   keycloak: {
     url: 'http://localhost:8080',
-    realm: 'my-app',
-    clientId: 'my-app-client'
+    realm: 'ng-demo',
+    clientId: 'ng-demo-client'
   }
 } 

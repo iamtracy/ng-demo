@@ -3,7 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common'
-import { Message, Prisma } from '@prisma/generated'
+import { Message, Prisma } from '@prisma/client'
 import { User } from '@types'
 
 import { PrismaService } from '../prisma/prisma.service'

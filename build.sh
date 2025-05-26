@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default values
-IMAGE_NAME="my-app"
+IMAGE_NAME="ng-demo"
 IMAGE_TAG="latest"
 ENV_FILE=".env"
 DOCKER_COMPOSE_FILE="docker-compose.yml"
@@ -12,8 +12,8 @@ REGISTRY=""
 # Default environment variables
 DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/messages?schema=public"
 KEYCLOAK_AUTH_SERVER_URL="http://host.docker.internal:8080/auth"
-KEYCLOAK_REALM="my-app"
-KEYCLOAK_CLIENT_ID="my-app-client"
+KEYCLOAK_REALM="ng-demo"
+KEYCLOAK_CLIENT_ID="ng-demo-client"
 KEYCLOAK_CLIENT_SECRET="your-client-secret"
 NODE_ENV="production"
 PORT="3000"

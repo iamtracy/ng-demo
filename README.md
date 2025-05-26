@@ -9,6 +9,10 @@ Through a remarkable coincidence, exactly the kind that the Infinite Improbabili
 - **Frontend:** Angular (because space is infinite, and so are our modules)
 - **Backend:** NestJS (it knows where its towel is)
 - **Database:** Prisma + Postgres (more reliable than the Guide's servers)
+  ```typescript
+  // Import your models from @prisma/client
+  import { Message } from '@prisma/client'
+  ```
 - **Security:** Keycloak (better than Vogon poetry for keeping out intruders)
 - **Development:** Docker (contains entire worlds in boxes) & Shell Scripts (written by dolphins)
 - **Documentation:** Swagger (because even aliens need API docs)
@@ -74,7 +78,7 @@ sh dev.sh
 # Option 2: The Hard Way (for Vogons who enjoy the bureaucracy)
 cd server
 npm install        # Download the universe
-npm run prisma:generate   # Generate the meaning of life
+npm run prisma:generate   # Generate the meaning of life (creates @prisma/client)
 npm run prisma:migrate    # Move the stars around
 npm run start:dev         # Engage the improbability drive
 

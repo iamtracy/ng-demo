@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Default values
-CONTAINER_NAME="my-app"
-IMAGE_NAME="my-app"
+CONTAINER_NAME="ng-demo"
+IMAGE_NAME="ng-demo"
 IMAGE_TAG="latest"
 ENV_FILE=".env"
 PORT=3000
@@ -22,8 +22,8 @@ show_help() {
     echo
     echo "Options:"
     echo "  -h, --help           Show this help message"
-    echo "  -n, --name NAME      Container name (default: my-app)"
-    echo "  -i, --image NAME     Image name (default: my-app)"
+    echo "  -n, --name NAME      Container name (default: ng-demo)"
+    echo "  -i, --image NAME     Image name (default: ng-demo)"
     echo "  -t, --tag TAG        Image tag (default: latest)"
     echo "  -e, --env FILE       Environment file (default: .env)"
     echo "  -p, --port PORT      Host port to bind (default: 3000)"
@@ -36,7 +36,7 @@ show_help() {
     done
     echo
     echo "Example:"
-    echo "  ./run.sh --name my-app-prod --env .env.prod --port 8080 --detach"
+    echo "  ./run.sh --name ng-demo-prod --env .env.prod --port 8080 --detach"
 }
 
 # Parse command line arguments

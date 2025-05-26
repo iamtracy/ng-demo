@@ -16,7 +16,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { Message } from '@prisma/generated'
+import { Message } from '@prisma/client'
 import { User } from '@types'
 import { Request } from 'express'
 

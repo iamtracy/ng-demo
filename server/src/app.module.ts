@@ -25,8 +25,8 @@ const isProduction = process.env.NODE_ENV === 'production'
 const KEYCLOAK_CONFIG = {
   authServerUrl:
     process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080',
-  realm: process.env.KEYCLOAK_REALM ?? 'my-app',
-  clientId: process.env.KEYCLOAK_CLIENT_ID ?? 'my-app-client',
+  realm: process.env.KEYCLOAK_REALM ?? 'ng-demo',
+  clientId: process.env.KEYCLOAK_CLIENT_ID ?? 'ng-demo-client',
   secret: process.env.KEYCLOAK_CLIENT_SECRET,
 }
 

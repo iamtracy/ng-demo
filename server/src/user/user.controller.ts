@@ -6,7 +6,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { User as PrismaUser } from '@prisma/generated'
+import { User as PrismaUser } from '@prisma/client'
 import { User as KeycloakUser } from '@types'
 import { Roles } from 'nest-keycloak-connect'
 
