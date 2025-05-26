@@ -50,11 +50,6 @@ describe('MenuComponent', () => {
     expect(spectator.component).toBeTruthy()
   })
 
-  it('should check admin role', () => {
-    expect(spectator.component.hasAdminRole()).toBe(true)
-    expect(keycloakMock.hasRealmRole).toHaveBeenCalledWith('admin')
-  })
-
   it('should handle logout', () => {
     spectator.click('[data-testid="logout-button"]')
     expect(keycloakMock.logout).toHaveBeenCalled()

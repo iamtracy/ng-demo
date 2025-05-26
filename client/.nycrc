@@ -1,0 +1,10 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "exclude": [
+    "src/app/core/api/**/*",
+    "**/core/api/**",
+    "coverage/**",
+    "**/*.spec.ts"
+  ]
+} 
