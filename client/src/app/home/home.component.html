@@ -22,7 +22,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let data of (messages$ | async) || []">
-          <td>{{data}}</td>
+          <td>{{data.id}}</td>
           <td>
             <ng-container *ngIf="!data.editing; else editMode">
               <span 
