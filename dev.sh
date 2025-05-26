@@ -39,6 +39,20 @@ cleanup() {
 
 trap cleanup EXIT
 
+# Function to watch API changes and regenerate client code
+watch_and_generate() {
+    echo -e "${HYPERINTELLIGENT}[🧠] Initializing Babel Fish translation matrix...${NC}"
+    while true; do
+        if curl -s http://localhost:3000/api/docs-json > /dev/null; then
+            cd client
+            echo -e "${HYPERINTELLIGENT}[📡] Regenerating client code from latest API specs...${NC}"
+            npm run generate
+            cd ..
+        fi
+        sleep 5
+    done
+}
+
 # Launch client (the frontend component, not the squishy biological one)
 echo -e "${HYPERINTELLIGENT}[🌍] Engaging Frontend Neural Interface...${NC}"
 cd client
@@ -63,10 +77,14 @@ npm run start:dev 2>&1 | sed "s/^/$(printf "${IMPROBABILITY}[SERVER]${NC} ") /" 
 SERVER_PID=$!
 cd ..
 
+# Start the API watcher in the background
+watch_and_generate 2>&1 | sed "s/^/$(printf "${HYPERINTELLIGENT}[BABEL FISH]${NC} ") /" &
+WATCHER_PID=$!
+
 # Mission status
 echo -e "\n${TOWEL}[✨] Status: All Systems Go (unless the Vogons are involved)${NC}"
 echo -e "${SARCASM}[📡] Monitoring transmissions from both ends of the improbability curve...${NC}"
 echo -e "${CUP_OF_TEA}[🧭] Press Ctrl+C to dematerialize gracefully${NC}\n"
 
-# Wait for the absurdity to stabilize
-wait $CLIENT_PID $SERVER_PID
+# Wait for all processes
+wait $CLIENT_PID $SERVER_PID $WATCHER_PID

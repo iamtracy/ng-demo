@@ -10,11 +10,11 @@ import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { map, Observable, of, tap } from 'rxjs'
 
-import { MessageDto } from '../core/api'
+import { MessageDto } from '../api'
 
 import { HomeService } from './home.service'
 
-interface ExtendedMessage extends MessageDto {
+interface Message extends MessageDto {
   editing?: boolean
   editMessage?: string
 }
@@ -38,9 +38,9 @@ export class HomeComponent implements OnInit {
   @ViewChild('messageInput') messageInput!: ElementRef
   
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
-  messages$: Observable<ExtendedMessage[]> = of([])
+  messages$: Observable<Message[]> = of([])
   currentUserId = ''
-  currentlyEditing: ExtendedMessage | null = null
+  currentlyEditing: Message | null = null
   keycloak = inject(Keycloak)
 
   form = new FormGroup({
@@ -59,11 +59,11 @@ export class HomeComponent implements OnInit {
         ...msg,
         editing: false,
         editMessage: undefined
-      } as ExtendedMessage)))
+      })))
     )
   }
 
-  canEdit(element: ExtendedMessage): boolean {
+  canEdit(element: Message): boolean {
     return element.userId === this.currentUserId
   }
 
@@ -81,7 +81,7 @@ export class HomeComponent implements OnInit {
     .subscribe()
   }
 
-  startEdit(element: ExtendedMessage): void {
+  startEdit(element: Message): void {
     if (!this.canEdit(element)) return
 
     // Cancel any existing edit
@@ -100,7 +100,7 @@ export class HomeComponent implements OnInit {
     })
   }
 
-  async saveEdit(element: ExtendedMessage): Promise<void> {
+  async saveEdit(element: Message): Promise<void> {
     if (!this.canEdit(element)) return
 
     try {
@@ -113,7 +113,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  cancelEdit(element: ExtendedMessage): void {
+  cancelEdit(element: Message): void {
     element.editing = false
     delete element.editMessage
     this.currentlyEditing = null

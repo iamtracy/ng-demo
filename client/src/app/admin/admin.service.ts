@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { BehaviorSubject, Observable, startWith, switchMap, tap } from 'rxjs'
 
-import { UserDto, UsersService } from '../core/api'
+import { UserDto, UsersService } from '../api'
 
 @Injectable({
   providedIn: 'root'

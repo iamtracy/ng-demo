@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.0.0",
   "scripts": {
-    "generate": "openapi --input http://localhost:3000/api/docs-json --output ./src/app/core/api --client angular",
+    "generate": "openapi --input http://localhost:3000/api/docs-json --output ./src/app/api --client angular",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
