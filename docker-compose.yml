@@ -55,7 +55,6 @@ services:
       KC_CLIENT_SECRET: ng-demo-secret
       KC_CLIENT_ROLES: "user,admin"
       KC_REDIRECT_URIS: "http://localhost:4200/*"
-      # Development mode settings
       KC_DEV: "true"
       KC_FEATURES: "preview"
       KC_LOG_LEVEL: DEBUG

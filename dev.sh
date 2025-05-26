@@ -12,6 +12,30 @@ CUP_OF_TEA='\033[1;96m'
 SARCASM='\033[1;90m'
 NC='\033[0m' # Reset
 
+# Check if Docker daemon is running
+if ! docker info > /dev/null 2>&1; then
+    echo -e "\n${PANIC}"
+    echo "    ╔═══════════════════════════════════════════════════════════╗"
+    echo "    ║     🚫 INFINITE IMPROBABILITY DRIVE MALFUNCTION          ║"
+    echo "    ╠═══════════════════════════════════════════════════════════╣"
+    echo "    ║     The Docker daemon appears to be taking a day off,     ║"
+    echo "    ║     probably contemplating the meaning of life.           ║"
+    echo "    ║                                                           ║"
+    echo "    ║     Please ensure Docker is running before attempting     ║"
+    echo "    ║     to traverse the galaxy.                              ║"
+    echo "    ║                                                           ║"
+    echo "    ║     Error Code: 42                                        ║"
+    echo "    ╚═══════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
+    exit 1
+fi
+
+# Reset and start containers
+echo -e "${HYPERINTELLIGENT}[🔄] Resetting the infinite improbability drive...${NC}"
+docker-compose down
+echo -e "${HYPERINTELLIGENT}[🚀] Engaging hyperspace bypass...${NC}"
+docker-compose up -d
+
 # Opening transmission
 echo -e "\n${IMPROBABILITY}"
 echo "    ╔════════════════════════════════════════╗"
