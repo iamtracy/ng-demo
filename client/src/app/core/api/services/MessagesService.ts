@@ -22,7 +22,7 @@ export class MessagesService {
     public messageControllerFindAll(): Observable<Array<MessageDto>> {
         return __request(OpenAPI, this.http, {
             method: 'GET',
-            url: '/messages',
+            url: '/api/messages',
         });
     }
     /**
@@ -36,7 +36,7 @@ export class MessagesService {
     ): Observable<MessageDto> {
         return __request(OpenAPI, this.http, {
             method: 'POST',
-            url: '/messages',
+            url: '/api/messages',
             body: requestBody,
             mediaType: 'application/json',
         });
@@ -54,7 +54,7 @@ export class MessagesService {
     ): Observable<MessageDto> {
         return __request(OpenAPI, this.http, {
             method: 'PUT',
-            url: '/messages/{id}',
+            url: '/api/messages/{id}',
             path: {
                 'id': id,
             },
@@ -82,7 +82,7 @@ export class MessagesService {
     }> {
         return __request(OpenAPI, this.http, {
             method: 'DELETE',
-            url: '/messages/{id}',
+            url: '/api/messages/{id}',
             path: {
                 'id': id,
             },

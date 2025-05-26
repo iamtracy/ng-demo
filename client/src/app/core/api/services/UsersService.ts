@@ -21,7 +21,7 @@ export class UsersService {
     public userControllerGetCurrentUser(): Observable<UserDto> {
         return __request(OpenAPI, this.http, {
             method: 'GET',
-            url: '/users/me',
+            url: '/api/users/me',
         });
     }
     /**
@@ -32,7 +32,7 @@ export class UsersService {
     public userControllerSyncCurrentUser(): Observable<UserDto> {
         return __request(OpenAPI, this.http, {
             method: 'POST',
-            url: '/users/sync',
+            url: '/api/users/sync',
         });
     }
     /**
@@ -46,7 +46,7 @@ export class UsersService {
     ): Observable<UserDto> {
         return __request(OpenAPI, this.http, {
             method: 'GET',
-            url: '/users/{id}',
+            url: '/api/users/{id}',
             path: {
                 'id': id,
             },
@@ -64,7 +64,7 @@ export class UsersService {
     public userControllerGetAllUsers(): Observable<Array<UserDto>> {
         return __request(OpenAPI, this.http, {
             method: 'GET',
-            url: '/users',
+            url: '/api/users',
             errors: {
                 403: `Forbidden - Admin role required`,
             },

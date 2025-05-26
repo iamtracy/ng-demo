@@ -38,7 +38,7 @@ export type UserDto = {
     /**
      * User roles from Keycloak
      */
-    roles: Array<string>;
+    roles: Array<any[]>;
     /**
      * When the user last logged in
      */

@@ -18,7 +18,6 @@ import { en_US, provideNzI18n } from 'ng-zorro-antd/i18n'
 import { environment } from '../environments/environment'
 
 import { routes } from './app.routes'
-import { apiBaseUrlInterceptor } from './core/interceptors/api-base-url.interceptor'
 
 
 registerLocaleData(en)
@@ -56,6 +55,6 @@ export const appConfig: ApplicationConfig = {
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, includeBearerTokenInterceptor])), provideNzI18n(en_US), importProvidersFrom(FormsModule), provideAnimationsAsync(), provideHttpClient()
+    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])), provideNzI18n(en_US), importProvidersFrom(FormsModule), provideAnimationsAsync(), provideHttpClient()
   ]
 }
