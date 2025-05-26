@@ -82,8 +82,14 @@ export class MessageController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a message' })
   @ApiResponse({ 
-    status: 204, 
-    description: 'The message has been successfully deleted.'
+    status: 200, 
+    description: 'The message has been successfully deleted.',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'ID of the deleted message' }
+      }
+    }
   })
   @ApiResponse({ 
     status: 403, 
@@ -96,7 +102,8 @@ export class MessageController {
   async delete(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: User
-  ): Promise<void> {
+  ): Promise<{ id: number }> {
     await this.messageService.deleteMessage(id, user)
+    return { id }
   }
 }

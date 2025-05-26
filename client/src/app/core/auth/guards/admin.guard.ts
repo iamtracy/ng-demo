@@ -6,15 +6,9 @@ const isAdminAccessAllowed = async (
   state: RouterStateSnapshot,
   authData: AuthGuardData
 ): Promise<boolean | UrlTree> => {
-  const { authenticated, keycloak } = authData
+  const { keycloak } = authData
 
-  if (!authenticated) {
-    return false
-  }
-
-  const hasAdminRole = keycloak.hasRealmRole('admin')
-
-  return hasAdminRole
+  return keycloak.hasRealmRole('admin')
 }
 
 export const canActivateAdminRole = createAuthGuard<CanActivateFn>(isAdminAccessAllowed) 

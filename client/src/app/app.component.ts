@@ -106,7 +106,6 @@ export class AppComponent implements OnInit {
     )
 
   async ngOnInit() {
-    console.log(this.keycloak.tokenParsed)
     try {
       this.realmRoles = this.keycloak.realmAccess?.roles || []
     } catch (error) {

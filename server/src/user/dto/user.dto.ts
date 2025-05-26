@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { BaseDto } from '../../common/base.dto'
 
-export class UserDto {
+export class UserDto extends BaseDto {
   @ApiProperty({
     description: 'The unique identifier of the user (Keycloak sub)',
     example: 'f1234567-89ab-cdef-0123-456789abcdef'
@@ -45,18 +46,6 @@ export class UserDto {
     type: [String]
   })
   roles: string[]
-
-  @ApiProperty({
-    description: 'When the user was created',
-    example: '2024-03-20T10:30:00Z'
-  })
-  createdAt: Date
-
-  @ApiProperty({
-    description: 'When the user was last updated',
-    example: '2024-03-20T10:30:00Z'
-  })
-  updatedAt: Date
 
   @ApiProperty({
     description: 'When the user last logged in',

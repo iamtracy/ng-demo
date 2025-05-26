@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { HomeService } from './home.service'
 import { MatTableDataSource, MatTableModule } from '@angular/material/table'
 import { Observable, of, tap } from 'rxjs'
 import { MatButtonModule } from '@angular/material/button'
@@ -11,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { FormsModule } from '@angular/forms'
 import { MatPaginator } from '@angular/material/paginator'
 import Keycloak from 'keycloak-js'
+import { HomeService } from './home.service'
 
 interface Message {
   id: number;

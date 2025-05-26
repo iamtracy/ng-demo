@@ -39,8 +39,8 @@ export class HomeService {
 
   deleteGreeting(id: number) {
     return this.http.delete(`/messages/${id}`).pipe(
-      map((_: any) => this._greetings$.value.filter((greeting: any) => greeting.id !== id)),
-      tap((response: any) => this._greetings$.next(response))
+      map((response: any) => this._greetings$.value.filter((greeting: any) => greeting.id !== response.data.id)),
+      tap((filteredGreetings: any) => this._greetings$.next(filteredGreetings))
     )
   }
 }

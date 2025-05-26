@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { BaseDto } from '../../common/base.dto'
 
-export class MessageDto {
+export class MessageDto extends BaseDto {
   @ApiProperty({
     description: 'The unique identifier of the message',
     example: 1
@@ -18,16 +19,4 @@ export class MessageDto {
     example: 'f1234567-89ab-cdef-0123-456789abcdef'
   })
   userId: string
-
-  @ApiProperty({
-    description: 'When the message was created',
-    example: '2024-03-20T10:30:00Z'
-  })
-  createdAt: Date
-
-  @ApiProperty({
-    description: 'When the message was last updated',
-    example: '2024-03-20T10:30:00Z'
-  })
-  updatedAt: Date
 } 
