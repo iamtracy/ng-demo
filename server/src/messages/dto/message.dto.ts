@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+
 import { BaseDto } from '../../common/base.dto'
 
 export class MessageDto extends BaseDto {

@@ -4,9 +4,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common'
 import { Message, Prisma } from '@prisma/generated'
-import { PrismaService } from '../prisma/prisma.service'
-import { CreateMessageDto } from './dto/create-message.dto'
 import { User } from '@types'
+
+import { PrismaService } from '../prisma/prisma.service'
+
+import { CreateMessageDto } from './dto/create-message.dto'
 
 @Injectable()
 export class MessageService {

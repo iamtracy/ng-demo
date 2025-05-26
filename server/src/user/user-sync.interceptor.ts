@@ -5,8 +5,9 @@ import {
   CallHandler,
   Logger,
 } from '@nestjs/common'
-import { Observable } from 'rxjs'
 import { User as KeycloakUser } from '@types'
+import { Observable } from 'rxjs'
+
 import { UserService } from './user.service'
 
 @Injectable()

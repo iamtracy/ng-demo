@@ -1,3 +1,4 @@
+import { CurrentUser } from '@auth'
 import { Controller, Get, Post, Param, NotFoundException } from '@nestjs/common'
 import {
   ApiTags,
@@ -5,12 +6,12 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { Roles } from 'nest-keycloak-connect'
 import { User as PrismaUser } from '@prisma/generated'
-import { CurrentUser } from '@auth'
 import { User as KeycloakUser } from '@types'
-import { UserService } from './user.service'
+import { Roles } from 'nest-keycloak-connect'
+
 import { UserDto } from './dto/user.dto'
+import { UserService } from './user.service'
 
 @ApiTags('users')
 @Controller('users')

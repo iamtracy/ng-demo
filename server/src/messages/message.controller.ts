@@ -1,3 +1,4 @@
+import { CurrentUser } from '@auth'
 import {
   Controller,
   Get,
@@ -9,20 +10,19 @@ import {
   ParseIntPipe,
   Req,
 } from '@nestjs/common'
-import { User } from '@types'
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { CurrentUser } from '@auth'
 import { Message } from '@prisma/generated'
+import { User } from '@types'
 import { Request } from 'express'
 
-import { MessageService } from './message.service'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { MessageDto } from './dto/message.dto'
+import { MessageService } from './message.service'
 
 @ApiTags('messages')
 @Controller('messages')

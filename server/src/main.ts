@@ -1,8 +1,8 @@
-import { NestFactory } from '@nestjs/core'
 import { Logger, ValidationPipe } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
-import { Response } from 'express'
 import chalk from 'chalk'
+import { Response } from 'express'
 
 import { AppModule } from './app.module'
 
