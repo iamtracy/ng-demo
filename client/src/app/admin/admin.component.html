@@ -1,64 +1,45 @@
-<div *ngIf="users$ | async as users">
+<div class="container">
+  <div>
     <h2>User Management</h2>
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-
-        <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef> ID </th>
-            <td mat-cell *matCellDef="let user"> {{user.id.substring(0, 8)}}... </td>
-        </ng-container>
-
-        <ng-container matColumnDef="username">
-            <th mat-header-cell *matHeaderCellDef> Username </th>
-            <td mat-cell *matCellDef="let user"> {{user.username}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef> Email </th>
-            <td mat-cell *matCellDef="let user"> {{user.email}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="firstName">
-            <th mat-header-cell *matHeaderCellDef> First Name </th>
-            <td mat-cell *matCellDef="let user"> {{user.firstName || 'N/A'}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="lastName">
-            <th mat-header-cell *matHeaderCellDef> Last Name </th>
-            <td mat-cell *matCellDef="let user"> {{user.lastName || 'N/A'}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="roles">
-            <th mat-header-cell *matHeaderCellDef> Roles </th>
-            <td mat-cell *matCellDef="let user">
-                <span 
-                    class="role-badge" 
-                    *ngFor="let role of user.roles" 
-                    [class.admin-role]="role === 'admin'"
-                    [class.user-role]="role === 'user'"
-                >
-                    {{role}}
-                </span>
-                <span *ngIf="user.roles.length === 0" class="no-roles">No roles</span>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="emailVerified">
-            <th mat-header-cell *matHeaderCellDef> Email Verified </th>
-            <td mat-cell *matCellDef="let user">
-                <mat-icon [color]="user.emailVerified ? 'primary' : 'warn'">
-                    {{user.emailVerified ? 'check_circle' : 'cancel'}}
-                </mat-icon>
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="lastLoginAt">
-            <th mat-header-cell *matHeaderCellDef> Last Login </th>
-            <td mat-cell *matCellDef="let user"> 
-                {{user.lastLoginAt | date:'dd/MM/yyyy HH:mm'}} 
-            </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+    <nz-table [nzData]="(users$ | async) || []" nzSize="middle" [nzPageSize]="10">
+      <thead>
+        <tr>
+          <th nzWidth="120px">ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Roles</th>
+          <th nzWidth="120px">Email Verified</th>
+          <th nzWidth="150px">Last Login</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of (users$ | async) || []">
+          <td>{{user.id.substring(0, 8)}}...</td>
+          <td>{{user.username}}</td>
+          <td>{{user.email}}</td>
+          <td>{{user.firstName || 'N/A'}}</td>
+          <td>{{user.lastName || 'N/A'}}</td>
+          <td>
+            <nz-tag 
+              *ngFor="let role of user.roles" 
+              [nzColor]="role === 'admin' ? 'gold' : 'blue'"
+            >
+              <nz-icon [nzType]="role === 'admin' ? 'crown' : 'user'" />
+              {{role}}
+            </nz-tag>
+            <span *ngIf="user.roles.length === 0" class="no-roles">No roles</span>
+          </td>
+          <td>
+            <nz-icon 
+              [nzType]="user.emailVerified ? 'check-circle' : 'close-circle'" 
+              [style.color]="user.emailVerified ? '#52c41a' : '#ff4d4f'"
+            />
+          </td>
+          <td>{{user.lastLoginAt | date:'dd/MM/yyyy HH:mm'}}</td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
 </div>

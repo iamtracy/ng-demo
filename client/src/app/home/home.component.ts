@@ -1,25 +1,20 @@
 import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { MatTableDataSource, MatTableModule } from '@angular/material/table'
-import { Observable, of, tap } from 'rxjs'
-import { MatButtonModule } from '@angular/material/button'
+import { Observable, of, tap, map } from 'rxjs'
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
-import { MatFormFieldModule } from '@angular/material/form-field'
-import { MatInputModule } from '@angular/material/input'
-import { MatIconModule } from '@angular/material/icon'
 import { FormsModule } from '@angular/forms'
-import { MatPaginator } from '@angular/material/paginator'
+import { NzTableModule } from 'ng-zorro-antd/table'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 import Keycloak from 'keycloak-js'
 import { HomeService } from './home.service'
+import { MessageDto } from '../core/api'
 
-interface Message {
-  id: number;
-  message: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  editing?: boolean;
-  editMessage?: string;
+interface ExtendedMessage extends MessageDto {
+  editing?: boolean
+  editMessage?: string
 }
 
 @Component({
@@ -27,48 +22,23 @@ interface Message {
   standalone: true,
   imports: [
     CommonModule,
-    MatTableModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
+    NzTableModule,
+    NzDividerModule,
+    NzInputModule,
+    NzButtonModule,
+    NzIconModule,
     ReactiveFormsModule,
     FormsModule
   ],
-  templateUrl: './home.component.html',
-  styles: [`
-    .editable-cell {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .editable-cell:hover {
-      background: rgba(0, 0, 0, 0.04);
-    }
-    .edit-icon {
-      font-size: 18px;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .editable-cell:hover .edit-icon {
-      opacity: 0.5;
-    }
-    .not-owner {
-      cursor: not-allowed;
-      color: rgba(0, 0, 0, 0.5);
-    }
-  `]
+  templateUrl: './home.component.html'
 })
 export class HomeComponent implements OnInit {
-  @ViewChild('messageInput') messageInput!: ElementRef;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('messageInput') messageInput!: ElementRef
   
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
-  dataSource = new MatTableDataSource<Message>([])
-  messages$: Observable<any[]> = of([])
+  messages$: Observable<ExtendedMessage[]> = of([])
   currentUserId: string = ''
+  currentlyEditing: ExtendedMessage | null = null
   keycloak = inject(Keycloak)
 
   form = new FormGroup({
@@ -83,23 +53,24 @@ export class HomeComponent implements OnInit {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
     this.messages$ = this.homeService.messagesWithAutoLoad$.pipe(
-      tap((messages) => this.dataSource.data = messages)
+      map(messages => messages.map(msg => ({
+        ...msg,
+        editing: false,
+        editMessage: undefined
+      } as ExtendedMessage)))
     )
   }
 
-  canEdit(element: Message): boolean {
-    return element.userId === this.currentUserId;
+  canEdit(element: ExtendedMessage): boolean {
+    return element.userId === this.currentUserId
   }
 
   deleteGreeting(id: number) {
-    const greeting = this.dataSource.data.find(g => g.id === id);
-    if (greeting && this.canEdit(greeting)) {
-      this.homeService.deleteGreeting(id).subscribe()
-    }
+    this.homeService.deleteGreeting(id).subscribe()
   }
 
   onSubmit() {
-    if (!this.form.value.message) return;
+    if (!this.form.value.message) return
     
     this.homeService.createGreeting(this.form.value.message)
     .pipe(
@@ -108,40 +79,41 @@ export class HomeComponent implements OnInit {
     .subscribe()
   }
 
-  startEdit(element: Message): void {
-    if (!this.canEdit(element)) return;
+  startEdit(element: ExtendedMessage): void {
+    if (!this.canEdit(element)) return
 
-    // Cancel any other editing
-    this.dataSource.data.forEach(item => {
-      if (item !== element && item.editing) {
-        this.cancelEdit(item);
-      }
-    });
+    // Cancel any existing edit
+    if (this.currentlyEditing && this.currentlyEditing.id !== element.id) {
+      this.cancelEdit(this.currentlyEditing)
+    }
 
-    element.editing = true;
-    element.editMessage = element.message;
+    element.editing = true
+    element.editMessage = element.message
+    this.currentlyEditing = element
     
     setTimeout(() => {
       if (this.messageInput) {
-        this.messageInput.nativeElement.focus();
+        this.messageInput.nativeElement.focus()
       }
-    });
+    })
   }
 
-  async saveEdit(element: Message): Promise<void> {
-    if (!this.canEdit(element)) return;
+  async saveEdit(element: ExtendedMessage): Promise<void> {
+    if (!this.canEdit(element)) return
 
     try {
       this.homeService.updateGreeting(element.id, element.editMessage!).subscribe()
-      element.message = element.editMessage!;
-      element.editing = false;
+      element.message = element.editMessage!
+      element.editing = false
+      this.currentlyEditing = null
     } catch (error) {
-      console.error('Error saving message:', error);
+      console.error('Error saving message:', error)
     }
   }
 
-  cancelEdit(element: Message): void {
-    element.editing = false;
-    delete element.editMessage;
+  cancelEdit(element: ExtendedMessage): void {
+    element.editing = false
+    delete element.editMessage
+    this.currentlyEditing = null
   }
 }

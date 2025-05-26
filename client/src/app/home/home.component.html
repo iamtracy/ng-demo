@@ -1,75 +1,72 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <mat-form-field>
-        <mat-label>Input</mat-label>
-        <input matInput type="text" formControlName="message"/>
-    </mat-form-field>
-</form>
-<div *ngIf="messages$ | async as messages">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+<div class="container">
+  <div class="form-section">
+    <h2>Add New Message</h2>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="message-form">
+      <nz-input-group nzSize="large">
+        <input nz-input formControlName="message" placeholder="Enter your message..." type="text" />
+      </nz-input-group>
+    </form>
+  </div>
 
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef> ID </th>
-      <td mat-cell *matCellDef="let element"> {{element.id}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="message">
-      <th mat-header-cell *matHeaderCellDef> Message </th>
-      <td mat-cell *matCellDef="let element">
-        <ng-container *ngIf="!element.editing; else editMode">
-          <span 
-            [class.not-owner]="!canEdit(element)" 
-            (click)="startEdit(element)" 
-            class="editable-cell"
-          >
-            {{element.message}}
-            <mat-icon *ngIf="canEdit(element)" class="edit-icon">edit</mat-icon>
-          </span>
-        </ng-container>
-        <ng-template #editMode>
-          <mat-form-field appearance="outline" class="edit-form-field">
-            <input
-              matInput
-              [(ngModel)]="element.editMessage" 
-              (keyup.enter)="saveEdit(element)"
-              (keyup.escape)="cancelEdit(element)"
-              #messageInput
-            >
-            <button mat-icon-button matSuffix (click)="saveEdit(element)" color="primary">
-              <mat-icon>check</mat-icon>
-            </button>
-            <button mat-icon-button matSuffix (click)="cancelEdit(element)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-form-field>
-        </ng-template>
-      </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef> Created At </th>
-      <td mat-cell *matCellDef="let element"> {{element.createdAt | date:'dd/MM/yyyy HH:mm'}} </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="updatedAt">
-      <th mat-header-cell *matHeaderCellDef> Updated At </th>
-      <td mat-cell *matCellDef="let element"> {{element.updatedAt | date:'dd/MM/yyyy HH:mm'}} </td>
-    </ng-container>
-
-    <ng-container matColumnDef="delete">
-      <th mat-header-cell *matHeaderCellDef> Delete </th>
-      <td mat-cell *matCellDef="let element">
-        <button
-          mat-icon-button
-          color="warn" 
-          (click)="deleteGreeting(element.id)"
-          *ngIf="canEdit(element)"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-  
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+  <div class="table-section">
+    <h2>Messages</h2>
+    <nz-table [nzData]="(messages$ | async) || []" nzSize="middle" [nzPageSize]="10">
+      <thead>
+        <tr>
+          <th nzWidth="80px">ID</th>
+          <th>Message</th>
+          <th nzWidth="150px">Created</th>
+          <th nzWidth="150px">Updated</th>
+          <th nzWidth="120px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of (messages$ | async) || []">
+          <td>{{data.id}}</td>
+          <td>
+            <ng-container *ngIf="!data.editing; else editMode">
+              <span 
+                [class.not-owner]="!canEdit(data)" 
+                (click)="startEdit(data)" 
+                class="editable-cell"
+              >
+                {{data.message}}
+                <nz-icon *ngIf="canEdit(data)" class="edit-icon" nzType="edit" />
+              </span>
+            </ng-container>
+            <ng-template #editMode>
+              <nz-input-group nzCompact>
+                <input
+                  nz-input
+                  [(ngModel)]="data.editMessage" 
+                  (keyup.enter)="saveEdit(data)"
+                  (keyup.escape)="cancelEdit(data)"
+                  #messageInput
+                  style="width: calc(100% - 64px)"
+                >
+                <button nz-button nzType="primary" (click)="saveEdit(data)" style="width: 32px">
+                  <nz-icon nzType="check" />
+                </button>
+                <button nz-button nzType="default" (click)="cancelEdit(data)" style="width: 32px">
+                  <nz-icon nzType="close" />
+                </button>
+              </nz-input-group>
+            </ng-template>
+          </td>
+          <td>{{data.createdAt | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td>{{data.updatedAt | date:'dd/MM/yyyy HH:mm'}}</td>
+          <td>
+            <nz-button-group nzSize="small" *ngIf="canEdit(data)">
+              <button nz-button nzType="default" (click)="startEdit(data)">
+                <nz-icon nzType="edit" />
+              </button>
+              <button nz-button nzType="default" nzDanger (click)="deleteGreeting(data.id)">
+                <nz-icon nzType="delete" />
+              </button>
+            </nz-button-group>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
 </div>

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { BehaviorSubject, Observable } from 'rxjs'
 import { startWith, switchMap, tap } from 'rxjs/operators'
 import { UserDto, UsersService } from '../core/api'
+
 @Injectable({
   providedIn: 'root'
 })
@@ -22,9 +23,9 @@ export class AdminService {
       startWith([]),
       switchMap((currentUsers) => {
         if (currentUsers.length === 0) {
-          return this.getAllUsers();
+          return this.getAllUsers()
         }
-        return this.users$;
+        return this.users$
       })
     )
   }

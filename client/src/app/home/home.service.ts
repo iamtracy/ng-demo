@@ -16,11 +16,11 @@ export class HomeService {
       startWith([]),
       switchMap((currentMessages) => {
         if (currentMessages.length === 0) {
-          return this.getGreetings();
+          return this.getGreetings()
         }
-        return this.messages$;
+        return this.messages$
       })
-    );
+    )
   }
 
   getAllUsers() {
