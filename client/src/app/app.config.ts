@@ -12,14 +12,15 @@ import {
 
 import { routes } from './app.routes'
 import { apiBaseUrlInterceptor } from './core/interceptors/api-base-url.interceptor'
+import { environment } from '../environments/environment'
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideKeycloak({
       config: {
-        url: 'http://localhost:8080',
-        realm: 'my-app',
-        clientId: 'my-app-client',
+        url: environment.keycloak.url,
+        realm: environment.keycloak.realm,
+        clientId: environment.keycloak.clientId,
       },
       initOptions: {
         onLoad: 'login-required',
