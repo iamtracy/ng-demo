@@ -106,7 +106,7 @@ KEYCLOAK_CLIENT_SECRET=ng-demo-secret
 
 ```env
 # server/.env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/messages?schema=public"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ng_demo_db?schema=public"
 ```
 
 3. Choose your launch sequence:
