@@ -4,7 +4,7 @@
         <input matInput type="text" formControlName="message"/>
     </mat-form-field>
 </form>
-<div *ngIf="greetings$ | async as greetings">
+<div *ngIf="messages$ | async as messages">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
     <ng-container matColumnDef="id">

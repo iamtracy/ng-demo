@@ -67,7 +67,7 @@ export class HomeComponent implements OnInit {
   
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
   dataSource = new MatTableDataSource<Message>([])
-  greetings$: Observable<any[]> = of([])
+  messages$: Observable<any[]> = of([])
   currentUserId: string = ''
   keycloak = inject(Keycloak)
 
@@ -76,15 +76,14 @@ export class HomeComponent implements OnInit {
   })
 
   constructor(
-    private homeService: HomeService,
+    private homeService: HomeService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
-    this.homeService.getGreetings().subscribe()
-    this.greetings$ = this.homeService.greetings$.pipe(
-      tap((greetings) => this.dataSource.data = greetings)
+    this.messages$ = this.homeService.messagesWithAutoLoad$.pipe(
+      tap((messages) => this.dataSource.data = messages)
     )
   }
 

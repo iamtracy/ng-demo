@@ -1,58 +1,30 @@
-import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { BehaviorSubject } from 'rxjs'
-import { tap } from 'rxjs/operators'
-
-interface User {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  emailVerified: boolean
-  roles: string[]
-  createdAt: string
-  updatedAt: string
-  lastLoginAt: string
-}
-
-interface ApiResponse<T> {
-  data: T
-  message: string
-  status: number
-}
-
+import { BehaviorSubject, Observable } from 'rxjs'
+import { startWith, switchMap, tap } from 'rxjs/operators'
+import { UserDto, UsersService } from '../core/api'
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
-  private readonly _users$ = new BehaviorSubject<User[]>([])
+  private readonly _users$ = new BehaviorSubject<UserDto[]>([])
   readonly users$ = this._users$.asObservable()
 
-  constructor(private http: HttpClient) { }
+  constructor(private usersService: UsersService) { }
 
-  getAllUsers() {
-    return this.http.get<ApiResponse<User[]>>('/users').pipe(
-      tap((response) => this._users$.next(response.data))
+  private getAllUsers() {
+    return this.usersService.userControllerGetAllUsers().pipe(
+      tap((users: UserDto[]) => this._users$.next(users))
     )
   }
-
-  getUserById(id: string) {
-    return this.http.get<User>(`/users/${id}`)
-  }
-
-  updateUser(id: string, userData: Partial<User>) {
-    return this.http.put<User>(`/users/${id}`, userData).pipe(
-      tap(() => {
-        this.getAllUsers().subscribe()
-      })
-    )
-  }
-
-  deleteUser(id: string) {
-    return this.http.delete(`/users/${id}`).pipe(
-      tap(() => {
-        this.getAllUsers().subscribe()
+  
+  get usersWithAutoLoad$(): Observable<UserDto[]> {
+    return this.users$.pipe(
+      startWith([]),
+      switchMap((currentUsers) => {
+        if (currentUsers.length === 0) {
+          return this.getAllUsers();
+        }
+        return this.users$;
       })
     )
   }

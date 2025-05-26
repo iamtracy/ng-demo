@@ -5,19 +5,7 @@ import { MatIconModule } from '@angular/material/icon'
 import { Observable, of, tap } from 'rxjs'
 import Keycloak from 'keycloak-js'
 import { AdminService } from './admin.service'
-
-interface User {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  emailVerified: boolean
-  roles: string[]
-  createdAt: string
-  updatedAt: string
-  lastLoginAt: string
-}
+import { UserDto } from '../core/api'
 
 @Component({
   selector: 'app-admin',
@@ -32,8 +20,8 @@ interface User {
 })
 export class AdminComponent implements OnInit {
   displayedColumns: string[] = ['id', 'username', 'email', 'firstName', 'lastName', 'roles', 'emailVerified', 'lastLoginAt']
-  dataSource = new MatTableDataSource<User>([])
-  users$: Observable<User[]> = of([])
+  dataSource = new MatTableDataSource<UserDto>([])
+  users$: Observable<UserDto[]> = of([])
   currentUserId: string = ''
   keycloak = inject(Keycloak)
 
@@ -42,8 +30,7 @@ export class AdminComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
-    this.adminService.getAllUsers().subscribe()
-    this.users$ = this.adminService.users$.pipe(
+    this.users$ = this.adminService.usersWithAutoLoad$.pipe(
       tap((users) => this.dataSource.data = users)
     )
   }

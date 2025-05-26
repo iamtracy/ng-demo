@@ -4,7 +4,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import chalk from 'chalk'
 
 import { AppModule } from './app.module'
-import { TransformInterceptor } from './interceptors/transform.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -14,8 +13,6 @@ async function bootstrap() {
     transform: true,
     whitelist: true,
   }))
-
-  app.useGlobalInterceptors(new TransformInterceptor())
 
   const config = new DocumentBuilder()
     .setTitle('Messages API')
@@ -37,6 +34,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api/docs', app, document)
 
+  app.getHttpAdapter().get('/api/docs-json', (req, res) => {
+    res.json(document)
+  })
+
+
   await app.listen(port)
 
   const serverBanner = `
@@ -52,6 +54,7 @@ async function bootstrap() {
     ${chalk.yellow('🌍 Port:')} ${chalk.green(port)}
     ${chalk.yellow('🔥 Environment:')} ${chalk.green(process.env.NODE_ENV || 'development')}
     ${chalk.yellow('📚 API Docs:')} ${chalk.green(`http://localhost:${port}/api/docs`)}
+    ${chalk.yellow('📄 Swagger JSON:')} ${chalk.green(`http://localhost:${port}/api/docs-json`)}
     ${chalk.green('========================================')}
   `
 
