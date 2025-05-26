@@ -1,6 +1,9 @@
+import { join } from 'path'
+
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
+import { ServeStaticModule } from '@nestjs/serve-static'
 import * as dotenv from 'dotenv'
 import {
   AuthGuard,
@@ -18,6 +21,7 @@ import { UserModule } from './user/user.module'
 
 dotenv.config({ path: '../.env' })
 
+const isProduction = process.env.NODE_ENV === 'production'
 const KEYCLOAK_CONFIG = {
   authServerUrl:
     process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080',
@@ -45,6 +49,14 @@ if (!KEYCLOAK_CONFIG.secret) {
       bearerOnly: false,
       useNestLogger: true,
     }),
+    ...(isProduction
+      ? [
+          ServeStaticModule.forRoot({
+            rootPath: join(__dirname, '..', '..', 'public', 'browser'),
+            exclude: ['/api/*'],
+          }),
+        ]
+      : []),
     MessagesModule,
     UserModule,
     PrismaModule,

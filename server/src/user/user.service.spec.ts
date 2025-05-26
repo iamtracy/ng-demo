@@ -121,6 +121,7 @@ describe('UserService', () => {
     it('should sync user data from Keycloak', async () => {
       prismaServiceMock.user.upsert.mockResolvedValue(mockUser)
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       const result = await service.syncUserFromKeycloak(mockKeycloakUser as any)
 
       expect(result).toEqual(mockUser)
@@ -169,6 +170,7 @@ describe('UserService', () => {
         lastName: null,
       })
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await service.syncUserFromKeycloak(partialKeycloakUser as any)
 
       const expectedUpdate: Partial<UserUpdateInput> = {

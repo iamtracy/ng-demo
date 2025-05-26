@@ -1,0 +1,44 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies
+**/node_modules
+
+# Build outputs
+**/dist
+**/build
+**/.next
+**/.nuxt
+
+# Environment files
+**/.env*
+!**/.env.example
+
+# Development files
+**/.vscode
+**/.idea
+**/*.log
+**/coverage
+**/.nyc_output
+**/.DS_Store
+
+# Test files
+**/test
+**/__tests__
+**/*.spec.*
+**/*.test.*
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Documentation
+**/README.md
+**/docs
+
+# Temporary files
+**/*.swp
+**/*.swo
+**/tmp
+**/temp 

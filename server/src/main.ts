@@ -13,6 +13,8 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000
   const portStr = String(port)
 
+  app.setGlobalPrefix('api')
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
