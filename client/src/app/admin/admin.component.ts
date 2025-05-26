@@ -1,12 +1,14 @@
-import { Component, OnInit, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Observable, of } from 'rxjs'
+import { Component, OnInit, inject } from '@angular/core'
+import Keycloak from 'keycloak-js'
+import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
-import { NzIconModule } from 'ng-zorro-antd/icon'
-import Keycloak from 'keycloak-js'
-import { AdminService } from './admin.service'
+import { Observable, of } from 'rxjs'
+
 import { UserDto } from '../core/api'
+
+import { AdminService } from './admin.service'
 
 @Component({
   selector: 'app-admin',

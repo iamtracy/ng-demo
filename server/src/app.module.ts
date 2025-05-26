@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import {
-  AuthGuard,
-  PolicyEnforcementMode,
-  TokenValidation,
-  KeycloakConnectModule,
-  RoleGuard,
-  ResourceGuard,
-} from 'nest-keycloak-connect'
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import * as dotenv from 'dotenv'
+import {
+  AuthGuard,
+  KeycloakConnectModule,
+  PolicyEnforcementMode,
+  ResourceGuard,
+  RoleGuard,
+  TokenValidation,
+} from 'nest-keycloak-connect'
 
 import { MessagesModule } from './messages/message.module'
-import { UserModule } from './user/user.module'
-import { UserSyncInterceptor } from './user/user-sync.interceptor'
 import { PrismaModule } from './prisma/prisma.module'
+import { UserSyncInterceptor } from './user/user-sync.interceptor'
+import { UserModule } from './user/user.module'
 
 dotenv.config({ path: '../.env' })
 

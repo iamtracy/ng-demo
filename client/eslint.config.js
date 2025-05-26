@@ -1,7 +1,8 @@
 // @ts-check
-const eslint = require("@eslint/js");
-const tseslint = require("typescript-eslint");
-const angular = require("angular-eslint");
+const eslint = require("@eslint/js")
+const tseslint = require("typescript-eslint")
+const angular = require("angular-eslint")
+const importPlugin = require("eslint-plugin-import")
 
 module.exports = tseslint.config(
   {
@@ -15,6 +16,9 @@ module.exports = tseslint.config(
       ...tseslint.configs.stylistic,
       ...angular.configs.tsRecommended,
     ],
+    plugins: {
+      import: importPlugin,
+    },
     processor: angular.processInlineTemplates,
     rules: {
       "@angular-eslint/directive-selector": [
@@ -34,6 +38,26 @@ module.exports = tseslint.config(
         },
       ],
       "semi": ["error", "never"],
+      "import/order": [
+        "error",
+        {
+          "groups": [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index"
+          ],
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          }
+        }
+      ],
+      "import/no-unresolved": "off",
+      "import/named": "off",
     },
   },
   {

@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { User } from '@prisma/generated'
-import { PrismaService } from '../prisma/prisma.service'
-import { SyncUserDto } from './dto/sync-user.dto'
 import { User as KeycloakUser } from '@types'
+
+import { SyncUserDto } from './dto/sync-user.dto'
+import { PrismaService } from '../prisma/prisma.service'
 
 @Injectable()
 export class UserService {

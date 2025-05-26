@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
-import { BehaviorSubject, map, tap, Observable, startWith, switchMap } from 'rxjs'
+import { BehaviorSubject, map, startWith, switchMap, tap, Observable } from 'rxjs'
+
 import { MessageDto, MessagesService } from '../core/api'
 
 @Injectable({

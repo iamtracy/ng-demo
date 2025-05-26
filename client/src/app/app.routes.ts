@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router'
-import { HomeComponent } from './home/home.component'
-import { canActivateAuthRole } from './core/auth/guards/auth.guard'
-import { canActivateAdminRole } from './core/auth/guards/admin.guard'
+
 import { AdminComponent } from './admin/admin.component'
+import { canActivateAdminRole } from './core/auth/guards/admin.guard'
+import { canActivateAuthRole } from './core/auth/guards/auth.guard'
+import { HomeComponent } from './home/home.component'
 
 export const routes: Routes = [
     {

@@ -1,10 +1,10 @@
+import { CommonModule } from '@angular/common'
 import { Component, inject, OnInit } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 import Keycloak from 'keycloak-js'
-import { CommonModule } from '@angular/common'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzMenuModule } from 'ng-zorro-antd/menu'
-import { NzButtonModule } from 'ng-zorro-antd/button'
 
 @Component({
   selector: 'app-menu',

@@ -57,7 +57,7 @@ async function bootstrap() {
     `)}
     ${chalk.green('========================================')}
     ${chalk.yellow('🚀 Server Status:')} ${chalk.green('Online')}
-    ${chalk.yellow('🌍 Port:')} ${chalk.green(portStr)}
+    ${chalk.yellow('🌍 API Port:')} ${chalk.green(portStr)}
     ${chalk.yellow('🔥 Environment:')} ${chalk.green(process.env.NODE_ENV ?? 'development')}
     ${chalk.yellow('📚 API Docs:')} ${chalk.green(`http://localhost:${portStr}/api/docs`)}
     ${chalk.yellow('📄 Swagger JSON:')} ${chalk.green(`http://localhost:${portStr}/api/docs-json`)}

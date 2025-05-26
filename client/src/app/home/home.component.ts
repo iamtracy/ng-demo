@@ -1,16 +1,18 @@
-import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Observable, of, tap, map } from 'rxjs'
+import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { FormsModule } from '@angular/forms'
-import { NzTableModule } from 'ng-zorro-antd/table'
-import { NzDividerModule } from 'ng-zorro-antd/divider'
-import { NzInputModule } from 'ng-zorro-antd/input'
-import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzIconModule } from 'ng-zorro-antd/icon'
 import Keycloak from 'keycloak-js'
-import { HomeService } from './home.service'
+import { NzButtonModule } from 'ng-zorro-antd/button'
+import { NzDividerModule } from 'ng-zorro-antd/divider'
+import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzTableModule } from 'ng-zorro-antd/table'
+import { map, Observable, of, tap } from 'rxjs'
+
 import { MessageDto } from '../core/api'
+
+import { HomeService } from './home.service'
 
 interface ExtendedMessage extends MessageDto {
   editing?: boolean
