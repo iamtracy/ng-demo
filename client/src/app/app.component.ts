@@ -38,8 +38,9 @@ import { CommonModule } from '@angular/common'
             Admin
           </a>
           <span class="spacer"></span>
-          <nav class="nav-links">
-          </nav>
+          <span class="user-info">
+            <span class="user-name">{{ userName }}</span>
+          </span>
           <button mat-button color="primary" (click)="logout()">
             <mat-icon>logout</mat-icon>
             Logout
@@ -81,6 +82,9 @@ import { CommonModule } from '@angular/common'
       align-items: center;
       gap: 4px;
     }
+    .user-name {
+      font-size: 0.7em;
+    }
     mat-icon {
       margin-right: 4px;
     }
@@ -91,7 +95,8 @@ import { CommonModule } from '@angular/common'
 })
 export class AppComponent implements OnInit {
   private breakpointObserver = inject(BreakpointObserver)
-  private readonly keycloak = inject(Keycloak)
+  keycloak = inject(Keycloak)
+  userName = this.keycloak.tokenParsed?.['name']
   realmRoles: string[] = []
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
@@ -101,6 +106,7 @@ export class AppComponent implements OnInit {
     )
 
   async ngOnInit() {
+    console.log(this.keycloak.tokenParsed)
     try {
       this.realmRoles = this.keycloak.realmAccess?.roles || []
     } catch (error) {

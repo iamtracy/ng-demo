@@ -17,6 +17,8 @@ export class MessageService {
             select: {
               username: true,
               email: true,
+              firstName: true,
+              lastName: true,
             },
           },
         },

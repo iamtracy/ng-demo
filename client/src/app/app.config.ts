@@ -49,4 +49,4 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([apiBaseUrlInterceptor, includeBearerTokenInterceptor]))
   ]
-};
+}

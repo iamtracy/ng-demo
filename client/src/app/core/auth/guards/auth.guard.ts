@@ -8,11 +8,7 @@ const isAccessAllowed = async (
 ): Promise<boolean | UrlTree> => {
   const { authenticated } = authData
 
-  if (authenticated) {
-    return true
-  }
-
-  return false
+  return authenticated
 }
 
 export const canActivateAuthRole = createAuthGuard<CanActivateFn>(isAccessAllowed)

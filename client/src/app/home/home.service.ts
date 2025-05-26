@@ -6,8 +6,8 @@ import { BehaviorSubject, map, tap } from 'rxjs'
   providedIn: 'root'
 })
 export class HomeService {
-  private readonly _greetings$ = new BehaviorSubject<any[]>([]);
-  readonly greetings$ = this._greetings$.asObservable();
+  private readonly _greetings$ = new BehaviorSubject<any[]>([])
+  readonly greetings$ = this._greetings$.asObservable()
 
   constructor(private http: HttpClient) {}
 

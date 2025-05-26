@@ -13,13 +13,8 @@ const isAdminAccessAllowed = async (
   }
 
   const hasAdminRole = keycloak.hasRealmRole('admin')
-  
-  if (hasAdminRole) {
-    return true
-  }
 
-  console.warn('Access denied: Admin role required')
-  return false
+  return hasAdminRole
 }
 
 export const canActivateAdminRole = createAuthGuard<CanActivateFn>(isAdminAccessAllowed) 

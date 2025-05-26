@@ -44,7 +44,6 @@ export class AdminService {
   updateUser(id: string, userData: Partial<User>) {
     return this.http.put<User>(`/users/${id}`, userData).pipe(
       tap(() => {
-        // Refresh the users list after update
         this.getAllUsers().subscribe()
       })
     )
@@ -53,7 +52,6 @@ export class AdminService {
   deleteUser(id: string) {
     return this.http.delete(`/users/${id}`).pipe(
       tap(() => {
-        // Refresh the users list after deletion
         this.getAllUsers().subscribe()
       })
     )
