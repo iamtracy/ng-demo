@@ -6,7 +6,7 @@ import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { Observable, of } from 'rxjs'
 
-import { UserDto } from '../core/api'
+import { UserDto } from '../api'
 
 import { AdminService } from './admin.service'
 

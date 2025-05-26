@@ -44,7 +44,7 @@ module.exports = function (config) {
       // source files, that you wanna generate coverage for
       // do not include tests or libraries
       'src/**/*.ts': ['coverage'],
-      '!src/app/core/api/**/*.ts': ['coverage']
+      '!src/app/api/**/*.ts': ['coverage']
     },
     reporters: ['progress', 'kjhtml', 'coverage'],
     browsers: ['Chrome'],

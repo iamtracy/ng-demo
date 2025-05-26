@@ -2,7 +2,7 @@ import { SpectatorRouting, createRoutingFactory } from '@ngneat/spectator'
 import Keycloak from 'keycloak-js'
 import { of } from 'rxjs'
 
-import { MessageDto } from '../core/api'
+import { MessageDto } from '../api'
 
 import { HomeComponent } from './home.component'
 import { HomeService } from './home.service'
