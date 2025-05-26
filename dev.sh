@@ -39,20 +39,6 @@ cleanup() {
 
 trap cleanup EXIT
 
-# Function to watch API changes and regenerate client code
-watch_and_generate() {
-    echo -e "${HYPERINTELLIGENT}[🧠] Initializing Babel Fish translation matrix...${NC}"
-    while true; do
-        if curl -s http://localhost:3000/api/docs-json > /dev/null; then
-            cd client
-            echo -e "${HYPERINTELLIGENT}[📡] Regenerating client code from latest API specs...${NC}"
-            npm run generate
-            cd ..
-        fi
-        sleep 5
-    done
-}
-
 # Launch client (the frontend component, not the squishy biological one)
 echo -e "${HYPERINTELLIGENT}[🌍] Engaging Frontend Neural Interface...${NC}"
 cd client
@@ -77,8 +63,20 @@ npm run start:dev 2>&1 | sed "s/^/$(printf "${IMPROBABILITY}[SERVER]${NC} ") /" 
 SERVER_PID=$!
 cd ..
 
-# Start the API watcher in the background
-watch_and_generate 2>&1 | sed "s/^/$(printf "${HYPERINTELLIGENT}[BABEL FISH]${NC} ") /" &
+# Start the API watcher
+echo -e "${HYPERINTELLIGENT}[🧠] Initializing Babel Fish translation matrix...${NC}"
+
+# Wait for API to be ready
+echo -e "${SARCASM}[⏳] Waiting for server to finish calculating Pi...${NC}"
+until curl -s http://localhost:3000/api/docs-json > /dev/null; do
+    echo -e "${SARCASM}[⌛] Still calculating... (${TOWEL}42%${SARCASM} complete)${NC}"
+    sleep 2
+done
+echo -e "${HYPERINTELLIGENT}[🎯] Server ready! Deep Thought has finished its calculations.${NC}"
+
+cd client
+npm run watch-api 2>&1 | sed "s/^/$(printf "${HYPERINTELLIGENT}[BABEL FISH]${NC} ") /" &
+cd ..
 WATCHER_PID=$!
 
 # Mission status
