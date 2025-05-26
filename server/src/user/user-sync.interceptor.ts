@@ -15,12 +15,15 @@ export class UserSyncInterceptor implements NestInterceptor {
 
   constructor(private readonly userService: UserService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest()
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<unknown>> {
+    const request = context.switchToHttp().getRequest<{ user: KeycloakUser }>()
     const user: KeycloakUser = request.user
 
-    if (user?.sub) {
-      this.syncUserAsync(user)
+    if (user.sub) {
+      await this.syncUserAsync(user)
     }
 
     return next.handle()
@@ -30,7 +33,10 @@ export class UserSyncInterceptor implements NestInterceptor {
     try {
       await this.userService.syncUserFromKeycloak(keycloakUser)
     } catch (error) {
-      this.logger.error(`Failed to sync user ${keycloakUser.preferred_username}:`, error)
+      this.logger.error(
+        `Failed to sync user ${keycloakUser.preferred_username}:`,
+        error,
+      )
     }
   }
-} 
+}

@@ -1,6 +1,21 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe, Req } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+  Req,
+} from '@nestjs/common'
 import { User } from '@types'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger'
 import { CurrentUser } from '@auth'
 import { Message } from '@prisma/generated'
 import { Request } from 'express'
@@ -26,82 +41,94 @@ export class MessageController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get messages - all messages for admins, own messages for users' })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'List of messages',
-    type: [MessageDto]
+  @ApiOperation({
+    summary: 'Get messages - all messages for admins, own messages for users',
   })
-  async findAll(@CurrentUser() user: User, @Req() request: Request): Promise<MessageDto[]> {
-    const requestUser = (request as any).user
-    const isAdmin = requestUser?.realm_access?.roles?.includes('admin') || false
-    
+  @ApiResponse({
+    status: 200,
+    description: 'List of messages',
+    type: [MessageDto],
+  })
+  async findAll(
+    @CurrentUser() user: User,
+    @Req() request: Request,
+  ): Promise<MessageDto[]> {
+    const requestUser = (request as unknown as { user: User }).user
+    const isAdmin = requestUser.realm_access?.roles.includes('admin') ?? false
+
     const messages = await this.messageService.messages(user, isAdmin)
-    return messages.map(this.toMessageDto)
+    return messages.map((message) => this.toMessageDto(message))
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a new message' })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'The message has been successfully created.',
-    type: MessageDto
+    type: MessageDto,
   })
   async create(
     @Body() createMessageDto: CreateMessageDto,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
   ): Promise<MessageDto> {
-    const message = await this.messageService.createMessage(createMessageDto, user)
+    const message = await this.messageService.createMessage(
+      createMessageDto,
+      user,
+    )
     return this.toMessageDto(message)
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a message' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The message has been successfully updated.',
-    type: MessageDto
+    type: MessageDto,
   })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden. You can only update your own messages.'
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. You can only update your own messages.',
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Message not found.'
+  @ApiResponse({
+    status: 404,
+    description: 'Message not found.',
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateMessageDto: CreateMessageDto,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
   ): Promise<MessageDto> {
-    const message = await this.messageService.updateMessage(id, updateMessageDto, user)
+    const message = await this.messageService.updateMessage(
+      id,
+      updateMessageDto,
+      user,
+    )
     return this.toMessageDto(message)
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a message' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'The message has been successfully deleted.',
     schema: {
       type: 'object',
       properties: {
-        id: { type: 'number', description: 'ID of the deleted message' }
-      }
-    }
+        id: { type: 'number', description: 'ID of the deleted message' },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Forbidden. You can only delete your own messages.'
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden. You can only delete your own messages.',
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Message not found.'
+  @ApiResponse({
+    status: 404,
+    description: 'Message not found.',
   })
   async delete(
     @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: User
+    @CurrentUser() user: User,
   ): Promise<{ id: number }> {
     await this.messageService.deleteMessage(id, user)
     return { id }

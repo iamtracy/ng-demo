@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { User } from '@prisma/generated'
-import { PrismaService } from '../prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
 import { SyncUserDto } from './dto/sync-user.dto'
 import { User as KeycloakUser } from '@types'
 
@@ -22,7 +22,7 @@ export class UserService {
       firstName: keycloakUser.given_name,
       lastName: keycloakUser.family_name,
       emailVerified: keycloakUser.email_verified,
-      roles: keycloakUser.realm_access?.roles || [], // Extract roles from Keycloak token
+      roles: keycloakUser.realm_access?.roles ?? [],
     }
 
     return this.syncUser(syncData)
@@ -57,7 +57,9 @@ export class UserService {
         },
       })
 
-      this.logger.log(`User synced: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`)
+      this.logger.log(
+        `User synced: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`,
+      )
       return user
     } catch (error) {
       this.logger.error(`Failed to sync user ${syncUserDto.username}:`, error)
@@ -116,4 +118,4 @@ export class UserService {
     })
     this.logger.log(`User deleted: ${id}`)
   }
-} 
+}

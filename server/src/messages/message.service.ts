@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common'
 import { Message, Prisma } from '@prisma/generated'
-import { PrismaService } from '../prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { User } from '@types'
 
@@ -8,7 +12,7 @@ import { User } from '@types'
 export class MessageService {
   constructor(private prisma: PrismaService) {}
 
-  async messages(user: User, isAdmin: boolean = false): Promise<Message[]> {
+  async messages(user: User, isAdmin = false): Promise<Message[]> {
     if (isAdmin) {
       return this.prisma.message.findMany({
         orderBy: { createdAt: 'desc' },
@@ -33,7 +37,10 @@ export class MessageService {
     }
   }
 
-  async createMessage(createMessageDto: CreateMessageDto, user: User): Promise<Message> {
+  async createMessage(
+    createMessageDto: CreateMessageDto,
+    user: User,
+  ): Promise<Message> {
     const data: Prisma.MessageCreateInput = {
       message: createMessageDto.message,
       user: {
@@ -42,19 +49,23 @@ export class MessageService {
         },
       },
     }
-    
+
     return this.prisma.message.create({
       data,
     })
   }
 
-  async updateMessage(id: number, updateMessageDto: CreateMessageDto, user: User): Promise<Message> {
+  async updateMessage(
+    id: number,
+    updateMessageDto: CreateMessageDto,
+    user: User,
+  ): Promise<Message> {
     const message = await this.prisma.message.findUnique({
       where: { id },
     })
-    
+
     if (!message) {
-      throw new NotFoundException(`Message with ID ${id} not found`)
+      throw new NotFoundException(`Message with ID ${id.toString()} not found`)
     }
 
     if (message.userId !== user.sub) {
@@ -76,7 +87,7 @@ export class MessageService {
     })
 
     if (!message) {
-      throw new NotFoundException(`Message with ID ${id} not found`)
+      throw new NotFoundException(`Message with ID ${id.toString()} not found`)
     }
 
     if (message.userId !== user.sub) {
