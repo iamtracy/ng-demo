@@ -1,20 +1,20 @@
 <div class="menu-container">
-  <ul nz-menu nzMode="horizontal">
-    <li nz-menu-item [nzSelected]="isActiveRoute('/')">
+<ul nz-menu nzMode="horizontal">
+    <li nz-menu-item [nzSelected]="isActiveRoute('/')" data-testid="auth-menu-item">
       <a routerLink="/">Home</a>
-    </li>
-    <li nz-menu-item *ngIf="hasAdminRole()" [nzSelected]="isActiveRoute('/admin')">
-      <a routerLink="/admin">Admin</a>
-    </li>
-  </ul>
+  </li>
+    <li nz-menu-item *ngIf="hasAdminRole()" [nzSelected]="isActiveRoute('/admin')" data-testid="admin-menu-item">
+    <a routerLink="/admin">Admin</a>
+  </li>
+</ul>
   
   <div>
-    <span>
-      <nz-icon [nzType]="hasAdminRole() ? 'crown' : 'user'" />
+    <span data-testid="user-display">
+      <nz-icon [nzType]="hasAdminRole() ? 'crown' : 'user'" nzTheme="outline" />
       {{ getUserDisplayName() }}
     </span>
-    <button nz-button nzType="default" (click)="logout()">
-      <nz-icon nzType="logout" />
+    <button nz-button nzType="default" (click)="logout()" data-testid="logout-button">
+      <nz-icon nzType="logout" nzTheme="outline" />
       Logout
     </button>
   </div>

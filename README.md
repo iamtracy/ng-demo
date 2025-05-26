@@ -70,15 +70,22 @@ npm run dev
 ```
 
 The application will be available at:
-- API & Swagger Docs: http://localhost:3000/api/docs
-- Keycloak Admin: http://localhost:8080
+
+| Service | URL |
+|---------|-----|
+| UI | http://localhost:4200 |
+| API & Swagger Docs | http://localhost:3000/api/docs |
+| Keycloak Admin | http://localhost:8080 |
 
 ## Authentication
 
 The application uses Keycloak for authentication. Default test users:
-- admin/Password!23
-- user/Password!23
-- alice/Password!23
+
+| Username | Password | 
+|----------|----------|
+| admin | Password!23 |
+| user | Password!23 |
+| alice | Password!23 |
 
 To make API requests:
 1. Obtain an access token from Keycloak

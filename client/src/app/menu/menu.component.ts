@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common'
 import { Component, inject, OnInit } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
+import { CrownOutline, LogoutOutline, UserOutline } from '@ant-design/icons-angular/icons'
 import Keycloak from 'keycloak-js'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NzIconService } from 'ng-zorro-antd/icon'
 import { NzMenuModule } from 'ng-zorro-antd/menu'
 
 @Component({
   selector: 'app-menu',
+  standalone: true,
   imports: [NzIconModule, NzMenuModule, NzButtonModule, RouterModule, CommonModule],
   templateUrl: './menu.component.html',
   styles: [`
@@ -22,9 +25,14 @@ import { NzMenuModule } from 'ng-zorro-antd/menu'
   `]
 })
 export class MenuComponent implements OnInit {
+  private iconService = inject(NzIconService)
   keycloak = inject(Keycloak)
   router = inject(Router)
   realmRoles: string[] = []
+
+  constructor() {
+    this.iconService.addIcon(...[CrownOutline, LogoutOutline, UserOutline])
+  }
 
   async ngOnInit() {
     try {

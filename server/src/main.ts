@@ -48,20 +48,20 @@ async function bootstrap() {
   await app.listen(port)
 
   const serverBanner = `
-    ${chalk.cyan(`
+    ${chalk.hex('#26A7DE')(`
       ____                           
       / ___|  ___ _ ____   _____ _ __ 
       \\___ \\ / _ \\ '__\\ \\ / / _ \\ '__|
       ___) |  __/ |   \\ V /  __/ |   
       |____/ \\___|_|    \\_/ \\___|_|   
     `)}
-    ${chalk.green('========================================')}
-    ${chalk.yellow('🚀 Server Status:')} ${chalk.green('Online')}
-    ${chalk.yellow('🌍 API Port:')} ${chalk.green(portStr)}
-    ${chalk.yellow('🔥 Environment:')} ${chalk.green(process.env.NODE_ENV ?? 'development')}
-    ${chalk.yellow('📚 API Docs:')} ${chalk.green(`http://localhost:${portStr}/api/docs`)}
-    ${chalk.yellow('📄 Swagger JSON:')} ${chalk.green(`http://localhost:${portStr}/api/docs-json`)}
-    ${chalk.green('========================================')}
+    ${chalk.hex('#26A7DE')('========================================')}
+    ${chalk.hex('#FFD700')('🚀 Server Status:')} ${chalk.hex('#FFFFFF')('Online')}
+    ${chalk.hex('#FFD700')('🌍 API Port:')} ${chalk.hex('#FFFFFF')(portStr)}
+    ${chalk.hex('#FFD700')('🔥 Environment:')} ${chalk.hex('#FFFFFF')(process.env.NODE_ENV ?? 'development')}
+    ${chalk.hex('#FFD700')('📚 API Docs:')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs`)}
+    ${chalk.hex('#FFD700')('📄 Swagger JSON:')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs-json`)}
+    ${chalk.hex('#26A7DE')('========================================')}
   `
 
   Logger.log(serverBanner)

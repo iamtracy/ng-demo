@@ -1,73 +1,71 @@
 #!/bin/bash
 
-# Print commands and their arguments as they are executed
+# Print commands as they are executed
 set -x
 
-# Colors
-BLUE='\033[0;34m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-PURPLE='\033[0;35m'
-CYAN='\033[0;36m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+# Douglas Adams-themed terminal colors
+IMPROBABILITY='\033[38;5;57m'
+HYPERINTELLIGENT='\033[38;5;135m'
+PANIC='\033[1;91m'
+TOWEL='\033[1;97m'
+CUP_OF_TEA='\033[1;96m'
+SARCASM='\033[1;90m'
+NC='\033[0m' # Reset
 
-echo -e "${CYAN}"
-echo "    🚀 MISSION CONTROL INITIATED 🚀"
-echo "    =================================="
-echo "         🌌 SPACE DEV STATION 🌌"
-echo "    =================================="
-echo -e "${NC}"
+# Opening transmission
+echo -e "${IMPROBABILITY}"
+echo "      ▒▓█ GALACTIC DEV LAUNCH SYSTEM █▓▒"
+echo "    --------------------------------------"
+echo "       🚀 Powered by Infinite Improbability"
+echo "       🪐 Consult your towel before launch"
+echo "    --------------------------------------"
+echo -e "${TOWEL}             🚨 DON'T PANIC 🚨${NC}"
+echo ""
 
-echo -e "${YELLOW}🛰️  Initializing orbital development servers...${NC}"
+echo -e "${CUP_OF_TEA}☕ Brewing digital tea and warming up servers...${NC}"
 
-# Function to cleanup background processes on script exit
+# Cleanup on Ctrl+C
 cleanup() {
-  echo -e "${RED}"
-  echo "    🛑 MISSION ABORT SEQUENCE INITIATED 🛑"
-  echo "    ======================================="
-  echo "    🌍 Returning to Earth... Safe landing! 🌍"
+  echo -e "${PANIC}"
+  echo "      ✴️ Emergency Protocols Activated ✴️"
+  echo "    --------------------------------------"
+  echo "     🛬 Returning to Earth (or Magrathea)..."
   echo -e "${NC}"
-  kill $(jobs -p)
+  kill $(jobs -p) 2>/dev/null
   exit 0
 }
 
-# Set up cleanup on script exit
 trap cleanup EXIT
 
-# Function to run client with colored prefix
-run_client() {
-  cd client
-  npm run start 2>&1 | sed "s/^/$(echo -e "${CYAN}[🌟 CLIENT]${NC}") /"
-}
-
-# Function to run server with colored prefix
-run_server() {
-  cd server
-  echo -e "${PURPLE}[🔧 SERVER] Generating Prisma client...${NC}"
-  npm run prisma:generate 2>&1 | sed "s/^/$(echo -e "${PURPLE}[🔧 SERVER]${NC}") /"
-  echo -e "${PURPLE}[🔧 SERVER] Running database migrations...${NC}"
-  npm run prisma:migrate 2>&1 | sed "s/^/$(echo -e "${PURPLE}[🔧 SERVER]${NC}") /"
-  echo -e "${PURPLE}[🔧 SERVER] Launching NestJS rocket...${NC}"
-  npm run start:dev 2>&1 | sed "s/^/$(echo -e "${PURPLE}[🚀 SERVER]${NC}") /"
-}
-
-echo -e "${CYAN}🌟 Launching Frontend Spacecraft...${NC}"
-echo -e "${PURPLE}🚀 Igniting Backend Rocket Engines...${NC}"
-echo -e "${GREEN}🛸 Both vessels are preparing for launch...${NC}"
-echo ""
-
-# Run both in parallel with output prefixes
-run_client &
+# Launch client (the frontend component, not the squishy biological one)
+echo -e "${HYPERINTELLIGENT}🌍 Engaging Frontend Neural Interface...${NC}"
+cd client
+echo -e "${HYPERINTELLIGENT}[📦 CLIENT] Installing improbably necessary packages...${NC}"
+npm install
+echo -e "${HYPERINTELLIGENT}[🪐 CLIENT] Engaging launch thrusters...${NC}"
+npm run start 2>&1 | sed "s/^/$(printf "${IMPROBABILITY}[🌠 CLIENT]${NC} ") /" &
 CLIENT_PID=$!
+cd ..
 
-run_server &
+# Launch server (it definitely knows where its towel is)
+echo -e "${HYPERINTELLIGENT}🧠 Awakening Backend Intelligence Core...${NC}"
+cd server
+echo -e "${HYPERINTELLIGENT}[📦 SERVER] Installing alien dependencies...${NC}"
+npm install --force
+echo -e "${HYPERINTELLIGENT}[🧬 SERVER] Generating Prisma from improbable atoms...${NC}"
+npm run prisma:generate
+echo -e "${HYPERINTELLIGENT}[📡 SERVER] Broadcasting schema to the galaxy...${NC}"
+npm run prisma:migrate
+echo -e "${HYPERINTELLIGENT}[🚀 SERVER] Launching NestJS Hyperdrive...${NC}"
+npm run start:dev 2>&1 | sed "s/^/$(printf "${IMPROBABILITY}[🚀 SERVER]${NC} ") /" &
 SERVER_PID=$!
+cd ..
 
-echo -e "${YELLOW}⭐ Mission Status: BOTH SPACECRAFT LAUNCHED ⭐${NC}"
-echo -e "${GREEN}🌌 Monitoring space communications...${NC}"
-echo -e "${BLUE}📡 Press Ctrl+C to initiate landing sequence${NC}"
+# Mission status
+echo -e "${TOWEL}✨ Status: All Systems Go (unless the Vogons are involved) ✨${NC}"
+echo -e "${SARCASM}📡 Monitoring transmissions from both ends of the improbability curve...${NC}"
+echo -e "${CUP_OF_TEA}🧭 Press Ctrl+C to dematerialize gracefully${NC}"
 echo ""
 
-# Wait for both processes
-wait $CLIENT_PID $SERVER_PID 
+# Wait for the absurdity to stabilize
+wait $CLIENT_PID $SERVER_PID

@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common'
 import { Component, OnInit, inject } from '@angular/core'
+import { CrownFill, UserOutline, CheckCircleFill, CloseCircleFill } from '@ant-design/icons-angular/icons'
 import Keycloak from 'keycloak-js'
-import { NzIconModule } from 'ng-zorro-antd/icon'
+import { NZ_ICONS, NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzTagModule } from 'ng-zorro-antd/tag'
 import { Observable, of } from 'rxjs'
@@ -18,6 +19,12 @@ import { AdminService } from './admin.service'
     NzTableModule,
     NzTagModule,
     NzIconModule
+  ],
+  providers: [
+    {
+      provide: NZ_ICONS,
+      useValue: [CrownFill, UserOutline, CheckCircleFill, CloseCircleFill]
+    }
   ],
   templateUrl: './admin.component.html',
   styles: [`

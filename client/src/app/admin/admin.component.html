@@ -26,14 +26,15 @@
               *ngFor="let role of user.roles" 
               [nzColor]="role === 'admin' ? 'gold' : 'blue'"
             >
-              <nz-icon [nzType]="role === 'admin' ? 'crown' : 'user'" />
+              <nz-icon [nzType]="role === 'admin' ? 'crown' : 'user'" theme="fill" />
               {{role}}
             </nz-tag>
             <span *ngIf="user.roles.length === 0" class="no-roles">No roles</span>
           </td>
           <td>
             <nz-icon 
-              [nzType]="user.emailVerified ? 'check-circle' : 'close-circle'" 
+              [nzType]="user.emailVerified ? 'check-circle' : 'close-circle'"
+              [nzTheme]="'fill'"
               [style.color]="user.emailVerified ? '#52c41a' : '#ff4d4f'"
             />
           </td>
