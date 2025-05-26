@@ -19,7 +19,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@prisma/client": ["generated/prisma"],
       "@auth": ["src/auth"],
       "@types": ["src/types"]
     }
