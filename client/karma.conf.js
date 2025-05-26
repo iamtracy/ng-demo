@@ -39,17 +39,6 @@ module.exports = function (config) {
           lines: 30
         }
       },
-      exclude: [
-        // Exclude generated API files - try multiple path formats
-        '**/core/api/**',
-        '**/app/core/api/**',
-        './src/app/core/api/**',
-        'src/app/core/api/**',
-        '**/src/app/core/api/**',
-        // Add any other patterns you want to exclude
-        'src/test.ts',
-        'src/polyfills.ts'
-      ]
     },
     preprocessors: {
       // source files, that you wanna generate coverage for
