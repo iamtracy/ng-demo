@@ -41,16 +41,16 @@
   ],
   "users": [
     {
-      "username": "admin",
+      "username": "zaphod",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Admin",
-      "lastName": "User",
-      "email": "admin@ng-demo.com",
+      "firstName": "Zaphod",
+      "lastName": "Beeblebrox",
+      "email": "president@galaxy.com",
       "credentials": [
         {
           "type": "password",
-          "value": "Password!23",
+          "value": "hoopy123!",
           "temporary": false
         }
       ],
@@ -60,16 +60,16 @@
       ]
     },
     {
-      "username": "user",
+      "username": "arthur",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Regular",
-      "lastName": "User",
-      "email": "user@ng-demo.com",
+      "firstName": "Arthur",
+      "lastName": "Dent",
+      "email": "arthur@earth.com",
       "credentials": [
         {
           "type": "password",
-          "value": "Password!23",
+          "value": "hoopy123!",
           "temporary": false
         }
       ],
@@ -78,16 +78,16 @@
       ]
     },
     {
-      "username": "alice",
+      "username": "trillian",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Alice",
-      "lastName": "Smith",
-      "email": "alice@ng-demo.com",
+      "firstName": "Tricia",
+      "lastName": "McMillan",
+      "email": "trillian@heart-of-gold.com",
       "credentials": [
         {
           "type": "password",
-          "value": "Password!23",
+          "value": "hoopy123!",
           "temporary": false
         }
       ],

@@ -143,20 +143,31 @@ Your local instance of the galaxy will be available at:
 
 ## 🔐 Security Clearance (Authentication)
 
-Like the doors in the Heart of Gold, but less cheerful. Default crew members:
+### Test Credentials
+| Username | Role | Password | Notes |
+|-------------|------|----------|-------|
+| zaphod | admin | hoopy123! | Full access to all features |
+| arthur | user | hoopy123! | Standard user access |
+| trillian | user | hoopy123! | Standard user access |
 
-| Crew Member | Access Code |
-|-------------|-------------|
-| admin | Password!23 (Don't Panic!) |
-| user | Password!23 (Still Don't Panic!) |
-| alice | Password!23 (Seriously, No Panicking!) |
+### Quick Setup Tips
+1. The `dev.sh` script will automatically:
+   - Start all required services (PostgreSQL, Keycloak)
+   - Run database migrations
+   - Import test users into Keycloak
+   - Start both frontend and backend in development mode
 
-To communicate with the ship:
-1. Get your towel (access token) from Keycloak
-2. Wave it appropriately:
-   ```
-   Authorization: Bearer <your-towel-token>
-   ```
+2. Common Setup Issues:
+   - If Keycloak fails to start, check if port 8080 is free
+   - If PostgreSQL fails, check if port 5432 is available
+   - Run `docker-compose down -v` to reset all services
+   - Use `npm run prisma:reset` to reset the database
+
+3. Development URLs:
+   - Frontend: http://localhost:4200
+   - API & Docs: http://localhost:3000/api/docs
+   - Keycloak: http://localhost:8080
+   - Database: localhost:5432
 
 ## 🌍 Interfacing with the Ship (API Endpoints)
 
