@@ -32,9 +32,9 @@ fi
 
 # Reset and start containers
 echo -e "${HYPERINTELLIGENT}[🔄] Resetting the infinite improbability drive...${NC}"
-docker-compose down
+docker compose down
 echo -e "${HYPERINTELLIGENT}[🚀] Engaging hyperspace bypass...${NC}"
-docker-compose up -d
+docker compose up -d
 
 # Opening transmission
 echo -e "\n${IMPROBABILITY}"
