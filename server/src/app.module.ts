@@ -51,6 +51,10 @@ if (!KEYCLOAK_CONFIG.secret) {
   ],
   providers: [
     {
+      provide: APP_INTERCEPTOR,
+      useClass: UserSyncInterceptor,
+    },
+    {
       provide: APP_GUARD,
       useClass: AuthGuard,
     },
@@ -61,10 +65,6 @@ if (!KEYCLOAK_CONFIG.secret) {
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: UserSyncInterceptor,
     },
   ],
 })

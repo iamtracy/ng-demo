@@ -15,6 +15,10 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminComponent,
         canActivate: [canActivateAuthRole, canActivateAdminRole]
+    },
+    {
+        path: '**',
+        redirectTo: ''
     }
 ]
 
