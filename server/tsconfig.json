@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
@@ -18,7 +19,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@prisma/generated": ["generated/prisma"],
+      "@prisma/generated": ["./generated/prisma"],
       "@auth": ["src/auth"],
       "@types": ["src/types"]
     }
