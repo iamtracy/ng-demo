@@ -10,6 +10,7 @@ interface CompilerOptions {
 const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: 'src',
+  coveragePathIgnorePatterns: ['/node_modules/', '/generated/', '/types/'],
   testRegex: '.*\\.spec\\.ts$',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
