@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core'
+import { Component, inject, OnInit } from '@angular/core'
 import { Router, RouterModule } from '@angular/router'
 import Keycloak from 'keycloak-js'
 import { CommonModule } from '@angular/common'
@@ -21,7 +21,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button'
     }
   `]
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit {
   keycloak = inject(Keycloak)
   router = inject(Router)
   realmRoles: string[] = []

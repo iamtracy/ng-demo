@@ -27,7 +27,7 @@ import { UserDto } from '../core/api'
 })
 export class AdminComponent implements OnInit {
   users$: Observable<UserDto[]> = of([])
-  currentUserId: string = ''
+  currentUserId = ''
   keycloak = inject(Keycloak)
 
   constructor(private adminService: AdminService) {}

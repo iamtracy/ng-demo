@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit {
   
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
   messages$: Observable<ExtendedMessage[]> = of([])
-  currentUserId: string = ''
+  currentUserId = ''
   currentlyEditing: ExtendedMessage | null = null
   keycloak = inject(Keycloak)
 

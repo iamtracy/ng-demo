@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, switchMap, EMPTY } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { MessagesService, MessageDto, CreateMessageDto } from '../api';
 
 @Injectable({
@@ -10,16 +10,12 @@ export class MessagesStateService {
   private readonly _loading$ = new BehaviorSubject<boolean>(false);
   private readonly _error$ = new BehaviorSubject<string | null>(null);
 
-  // Public observables
   readonly messages$ = this._messages$.asObservable();
   readonly loading$ = this._loading$.asObservable();
   readonly error$ = this._error$.asObservable();
 
   constructor(private messagesService: MessagesService) {}
 
-  /**
-   * Load all messages and update the state
-   */
   loadMessages(): Observable<MessageDto[]> {
     this._loading$.next(true);
     this._error$.next(null);
@@ -39,15 +35,11 @@ export class MessagesStateService {
     );
   }
 
-  /**
-   * Create a new message and update the state
-   */
   createMessage(createMessageDto: CreateMessageDto): Observable<MessageDto> {
     return this.messagesService.messageControllerCreate(createMessageDto).pipe(
       tap({
         next: (newMessage) => {
           const currentMessages = this._messages$.value;
-          // Add new message and sort by ID
           const updatedMessages = [newMessage, ...currentMessages].sort((a, b) => b.id - a.id);
           this._messages$.next(updatedMessages);
         },
@@ -59,9 +51,6 @@ export class MessagesStateService {
     );
   }
 
-  /**
-   * Update a message and update the state
-   */
   updateMessage(id: number, updateMessageDto: CreateMessageDto): Observable<MessageDto> {
     return this.messagesService.messageControllerUpdate(id, updateMessageDto).pipe(
       tap({
@@ -80,15 +69,11 @@ export class MessagesStateService {
     );
   }
 
-  /**
-   * Delete a message and update the state
-   */
-  deleteMessage(id: number): Observable<any> {
+  deleteMessage(id: number): Observable<unknown> {
     return this.messagesService.messageControllerDelete(id).pipe(
       tap({
-        next: (response) => {
+        next: () => {
           const currentMessages = this._messages$.value;
-          // Use the passed id since the response might not have the exact structure
           const updatedMessages = currentMessages.filter(msg => msg.id !== id);
           this._messages$.next(updatedMessages);
         },
@@ -100,16 +85,10 @@ export class MessagesStateService {
     );
   }
 
-  /**
-   * Refresh messages (useful for manual refresh)
-   */
   refresh(): void {
     this.loadMessages().subscribe();
   }
 
-  /**
-   * Clear error state
-   */
   clearError(): void {
     this._error$.next(null);
   }
