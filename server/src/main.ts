@@ -1,3 +1,4 @@
+import { getThemeSync } from '@intelika/swagger-theme'
 import { Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
@@ -24,9 +25,10 @@ async function bootstrap() {
   )
 
   const config = new DocumentBuilder()
-    .setTitle('Messages API')
-    .setDescription('The messages API description')
-    .setVersion('1.0')
+    .setTitle("The Hitchhiker's Guide to the Galaxy API")
+    .setDescription('A mostly harmless API for intergalactic message sharing')
+    .setVersion('42.0')
+    .addServer(`http://localhost:${portStr}/api`)
     .addBearerAuth(
       {
         type: 'http',
@@ -41,36 +43,42 @@ async function bootstrap() {
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup('/api/docs', app, document)
+  SwaggerModule.setup('/api/docs', app, document, {
+    customCss: getThemeSync().toString(),
+    customSiteTitle: "The Guide API - Don't Panic!",
+    customfavIcon: '/favicon.ico',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
 
   app
     .getHttpAdapter()
     .get('/api/docs-json', (_req, res: Response) => res.json(document))
 
   const serverBanner = `
-      ${chalk.hex('#26A7DE')(`
-         ____    ___   _   _ _ _____ 
-        |  _ \\  / _ \\ | \\ | ( )_   _|
-        | | | || | | ||  \\| |/  | |  
-        | |_| || |_| || |\\  |   | |  
-        |____/  \\___/ |_| \\_|   |_|  
-         ____   _    _   _ ___ ____ 
-        |  _ \\ / \\  | \\ | |_ _/ ___|
-        | |_) / _ \\ |  \\| || | |    
-        |  __/ ___ \\| |\\  || | |___ 
-        |_|/_/   \\_\\_| \\_|___\\____|
+      ${chalk.hex('#FF0000')(`
+    ╔════════════════════════════════════════════════════════════════════════════════════╗
+    ║                                                                                    ║
+    ║  ██████╗  ██████╗ ███╗   ██╗██╗████████╗    ██████╗  █████╗ ███╗   ██╗██╗ ██████╗  ║
+    ║  ██╔══██╗██╔═══██╗████╗  ██║╚═╝╚══██╔══╝    ██╔══██╗██╔══██╗████╗  ██║██║██╔════╝  ║
+    ║  ██║  ██║██║   ██║██╔██╗ ██║       ██║       ██████╔╝███████║██╔██╗ ██║██║██║      ║
+    ║  ██║  ██║██║   ██║██║╚██╗██║       ██║       ██╔═══╝ ██╔══██║██║╚██╗██║██║██║      ║
+    ║  ██████╔╝╚██████╔╝██║ ╚████║       ██║       ██║     ██║  ██║██║ ╚████║██║╚██████╗ ║
+    ║  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝       ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ║
+    ║                                                                                    ║
+    ╚════════════════════════════════════════════════════════════════════════════════════╝
       `)}
-      ${chalk.hex('#26A7DE')('═══════════════════════ SYSTEM STATUS ══════════════════════════════════════════════')}
-      ${chalk.hex('#FFD700')('🚀 Improbability Drive: ')} ${chalk.hex('#00FF00')('Engaged')}
-      ${chalk.hex('#FFD700')('🐋 Infinite Universe:   ')} ${chalk.hex('#FFFFFF')(process.env.NODE_ENV ?? 'mostly harmless')}
-      ${process.env.NODE_ENV !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')('http://localhost:4200') + chalk.hex('#FFD700')(' (Share & Enjoy™)') : ''}
-      ${chalk.hex('#FFD700')('🌌 Space-Time Port:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}`)}
-      ${chalk.hex('#FFD700')('📖 Guide Entry:         ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs`)}
-      ${chalk.hex('#FFD700')('🐬 Babel Fish JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs-json`)}
-      ${chalk.hex('#26A7DE')('════════════════════════════════════════════════════════════════════════════════════')}
-      ${chalk.hex('#FFD700')('🤖 Deep Thought:        ')} ${chalk.hex('#FFFFFF')('Computing ultimate answer... 42 milliseconds response time')}
-      ${chalk.hex('#26A7DE')('════════════════════════════════════════════════════════════════════════════════════')}
-      ${chalk.hex('#FFD700')('Note:')} ${chalk.hex('#FFFFFF')("In case of server panic, DON'T PANIC!")}
+    ${chalk.hex('#26A7DE')('════════════════════════ SYSTEM STATUS ═══════════════════════════════════════════════')}
+    ${chalk.hex('#FFFFFF')('🐋 Universe Mode:       ')} ${chalk.hex('#FFD700')(process.env.NODE_ENV ?? 'mostly harmless')}
+    ${process.env.NODE_ENV !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')('http://localhost:4200') + chalk.hex('#FFD700')(' (Share & Enjoy™)') : ''}
+    ${chalk.hex('#FFD700')('🌌 Space-Time Port:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}`)}
+    ${chalk.hex('#FFD700')('📖 Guide Entry:         ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs`)}
+    ${chalk.hex('#FFD700')('🐬 Babel Fish JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${portStr}/api/docs-json`)}
+    ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
+    ${chalk.hex('#FFD700')('🤖 Deep Thought:        ')} ${chalk.hex('#FFFFFF')('Computing ultimate answer... 42 milliseconds response time')}
+    ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
+    ${chalk.hex('#FFD700')('💡 Tip:')} ${chalk.hex('#FFFFFF')('The answer to life, the universe, and everything is 42!')}
     `
 
   await app.listen(port)

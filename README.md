@@ -60,7 +60,7 @@ Through a remarkable coincidence, exactly the kind that the Infinite Improbabili
 - **Docker & Scripts** (contains entire worlds in boxes)
   - Containerized development environment
   - Hot reload for both frontend and backend
-  - One-command setup with `dev.sh`
+  - One-command setup with `dev.js`
 
 - **Testing & Quality**
   - Jest for unit and integration tests (42% accuracy guaranteed)
@@ -117,9 +117,9 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ng_demo_db?schema=pu
 > 
 > Without Docker, the Infinite Improbability Drive (our services) won't have enough power to start.
 
-### Option A: One-Command Launch
+### Option A: One-Command Launch (Recommended)
 ```bash
-sh dev.sh    # Recommended: handles all setup and startup automatically
+node dev.js    # Handles all setup and startup automatically
 ```
 
 ### Option B: Manual Launch
@@ -158,11 +158,12 @@ Your local instance of the galaxy will be available at:
 | trillian | user | hoopy123! | Standard user access |
 
 ### Quick Setup Tips
-1. The `dev.sh` script will automatically:
+1. The `dev.js` script will automatically:
    - Start all required services (PostgreSQL, Keycloak)
    - Run database migrations
    - Import test users into Keycloak
    - Start both frontend and backend in development mode
+   - Generate API client code automatically
 
 2. Common Setup Issues:
    - If Keycloak fails to start, check if port 8080 is free
@@ -303,7 +304,7 @@ The project maintains type safety throughout the stack:
 3. **Development Flow:**
    ```bash
    # Start everything with a single command
-   ./dev.sh
+   node dev.js
    
    # Or start services individually (for the bureaucratically inclined)
    docker-compose up -d    # Infrastructure
@@ -319,9 +320,9 @@ Our Babel Fish is a sophisticated piece of technology that translates your NestJ
 
 ### How it Works
 
-1. When you run `npm run dev`, the Babel Fish activates automatically and:
+1. When you run `node dev.js`, the Babel Fish activates automatically and:
    - Waits for the NestJS server to be ready
-   - Generates Angular-compatible TypeScript code when the api is available
+   - Generates Angular-compatible TypeScript code when the API is available
 
 2. The generated code lives in `client/src/app/api/` and includes:
    - TypeScript interfaces matching your server DTOs
@@ -353,7 +354,7 @@ If you see TypeScript errors about missing API types:
    curl http://localhost:3000/api/docs-json
    ```
 3. Run the generate command manually (see above)
-4. If problems persist, remember: DON'T PANIC! Just restart the dev server by running dev.sh
+4. If problems persist, remember: DON'T PANIC! Just restart the dev server by running `node dev.js`
 
 ### Technical Details
 
@@ -361,7 +362,7 @@ The generation process:
 1. Fetches OpenAPI specs from `http://localhost:3000/api/docs-json`
 2. Uses `@openapitools/openapi-generator-cli` for code generation
 3. Outputs to `client/src/app/api/`
-4. Runs automatically during development via nodemon
+4. Runs automatically during development via the dev script
 5. Takes approximately 42 milliseconds (results may vary)
 
 Remember: The Answer to the Ultimate Question of Life, the Universe, and your API types is automated code generation! 🚀
