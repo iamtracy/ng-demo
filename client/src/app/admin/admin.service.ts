@@ -32,17 +32,17 @@ export class AdminService {
   constructor(private http: HttpClient) { }
 
   getAllUsers() {
-    return this.http.get<ApiResponse<User[]>>('/api/users').pipe(
+    return this.http.get<ApiResponse<User[]>>('/users').pipe(
       tap((response) => this._users$.next(response.data))
     )
   }
 
   getUserById(id: string) {
-    return this.http.get<User>(`/api/users/${id}`)
+    return this.http.get<User>(`/users/${id}`)
   }
 
   updateUser(id: string, userData: Partial<User>) {
-    return this.http.put<User>(`/api/users/${id}`, userData).pipe(
+    return this.http.put<User>(`/users/${id}`, userData).pipe(
       tap(() => {
         // Refresh the users list after update
         this.getAllUsers().subscribe()
@@ -51,7 +51,7 @@ export class AdminService {
   }
 
   deleteUser(id: string) {
-    return this.http.delete(`/api/users/${id}`).pipe(
+    return this.http.delete(`/users/${id}`).pipe(
       tap(() => {
         // Refresh the users list after deletion
         this.getAllUsers().subscribe()

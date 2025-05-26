@@ -11,6 +11,7 @@ import {
 } from 'keycloak-angular'
 
 import { routes } from './app.routes'
+import { apiBaseUrlInterceptor } from './core/interceptors/api-base-url.interceptor'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,14 +39,13 @@ export const appConfig: ApplicationConfig = {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [
         {
-          urlPattern: /^(?!http:\/\/localhost:8080).*$/i,
-          excludedUrlPattern: /\.(html|css|js|png|jpg|jpeg|gif|ico|json)$/i,
+          urlPattern: /^\/api/i,
           httpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
         }
       ]
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor]))
+    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, includeBearerTokenInterceptor]))
   ]
 };

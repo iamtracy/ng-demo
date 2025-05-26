@@ -1,11 +1,8 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
     <mat-form-field>
         <mat-label>Input</mat-label>
         <input matInput type="text" formControlName="message"/>
     </mat-form-field>
-
-    <button mat-raised-button color="primary" type="submit">Submit</button>
 </form>
 <div *ngIf="greetings$ | async as greetings">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">

@@ -40,7 +40,7 @@ import { CommonModule } from '@angular/common'
           <span class="spacer"></span>
           <nav class="nav-links">
           </nav>
-          <button mat-flat-button color="warn" (click)="logout()">
+          <button mat-button color="primary" (click)="logout()">
             <mat-icon>logout</mat-icon>
             Logout
           </button>
