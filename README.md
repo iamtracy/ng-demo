@@ -4,27 +4,70 @@
 > "In the beginning, the tech stack was created. This has made a lot of people very angry and been widely regarded as a bad move." 
 > - Mostly Harmless Developer's Handbook
 
-## 🧰 The Improbability Drive (Tech Stack)
-Through a remarkable coincidence, exactly the kind that the Infinite Improbability Drive was designed to generate, our stack consists of:
-- **Frontend:** Angular (because space is infinite, and so are our modules)
-- **Backend:** NestJS (it knows where its towel is)
-- **Database:** Prisma + Postgres (more reliable than the Guide's servers)
-  ```typescript
-  // Import your models from @prisma/client
-  import { Message } from '@prisma/client'
-  ```
-- **Security:** Keycloak (better than Vogon poetry for keeping out intruders)
-- **Development:** Docker (contains entire worlds in boxes) & Shell Scripts (written by dolphins)
-- **Documentation:** Swagger (because even aliens need API docs)
-- **Testing:** Jest (answers all questions with 42% accuracy)
+## 🎯 What is this Thing? (Project Overview)
 
-## 🏁 Features (or "Why This App Probably Won't Destroy Earth")
-- Role-based security (stricter than the Galactic Hyperspace Planning Council)
-- User data isolation (more private than Zaphod's second head)
-- API documentation (clearer than the Babel fish)
-- JWT authentication (more secure than the doors by Sirius Cybernetics Corp.)
-- Modular architecture (like the Restaurant at the End of the Universe - everything in its right place)
-- Development automation (because life's too short to be a Vogon)
+This is a demonstration of a modern full-stack TypeScript application, much like the Guide itself but with fewer entries about towels. It showcases:
+
+### Core Functionality
+- Users can post, edit, and delete their own messages
+- Admins can see and moderate all messages
+- Each user has their own secure space in the galaxy
+- Messages are stored safely in our infinitely improbable database
+
+### Technical Showcase
+- **Authentication:** Complete Keycloak integration with role-based access
+- **Type Safety:** End-to-end TypeScript with automatic type generation
+- **API Design:** RESTful endpoints with OpenAPI/Swagger documentation
+- **Modern Stack:** Angular (frontend) + NestJS (backend) + Prisma (ORM) + PostgreSQL (database)
+- **Development:** Docker-based development environment with hot reload
+- **Testing:** Unit tests, integration tests, and end-to-end tests
+
+### Architecture Highlights
+- Clean separation between frontend and backend
+- Automatic API client generation
+- Resource-based authorization
+- Database migrations and type generation
+- Development automation scripts
+
+Think of it as a small piece of the galaxy where messages can be shared safely, with all the modern conveniences a developer could want, and none of the Vogon poetry.
+
+## 🧰 The Improbability Drive (Technical Architecture)
+Through a remarkable coincidence, exactly the kind that the Infinite Improbability Drive was designed to generate, our stack consists of:
+
+### Core Technologies
+- **Frontend:** Angular (because space is infinite, and so are our modules)
+  - Type-safe API client generation
+  - Component-based architecture
+  - Modern reactive patterns
+
+- **Backend:** NestJS (it knows where its towel is)
+  - RESTful API with OpenAPI/Swagger documentation
+  - Modular architecture with dependency injection
+  - End-to-end TypeScript support
+
+- **Database:** PostgreSQL with Prisma ORM (more reliable than the Guide's servers)
+  - Automated migrations and type generation
+  - Type-safe database queries
+  - Schema-driven development
+
+### Security & Authentication
+- **Keycloak Integration** (better than Vogon poetry for keeping out intruders)
+  - Role-based access control
+  - JWT authentication
+  - Resource-based authorization
+
+### Development Experience
+- **Docker & Scripts** (contains entire worlds in boxes)
+  - Containerized development environment
+  - Hot reload for both frontend and backend
+  - One-command setup with `dev.sh`
+
+- **Testing & Quality**
+  - Jest for unit and integration tests (42% accuracy guaranteed)
+  - End-to-end testing support
+  - Automated type checking
+
+Think of it as a small piece of the galaxy where messages can be shared safely, with all the modern conveniences a developer could want, and none of the Vogon poetry.
 
 ## Prerequisites (Things You'll Need on Your Journey)
 
@@ -42,12 +85,7 @@ cd ng-demo
 
 2. Configure your local sector of space:
 
-Here's your guide to the cosmic constants:
-- `PORT`: 3000 (A perfectly normal port number)
-- `NODE_ENV`: development (Because production is too serious)
-- `POSTGRES_HOST`: localhost (Your local piece of the galaxy)
-- `POSTGRES_DB`: ng_demo_db (Where we store the meaning of life)
-- `KEYCLOAK_REALM`: ng-demo (Your own secure dimension)
+Create two configuration files:
 
 ```env
 # .env
@@ -58,33 +96,41 @@ POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=ng_demo_db
+
+# Keycloak Configuration
 KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
 KEYCLOAK_REALM=ng-demo
 KEYCLOAK_CLIENT_ID=ng-demo-client
 KEYCLOAK_CLIENT_SECRET=ng-demo-secret
+```
 
+```env
 # server/.env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/messages?schema=public"
 ```
 
-3. Initiate the launch sequence:
+⚠️ Note: For production, replace all default credentials with secure values.
+
+3. Choose your launch sequence:
+
+### Option A: One-Command Launch
 ```bash
-# Start the infrastructure (like starting up the Heart of Gold)
-docker-compose up -d
+sh dev.sh    # Recommended: handles all setup and startup automatically
+```
 
-# Option 1: The Easy Way (recommended by Slartibartfast)
-sh dev.sh
-
-# Option 2: The Hard Way (for Vogons who enjoy the bureaucracy)
+### Option B: Manual Launch
+```bash
+# 1. Setup Server
 cd server
-npm install        # Download the universe
-npm run prisma:generate   # Generate the meaning of life (creates @prisma/client)
-npm run prisma:migrate    # Move the stars around
-npm run start:dev         # Engage the improbability drive
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run start:dev
 
+# 2. Setup Client
 cd ../client
-npm install              # More universal constants
-npm run dev             # Make it go
+npm install
+npm run dev
 ```
 
 Your local instance of the galaxy will be available at:
@@ -151,6 +197,101 @@ npm run lint  # Checks if your code is poetry to a Vogon
 - Input validation (catches things even Deep Thought would miss)
 - Error handling (more helpful than Marvin, less depressing)
 - Environment-specific configurations (works in any parallel universe)
+
+## 📊 Database Schema (The Universal Data Structure)
+
+Our database models are defined using Prisma's schema language, which is more elegant than Vogon poetry:
+
+```prisma
+model Message {
+  id        Int      @default(autoincrement()) @id
+  message   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model User {
+  id            String    @id  // Keycloak sub (user ID)
+  email         String    @unique
+  username      String    @unique
+  firstName     String?
+  lastName      String?
+  emailVerified Boolean   @default(false)
+  roles         String[]  @default([])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+  
+  // Relations
+  messages      Message[]
+  
+  @@map("users")
+}
+```
+
+## 🎯 Type Safety Across the Galaxy
+
+The project maintains type safety throughout the stack:
+
+1. **Database Layer:**
+   ```typescript
+   // Prisma provides fully typed models
+   import { Message, User } from '@prisma/client'
+   ```
+
+2. **API Layer:**
+   ```typescript
+   // DTOs ensure type safety in requests/responses
+   export class MessageDto {
+     id: number
+     message: string
+     userId: string
+     createdAt: Date
+     updatedAt: Date
+   }
+   ```
+
+3. **Frontend Layer:**
+   ```typescript
+   // Auto-generated Angular services with type safety
+   this.messageService.findAll().subscribe((messages: Message[]) => {
+     // TypeScript knows the shape of 'messages'
+   })
+   ```
+
+## 💡 Development Tips (A Hitchhiker's Guide to Not Panicking)
+
+1. **Database Operations:**
+   ```bash
+   # Reset your local database (in case of existential crisis)
+   cd server
+   npm run prisma:reset
+   
+   # View your data through Prisma Studio
+   npm run prisma:studio  # Opens at http://localhost:5555
+   ```
+
+2. **Common Issues:**
+   - If Keycloak acts up, try `docker-compose restart keycloak`
+   - Database connection issues? Check your towel (DATABASE_URL)
+   - Types out of sync? Run generators manually (see Babel Fish section)
+
+3. **Development Flow:**
+   ```bash
+   # Start everything with a single command
+   ./dev.sh
+   
+   # Or start services individually (for the bureaucratically inclined)
+   docker-compose up -d    # Infrastructure
+   cd server && npm run start:dev
+   cd client && npm start
+   ```
 
 ## 🐠 The Babel Fish API Generator
 
