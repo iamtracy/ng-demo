@@ -109,9 +109,13 @@ KEYCLOAK_CLIENT_SECRET=ng-demo-secret
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/messages?schema=public"
 ```
 
-⚠️ Note: For production, replace all default credentials with secure values.
-
 3. Choose your launch sequence:
+
+> ⚠️ **WARNING**: The Docker daemon must be running before launch
+> 
+> Make sure Docker is running on your system before proceeding. The script will check for this and display an error if Docker isn't available.
+> 
+> Without Docker, the Infinite Improbability Drive (our services) won't have enough power to start.
 
 ### Option A: One-Command Launch
 ```bash
@@ -120,14 +124,17 @@ sh dev.sh    # Recommended: handles all setup and startup automatically
 
 ### Option B: Manual Launch
 ```bash
-# 1. Setup Server
+# 1. Start Infrastructure
+docker-compose up -d    # Start PostgreSQL and Keycloak
+
+# 2. Setup Server
 cd server
 npm install
 npm run prisma:generate
 npm run prisma:migrate
 npm run start:dev
 
-# 2. Setup Client
+# 3. Setup Client
 cd ../client
 npm install
 npm run dev
