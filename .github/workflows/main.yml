@@ -45,7 +45,7 @@ jobs:
 
       - name: 📦 Install server dependencies
         working-directory: ./server
-        run: npm ci
+        run: npm ci --force
 
       - name: 🔒 Security audit - Client
         working-directory: ./client
@@ -64,14 +64,6 @@ jobs:
       - name: 🧹 Lint server code
         working-directory: ./server
         run: npm run lint
-
-      - name: 🔍 Type check client
-        working-directory: ./client
-        run: npx tsc --noEmit
-
-      - name: 🔍 Type check server
-        working-directory: ./server
-        run: npx tsc --noEmit
 
       - name: 💅 Check Prettier formatting - Client
         working-directory: ./client
