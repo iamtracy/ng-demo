@@ -174,12 +174,23 @@ describe('UserService', () => {
       const expectedUpdate: Partial<UserUpdateInput> = {
         email: partialKeycloakUser.email,
         username: partialKeycloakUser.preferred_username,
-        firstName: undefined,
-        lastName: undefined,
+        firstName: '',
+        lastName: '',
         emailVerified: partialKeycloakUser.email_verified,
         roles: partialKeycloakUser.realm_access?.roles ?? [],
         lastLoginAt: expect.any(Date) as unknown as Date,
         updatedAt: expect.any(Date) as unknown as Date,
+      }
+
+      const expectedCreate: Partial<UserCreateInput> = {
+        id: partialKeycloakUser.sub,
+        email: partialKeycloakUser.email,
+        username: partialKeycloakUser.preferred_username,
+        firstName: '',
+        lastName: '',
+        emailVerified: partialKeycloakUser.email_verified,
+        roles: partialKeycloakUser.realm_access?.roles ?? [],
+        lastLoginAt: expect.any(Date) as unknown as Date,
       }
 
       interface ExpectedArgs {
@@ -191,6 +202,7 @@ describe('UserService', () => {
       const expectedArgs: Partial<ExpectedArgs> = {
         where: { id: partialKeycloakUser.sub },
         update: expectedUpdate,
+        create: expectedCreate,
       }
 
       expect(prismaServiceMock.user.upsert).toHaveBeenCalledWith(
