@@ -34,14 +34,6 @@ jobs:
             client/package-lock.json
             server/package-lock.json
 
-      - name: 📦 Install client dependencies
-        working-directory: ./client
-        run: npm ci
-
-      - name: 📦 Install server dependencies
-        working-directory: ./server
-        run: npm ci --force
-
       - name: 🚀 Start development environment
         run: |
           echo "Starting development environment with dev.js..."
