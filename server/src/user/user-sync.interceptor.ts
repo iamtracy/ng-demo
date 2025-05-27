@@ -25,7 +25,7 @@ export class UserSyncInterceptor implements NestInterceptor {
       .getRequest<{ user: OIDCTokenPayload }>()
     const user: OIDCTokenPayload = request.user
 
-    if (user.sub) {
+    if (user.sub !== undefined && user.sub !== '') {
       await this.syncUserAsync(user)
     }
 

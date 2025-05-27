@@ -9,11 +9,11 @@ import { UserService } from './user.service'
 
 interface MockPrismaService {
   user: {
-    upsert: jest.Mock<Promise<User>, [any]>
-    findUnique: jest.Mock<Promise<User | null>, [any]>
-    findMany: jest.Mock<Promise<User[]>, [any]>
-    update: jest.Mock<Promise<User>, [any]>
-    delete: jest.Mock<Promise<User>, [any]>
+    upsert: jest.Mock<Promise<User>, [unknown]>
+    findUnique: jest.Mock<Promise<User | null>, [unknown]>
+    findMany: jest.Mock<Promise<User[]>, [unknown]>
+    update: jest.Mock<Promise<User>, [unknown]>
+    delete: jest.Mock<Promise<User>, [unknown]>
   }
 }
 
@@ -121,8 +121,7 @@ describe('UserService', () => {
     it('should sync user data from Keycloak', async () => {
       prismaServiceMock.user.upsert.mockResolvedValue(mockUser)
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      const result = await service.syncUserFromKeycloak(mockKeycloakUser as any)
+      const result = await service.syncUserFromKeycloak(mockKeycloakUser)
 
       expect(result).toEqual(mockUser)
       const expectedUpdate: UserUpdateInput = {
@@ -170,8 +169,7 @@ describe('UserService', () => {
         lastName: null,
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      await service.syncUserFromKeycloak(partialKeycloakUser as any)
+      await service.syncUserFromKeycloak(partialKeycloakUser)
 
       const expectedUpdate: Partial<UserUpdateInput> = {
         email: partialKeycloakUser.email,

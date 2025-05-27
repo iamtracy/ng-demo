@@ -30,7 +30,7 @@ const KEYCLOAK_CONFIG = {
   secret: process.env.KEYCLOAK_CLIENT_SECRET,
 }
 
-if (!KEYCLOAK_CONFIG.secret) {
+if (KEYCLOAK_CONFIG.secret === undefined || KEYCLOAK_CONFIG.secret === '') {
   throw new Error('Missing Keycloak client secret')
 }
 

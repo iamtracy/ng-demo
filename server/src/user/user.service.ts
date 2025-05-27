@@ -10,7 +10,7 @@ import { SyncUserDto } from './dto/sync-user.dto'
 export class UserService {
   private readonly logger = new Logger(UserService.name)
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Sync user data from Keycloak token to local database

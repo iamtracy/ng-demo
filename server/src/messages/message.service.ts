@@ -12,7 +12,7 @@ import { CreateMessageDto } from './dto/create-message.dto'
 
 @Injectable()
 export class MessageService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async messages(user: OIDCTokenPayload, isAdmin = false): Promise<Message[]> {
     if (isAdmin) {

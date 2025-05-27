@@ -20,22 +20,34 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   private toUserDto(user: PrismaUser | OIDCTokenPayload): UserDto {
-    if ('createdAt' in user && 'updatedAt' in user) {
-      const prismaUser = user as PrismaUser
-      return {
-        id: prismaUser.id,
-        email: prismaUser.email,
-        username: prismaUser.username,
-        firstName: prismaUser.firstName ?? '',
-        lastName: prismaUser.lastName ?? '',
-        emailVerified: prismaUser.emailVerified,
-        roles: prismaUser.roles,
-        createdAt: prismaUser.createdAt,
-        updatedAt: prismaUser.updatedAt,
-        lastLoginAt: prismaUser.lastLoginAt ?? undefined,
-      }
+    if (this.isPrismaUser(user)) {
+      return this.mapPrismaUserToDto(user)
     }
+    return this.mapOIDCTokenToDto(user)
+  }
 
+  private isPrismaUser(
+    user: PrismaUser | OIDCTokenPayload,
+  ): user is PrismaUser {
+    return 'createdAt' in user && 'updatedAt' in user
+  }
+
+  private mapPrismaUserToDto(user: PrismaUser): UserDto {
+    return {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      emailVerified: user.emailVerified,
+      roles: user.roles,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastLoginAt: user.lastLoginAt ?? undefined,
+    }
+  }
+
+  private mapOIDCTokenToDto(user: OIDCTokenPayload): UserDto {
     return {
       email: user.email ?? '',
       emailVerified: user.email_verified ?? false,

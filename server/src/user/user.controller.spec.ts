@@ -1,14 +1,14 @@
 import { NotFoundException } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { User as PrismaUser } from '@prisma/client'
-import { User as KeycloakUser } from '@types'
+import { OIDCTokenPayload } from '@types'
 
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
 
 jest.mock('@auth', () => ({
   CurrentUser: () => {
-    return (target: any, key: string, descriptor: PropertyDescriptor) => {
+    return (_: unknown, key: string, descriptor: PropertyDescriptor) => {
       return descriptor
     }
   },
@@ -30,7 +30,7 @@ describe('UserController', () => {
     lastLoginAt: new Date(),
   }
 
-  const mockKeycloakUser: KeycloakUser = {
+  const mockKeycloakUser: OIDCTokenPayload = {
     sub: 'test-id',
     email: 'test@example.com',
     preferred_username: 'testuser',
