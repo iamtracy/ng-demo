@@ -90,7 +90,7 @@ module.exports = tseslint.config(
     },
   },
   {
-    files: ["**/*.spec.ts"],
+    files: ["**/*.spec.ts", "**/cypress/**/*.ts"],
     rules: {
       "max-lines-per-function": "off",
       "max-params": "off",
