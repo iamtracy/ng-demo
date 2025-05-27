@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { BehaviorSubject, map, startWith, switchMap, tap, Observable } from 'rxjs'
+import { BehaviorSubject, map, tap, Observable } from 'rxjs'
 
 import { MessageDto, MessagesService } from '../api'
 
@@ -8,20 +8,23 @@ import { MessageDto, MessagesService } from '../api'
 })
 export class HomeService {
   private readonly _messages$ = new BehaviorSubject<MessageDto[]>([])
+  private _isLoaded = false
   readonly messages$ = this._messages$.asObservable()
 
   constructor(private messagesService: MessagesService) {}
 
   get messagesWithAutoLoad$(): Observable<MessageDto[]> {
-    return this._messages$.pipe(
-      startWith([]),
-      switchMap((currentMessages) => {
-        if (currentMessages.length === 0) {
-          return this.getGreetings()
-        }
-        return this.messages$
-      })
-    )
+    if (!this._isLoaded) {
+      this._isLoaded = true
+      this.loadMessages()
+    }
+    return this.messages$
+  }
+
+  private loadMessages(): void {
+    this.messagesService.messageControllerFindAll().pipe(
+      tap((response: MessageDto[]) => this._messages$.next(response))
+    ).subscribe()
   }
 
   getAllUsers() {

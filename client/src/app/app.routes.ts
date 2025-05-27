@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router'
 
-import { AdminComponent } from './admin/admin.component'
-import { canActivateAdminRole } from './auth/guards/admin.guard'
 import { canActivateAuthRole } from './auth/guards/auth.guard'
 import { HomeComponent } from './home/home.component'
 
@@ -13,8 +11,8 @@ export const routes: Routes = [
     },
     {
         path: 'admin',
-        component: AdminComponent,
-        canActivate: [canActivateAuthRole, canActivateAdminRole]
+        loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes),
+        canActivate: [canActivateAuthRole]
     },
     {
         path: '**',
