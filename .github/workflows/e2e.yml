@@ -1,0 +1,132 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_run:
+    workflows: ["CI - Code Quality & Unit Tests"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+    
+    strategy:
+      matrix:
+        node-version: ['22.x']
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: 🚀 Start development environment
+        run: |
+          echo "Starting development environment with dev.js..."
+          # Set CI-optimized environment variables
+          export KC_LOG_LEVEL=INFO
+          export NODE_ENV=development
+          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ng_demo_db
+          export KEYCLOAK_CLIENT_SECRET=ng-demo-secret
+          export KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
+          export KEYCLOAK_REALM=ng-demo
+          export KEYCLOAK_CLIENT_ID=ng-demo-client
+          
+          # Start dev environment in background
+          timeout 600 node dev.js &
+          DEV_PID=$!
+          echo "DEV_PID=$DEV_PID" >> $GITHUB_ENV
+          
+          # Give services time to start up
+          echo "⏳ Giving services 10 seconds to start up..."
+          sleep 10
+          
+          # Wait for services to be ready
+          echo "Waiting for application services to be ready..."
+          timeout 300 bash -c '
+            while true; do
+              echo "Checking application services... ($(date))"
+              
+              # Check if server is ready
+              if curl -s -f http://localhost:3000/api/docs-json > /dev/null; then
+                echo "✅ Server is ready!"
+                
+                # Check if client is ready
+                if curl -s -f http://localhost:4200 > /dev/null; then
+                  echo "✅ Client is ready!"
+                  echo "✅ Assuming Keycloak is healthy (Docker Compose started successfully)"
+                  break
+                else
+                  echo "⏳ Waiting for client..."
+                fi
+              else
+                echo "⏳ Waiting for server..."
+              fi
+              
+              sleep 10
+            done
+          '
+          
+          echo "🎉 All services are ready!"
+
+      - name: 🎭 Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./client
+          install: false
+          browser: chrome
+          wait-on: 'http://localhost:4200'
+          wait-on-timeout: 60
+        env:
+          CYPRESS_baseUrl: http://localhost:4200
+          CYPRESS_apiUrl: http://localhost:3000
+          CYPRESS_keycloakUrl: http://localhost:8080
+
+      - name: 📸 Upload Cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: client/cypress/screenshots
+
+      - name: 📹 Upload Cypress videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: client/cypress/videos
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up development environment..."
+          
+          # Stop the dev.js process if it's running
+          if [ ! -z "$DEV_PID" ]; then
+            echo "Stopping dev.js process (PID: $DEV_PID)..."
+            kill -SIGINT $DEV_PID 2>/dev/null || true
+            sleep 5
+            kill -SIGKILL $DEV_PID 2>/dev/null || true
+          fi
+          
+          # Stop any remaining Node processes
+          pkill -f "npm run start" || true
+          pkill -f "ng serve" || true
+          pkill -f "nest start" || true
+          
+          # Stop Docker containers
+          docker compose down || true 

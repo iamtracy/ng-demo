@@ -1,0 +1,58 @@
+{
+  "admin": {
+    "username": "zaphod",
+    "password": "hoopy123!",
+    "email": "president@galaxy.com",
+    "firstName": "Zaphod",
+    "lastName": "Beeblebrox",
+    "roles": ["admin", "user"],
+    "description": "President of the Galaxy - Admin user for testing admin functionality"
+  },
+  "user": {
+    "username": "arthur",
+    "password": "hoopy123!",
+    "email": "arthur@earth.com",
+    "firstName": "Arthur",
+    "lastName": "Dent",
+    "roles": ["user"],
+    "description": "Regular user from Earth - Standard user for testing user functionality"
+  },
+  "user2": {
+    "username": "trillian",
+    "password": "hoopy123!",
+    "email": "trillian@heart-of-gold.com",
+    "firstName": "Tricia",
+    "lastName": "McMillan",
+    "roles": ["user"],
+    "description": "Astrophysicist - Alternative user for testing user functionality"
+  },
+  "testUsers": [
+    {
+      "username": "zaphod",
+      "password": "hoopy123!",
+      "email": "president@galaxy.com",
+      "firstName": "Zaphod",
+      "lastName": "Beeblebrox",
+      "roles": ["admin", "user"],
+      "type": "admin"
+    },
+    {
+      "username": "arthur",
+      "password": "hoopy123!",
+      "email": "arthur@earth.com",
+      "firstName": "Arthur",
+      "lastName": "Dent",
+      "roles": ["user"],
+      "type": "user"
+    },
+    {
+      "username": "trillian",
+      "password": "hoopy123!",
+      "email": "trillian@heart-of-gold.com",
+      "firstName": "Tricia",
+      "lastName": "McMillan",
+      "roles": ["user"],
+      "type": "user"
+    }
+  ]
+} 
