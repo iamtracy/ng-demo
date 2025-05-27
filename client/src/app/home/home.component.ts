@@ -84,7 +84,6 @@ export class HomeComponent implements OnInit {
   startEdit(element: Message): void {
     if (!this.canEdit(element)) return
 
-    // Cancel any existing edit
     if (this.currentlyEditing && this.currentlyEditing.id !== element.id) {
       this.cancelEdit(this.currentlyEditing)
     }

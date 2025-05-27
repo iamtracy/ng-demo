@@ -8,23 +8,20 @@ import { MessageDto, MessagesService } from '../api'
 })
 export class HomeService {
   private readonly _messages$ = new BehaviorSubject<MessageDto[]>([])
-  private _isLoaded = false
   readonly messages$ = this._messages$.asObservable()
+  
+  private _initialized = false
 
   constructor(private messagesService: MessagesService) {}
 
   get messagesWithAutoLoad$(): Observable<MessageDto[]> {
-    if (!this._isLoaded) {
-      this._isLoaded = true
-      this.loadMessages()
+    if (!this._initialized) {
+      this._initialized = true
+      this.messagesService.messageControllerFindAll().pipe(
+        tap((response: MessageDto[]) => this._messages$.next(response))
+      ).subscribe()
     }
     return this.messages$
-  }
-
-  private loadMessages(): void {
-    this.messagesService.messageControllerFindAll().pipe(
-      tap((response: MessageDto[]) => this._messages$.next(response))
-    ).subscribe()
   }
 
   getAllUsers() {

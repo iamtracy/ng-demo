@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { BehaviorSubject, Observable, startWith, switchMap, tap } from 'rxjs'
+import { BehaviorSubject, Observable, tap } from 'rxjs'
 
 import { UserDto, UsersService } from '../api'
 
@@ -9,24 +9,18 @@ import { UserDto, UsersService } from '../api'
 export class AdminService {
   private readonly _users$ = new BehaviorSubject<UserDto[]>([])
   readonly users$ = this._users$.asObservable()
+  
+  private _initialized = false
 
   constructor(private usersService: UsersService) { }
-
-  private getAllUsers() {
-    return this.usersService.userControllerGetAllUsers().pipe(
-      tap((users: UserDto[]) => this._users$.next(users))
-    )
-  }
   
   get usersWithAutoLoad$(): Observable<UserDto[]> {
-    return this.users$.pipe(
-      startWith([]),
-      switchMap((currentUsers) => {
-        if (currentUsers.length === 0) {
-          return this.getAllUsers()
-        }
-        return this.users$
-      })
-    )
+    if (!this._initialized) {
+      this._initialized = true
+      this.usersService.userControllerGetAllUsers().pipe(
+        tap((users: UserDto[]) => this._users$.next(users))
+      ).subscribe()
+    }
+    return this.users$
   }
 }
