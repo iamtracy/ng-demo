@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { BehaviorSubject, Observable, tap } from 'rxjs'
 
 import { UserDto, UsersService } from '../api'
@@ -9,10 +9,8 @@ import { UserDto, UsersService } from '../api'
 export class AdminService {
   private readonly _users$ = new BehaviorSubject<UserDto[]>([])
   readonly users$ = this._users$.asObservable()
-  
   private _initialized = false
-
-  constructor(private usersService: UsersService) { }
+  readonly usersService = inject(UsersService)
   
   get usersWithAutoLoad$(): Observable<UserDto[]> {
     if (!this._initialized) {

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms'
-import { FormsModule } from '@angular/forms'
+import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms'
 import Keycloak from 'keycloak-js'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
@@ -22,6 +21,7 @@ interface Message extends MessageDto {
 @Component({
   selector: 'app-home',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     NzTableModule,
@@ -36,22 +36,20 @@ interface Message extends MessageDto {
 })
 export class HomeComponent implements OnInit {
   @ViewChild('messageInput') messageInput!: ElementRef
+  readonly homeService = inject(HomeService)
+  keycloak = inject(Keycloak)
   
   displayedColumns: string[] = ['id', 'message', 'createdAt', 'updatedAt', 'delete']
   messages$: Observable<Message[]> = of([])
   currentUserId = ''
   currentlyEditing: Message | null = null
-  keycloak = inject(Keycloak)
 
   form = new FormGroup({
     message: new FormControl('')
   })
 
-  constructor(
-    private homeService: HomeService
-  ) {}
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
     this.messages$ = this.homeService.messagesWithAutoLoad$.pipe(
@@ -67,11 +65,11 @@ export class HomeComponent implements OnInit {
     return element.userId === this.currentUserId
   }
 
-  deleteGreeting(id: number) {
+  deleteGreeting(id: number): void {
     this.homeService.deleteGreeting(id).subscribe()
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (!this.form.value.message) return
     
     this.homeService.createGreeting(this.form.value.message)

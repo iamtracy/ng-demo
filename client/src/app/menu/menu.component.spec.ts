@@ -1,47 +1,54 @@
 import { SpectatorRouting, createRoutingFactory } from '@ngneat/spectator'
 import Keycloak from 'keycloak-js'
+import { of } from 'rxjs'
+
+import { UserDto } from '../api'
 
 import { MenuComponent } from './menu.component'
+import { MenuService } from './menu.service'
 
 describe('MenuComponent', () => {
   let spectator: SpectatorRouting<MenuComponent>
+  let menuService: jasmine.SpyObj<MenuService>
   
+  const mockUser: UserDto = {
+    id: 'user1',
+    email: 'test@example.com',
+    username: 'testUser',
+    firstName: 'Test',
+    lastName: 'User',
+    emailVerified: true,
+    roles: ['user', 'admin'] as unknown as string[][],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString()
+  }
+
+  const mockUserWithoutAdmin: UserDto = {
+    ...mockUser,
+    roles: ['user'] as unknown as string[][]
+  }
+
   const keycloakMock = {
-    hasRealmRole: jasmine.createSpy('hasRealmRole'),
-    authenticated: true,
-    token: 'mock-token',
-    realmAccess: {
-      roles: ['user', 'admin']
-    },
-    tokenParsed: {
-      ['preferred_username']: 'testUser',
-      ['given_name']: 'Test',
-      ['family_name']: 'User',
-      email: 'test@example.com',
-      realm_access: {
-        roles: ['user', 'admin']
-      }
-    },
-    init: jasmine.createSpy('init').and.resolveTo(true),
-    updateToken: jasmine.createSpy('updateToken').and.resolveTo(true),
-    login: jasmine.createSpy('login'),
-    logout: jasmine.createSpy('logout'),
-    register: jasmine.createSpy('register')
+    logout: jasmine.createSpy('logout').and.resolveTo()
+  }
+
+  const menuServiceMock = {
+    userWithAutoLoad$: of(mockUser),
+    logout: jasmine.createSpy('logout').and.resolveTo()
   }
 
   const createComponent = createRoutingFactory({
     component: MenuComponent,
     providers: [
-      { provide: Keycloak, useValue: keycloakMock }
+      { provide: Keycloak, useValue: keycloakMock },
+      { provide: MenuService, useValue: menuServiceMock }
     ]
   })
 
   beforeEach(async () => {
-    keycloakMock.hasRealmRole.and.callFake((role: string) => {
-      return keycloakMock.realmAccess?.roles.includes(role) ?? false
-    })
-    
     spectator = createComponent()
+    menuService = spectator.inject(MenuService) as jasmine.SpyObj<MenuService>
     await spectator.fixture.whenStable()
     spectator.detectChanges()
   })
@@ -50,9 +57,9 @@ describe('MenuComponent', () => {
     expect(spectator.component).toBeTruthy()
   })
 
-  it('should handle logout', () => {
-    spectator.click('[data-testid="logout-button"]')
-    expect(keycloakMock.logout).toHaveBeenCalled()
+  it('should handle logout', async () => {
+    await spectator.component.logout()
+    expect(menuService.logout).toHaveBeenCalled()
   })
 
   it('should show full name when available', () => {
@@ -60,16 +67,9 @@ describe('MenuComponent', () => {
     expect(displayName).toContain('Test User')
   })
 
-  it('should show admin menu items only for admin users', () => {
-    keycloakMock.hasRealmRole.and.returnValue(true)
-    spectator.detectChanges()
+  it('should show admin menu items for admin users', () => {
     const adminElements = spectator.queryAll('[data-testid="admin-menu-item"]')
     expect(adminElements.length).toBe(1)
-
-    keycloakMock.hasRealmRole.and.returnValue(false)
-    spectator.detectChanges()
-    const noAdminElements = spectator.queryAll('[data-testid="admin-menu-item"]')
-    expect(noAdminElements.length).toBe(0)
   })
 
   it('should show authenticated menu items', () => {
@@ -77,14 +77,12 @@ describe('MenuComponent', () => {
     expect(authElements.length).toBe(1)
   })
 
-  it('should not show admin items when user lacks role', () => {
-    keycloakMock.realmAccess!.roles = ['user']
-    keycloakMock.hasRealmRole.and.callFake((role: string) => {
-      return keycloakMock.realmAccess?.roles.includes(role) ?? false
-    })
-    
+  it('should not show admin items when user lacks admin role', () => {
+    // Update the mock to return user without admin role
+    menuServiceMock.userWithAutoLoad$ = of(mockUserWithoutAdmin)
+    spectator = createComponent()
     spectator.detectChanges()
-    expect(spectator.component.hasAdminRole()).toBe(false)
+    
     const adminElements = spectator.queryAll('[data-testid="admin-menu-item"]')
     expect(adminElements.length).toBe(0)
   })

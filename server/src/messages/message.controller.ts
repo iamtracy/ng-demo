@@ -23,8 +23,8 @@ import { MessageDto } from './dto/message.dto'
 import { MessageService } from './message.service'
 
 @ApiTags('messages')
-@Controller('messages')
 @ApiBearerAuth('access-token')
+@Controller('messages')
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 

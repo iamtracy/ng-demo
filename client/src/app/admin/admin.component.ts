@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, OnInit, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core'
 import Keycloak from 'keycloak-js'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzTableModule } from 'ng-zorro-antd/table'
@@ -13,6 +13,7 @@ import { AdminService } from './admin.service'
 @Component({
   selector: 'app-admin',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     NzTableModule,
@@ -31,10 +32,9 @@ export class AdminComponent implements OnInit {
   users$: Observable<UserDto[]> = of([])
   currentUserId = ''
   keycloak = inject(Keycloak)
+  readonly adminService = inject(AdminService)
 
-  constructor(private adminService: AdminService) {}
-
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
     
     this.users$ = this.adminService.usersWithAutoLoad$

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { BehaviorSubject, map, tap, Observable } from 'rxjs'
 
 import { MessageDto, MessagesService } from '../api'
@@ -9,10 +9,8 @@ import { MessageDto, MessagesService } from '../api'
 export class HomeService {
   private readonly _messages$ = new BehaviorSubject<MessageDto[]>([])
   readonly messages$ = this._messages$.asObservable()
-  
   private _initialized = false
-
-  constructor(private messagesService: MessagesService) {}
+  readonly messagesService = inject(MessagesService)
 
   get messagesWithAutoLoad$(): Observable<MessageDto[]> {
     if (!this._initialized) {
@@ -24,19 +22,19 @@ export class HomeService {
     return this.messages$
   }
 
-  getAllUsers() {
+  getAllUsers(): Observable<MessageDto[]> {
     return this.messagesService.messageControllerFindAll().pipe(
       tap((response: MessageDto[]) => this._messages$.next(response))
     )
   }
 
-  getGreetings() {
+  getGreetings(): Observable<MessageDto[]> {
     return this.messagesService.messageControllerFindAll().pipe(
       tap((response: MessageDto[]) => this._messages$.next(response))
     )
   }
 
-  createGreeting(message: string) {
+  createGreeting(message: string): Observable<MessageDto[]> {
     return this.messagesService.messageControllerCreate({
       message
     }).pipe(
@@ -45,7 +43,7 @@ export class HomeService {
     )
   }
 
-  updateGreeting(id: number, message: string) {
+  updateGreeting(id: number, message: string): Observable<MessageDto[]> {
     return this.messagesService.messageControllerUpdate(id, {
       message
     }).pipe(
@@ -54,7 +52,7 @@ export class HomeService {
     )
   }
 
-  deleteGreeting(id: number) {
+  deleteGreeting(id: number): Observable<MessageDto[]> {
     return this.messagesService.messageControllerDelete(id).pipe(
       map(() => this._messages$.value.filter((greeting: MessageDto) => greeting.id !== id)),
       tap((filteredGreetings: MessageDto[]) => this._messages$.next(filteredGreetings))

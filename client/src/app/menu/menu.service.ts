@@ -8,13 +8,11 @@ import { UserDto, UsersService } from '../api'
   providedIn: 'root'
 })
 export class MenuService {
-  private _user$ = new BehaviorSubject<UserDto | null>(null)
+  private readonly _user$ = new BehaviorSubject<UserDto | null>(null)
   readonly user$ = this._user$.asObservable()
-  
   private _initialized = false
-  private keycloak = inject(Keycloak)
-  
-  constructor(private usersService: UsersService) {}
+  private readonly keycloak = inject(Keycloak)
+  readonly usersService = inject(UsersService)
 
   get userWithAutoLoad$(): Observable<UserDto | null> {
     if (!this._initialized) {
@@ -26,7 +24,7 @@ export class MenuService {
     return this.user$
   }
 
-  getUsers() {
+  getUsers(): Observable<UserDto> {
     return this.usersService.userControllerGetCurrentUser().pipe(
       tap((user: UserDto) => this._user$.next(user))
     )

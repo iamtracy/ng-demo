@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common'
-import { Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { RouterModule } from '@angular/router'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
@@ -11,6 +11,7 @@ import { MenuService } from './menu.service'
 @Component({
   selector: 'app-menu',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NzIconModule, NzMenuModule, NzButtonModule, RouterModule, CommonModule],
   templateUrl: './menu.component.html',
   styles: [`
@@ -25,14 +26,14 @@ import { MenuService } from './menu.service'
   `]
 })
 export class MenuComponent {
-  private menuService = inject(MenuService)
+  private readonly menuService = inject(MenuService)
 
   user$ = this.menuService.userWithAutoLoad$
   hasAdminRole$ = this.user$.pipe(
     map(user => ((user?.roles as unknown) as string[])?.includes('admin') ?? false)
   )
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
       await this.menuService.logout()
     } catch (error) {
