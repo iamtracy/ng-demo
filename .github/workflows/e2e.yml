@@ -111,14 +111,14 @@ jobs:
           CYPRESS_keycloakUrl: http://localhost:8080
 
       - name: 📸 Upload Cypress screenshots
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: client/cypress/screenshots
 
       - name: 📹 Upload Cypress videos
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: cypress-videos

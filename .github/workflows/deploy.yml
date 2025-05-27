@@ -73,7 +73,7 @@ jobs:
           docker save ng-demo:${{ github.sha }} | gzip > ng-demo-${{ github.sha }}.tar.gz
 
       - name: 📤 Upload Docker image artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image-${{ github.sha }}
           path: ng-demo-${{ github.sha }}.tar.gz
@@ -101,7 +101,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 📥 Download Docker image
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: docker-image-${{ github.sha }}
 

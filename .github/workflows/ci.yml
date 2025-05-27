@@ -98,7 +98,7 @@ jobs:
         run: npm run test:ci
 
       - name: 📈 Upload client coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           directory: ./client/coverage
           flags: client
@@ -106,7 +106,7 @@ jobs:
         continue-on-error: true
 
       - name: 📈 Upload server coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           directory: ./server/coverage
           flags: server
@@ -152,14 +152,14 @@ jobs:
         run: npm run build
 
       - name: 📦 Upload client build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: client-build
           path: client/dist/
           retention-days: 1
 
       - name: 📦 Upload server build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: server-build
           path: server/dist/
