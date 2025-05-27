@@ -42,135 +42,56 @@ jobs:
         working-directory: ./server
         run: npm ci --force
 
-      - name: 🐳 Start Docker services
+      - name: 🚀 Start development environment
         run: |
-          echo "Starting Docker services..."
+          echo "Starting development environment with dev.js..."
           # Set CI-optimized environment variables
           export KC_LOG_LEVEL=INFO
-          docker compose up -d postgres keycloak-db keycloak
-          echo "Services started, checking status..."
-          docker compose ps
+          export NODE_ENV=development
+          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ng_demo_db
+          export KEYCLOAK_CLIENT_SECRET=ng-demo-secret
+          export KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
+          export KEYCLOAK_REALM=ng-demo
+          export KEYCLOAK_CLIENT_ID=ng-demo-client
           
-          # Show any immediate errors
-          echo "Checking for any failed containers:"
-          docker compose ps --filter "status=exited"
-
-      - name: ⏳ Wait for PostgreSQL (Main DB)
-        run: |
-          echo "Waiting for main PostgreSQL database..."
-          timeout 60 bash -c 'until docker exec ng-demo-postgres pg_isready -U postgres; do sleep 2; done'
-          echo "Main PostgreSQL is ready!"
-
-      - name: ⏳ Wait for Keycloak Database
-        run: |
-          echo "Waiting for Keycloak PostgreSQL database..."
-          timeout 60 bash -c 'until docker exec keycloak-postgres pg_isready -U keycloak; do sleep 2; done'
-          echo "Keycloak PostgreSQL is ready!"
-
-      - name: ⏳ Wait for Keycloak
-        run: |
-          echo "Waiting for Keycloak to start..."
+          # Start dev environment in background
+          timeout 600 node dev.js &
+          DEV_PID=$!
+          echo "DEV_PID=$DEV_PID" >> $GITHUB_ENV
           
-          # Check Docker containers status
-          echo "Docker containers status:"
-          docker ps -a
-          
-          # Wait for Keycloak container to be running
-          echo "Waiting for Keycloak container to be in 'Up' state..."
-          timeout 60 bash -c 'until docker ps | grep keycloak | grep -q "Up"; do 
-            echo "Keycloak container not up yet..."
-            docker ps | grep keycloak || echo "Keycloak container not found"
-            sleep 3
-          done'
-          
-          # Show Keycloak logs for debugging
-          echo "Keycloak container logs (last 50 lines):"
-          docker logs keycloak --tail 50 || true
-          
-          # Wait for Keycloak to be responsive with more detailed checking
-          echo "Waiting for Keycloak service to be responsive..."
+          # Wait for services to be ready
+          echo "Waiting for services to be ready..."
           timeout 300 bash -c '
             while true; do
-              echo "Checking Keycloak endpoints... ($(date))"
+              echo "Checking services... ($(date))"
               
-              # Try the health endpoint first
-              if curl -s -f http://localhost:8080/health/ready; then
-                echo "Health endpoint responded successfully!"
-                break
+              # Check if server is ready
+              if curl -s -f http://localhost:3000/api/docs-json > /dev/null; then
+                echo "✅ Server is ready!"
+                
+                # Check if client is ready
+                if curl -s -f http://localhost:4200 > /dev/null; then
+                  echo "✅ Client is ready!"
+                  
+                  # Check if Keycloak realm is ready
+                  if curl -s -f http://localhost:8080/realms/ng-demo/.well-known/openid_configuration > /dev/null; then
+                    echo "✅ Keycloak realm is ready!"
+                    break
+                  else
+                    echo "⏳ Waiting for Keycloak realm..."
+                  fi
+                else
+                  echo "⏳ Waiting for client..."
+                fi
+              else
+                echo "⏳ Waiting for server..."
               fi
               
-              # Try basic health endpoint
-              if curl -s -f http://localhost:8080/health; then
-                echo "Basic health endpoint responded!"
-                break
-              fi
-              
-              # Try the root endpoint
-              if curl -s http://localhost:8080/ | grep -q "Keycloak"; then
-                echo "Keycloak root page is accessible!"
-                break
-              fi
-              
-              # Show what we got from the health endpoint
-              echo "Health endpoint response:"
-              curl -s http://localhost:8080/health/ready || echo "Health endpoint not accessible"
-              
-              echo "Waiting 10 seconds before next check..."
               sleep 10
             done
           '
           
-          echo "Keycloak is ready!"
-          
-          # Verify realm import was successful
-          echo "Verifying realm configuration import..."
-          timeout 60 bash -c '
-            while true; do
-              echo "Checking ng-demo realm availability..."
-              if curl -s -f http://localhost:8080/realms/ng-demo/.well-known/openid_configuration > /dev/null; then
-                echo "✅ ng-demo realm is accessible!"
-                break
-              fi
-              echo "Realm not yet available, waiting..."
-              sleep 5
-            done
-          '
-          
-          echo "Final verification - checking available endpoints:"
-          echo "Health endpoint:"
-          curl -s http://localhost:8080/health || echo "Health endpoint not available"
-          echo "Realm endpoint:"
-          curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | jq '.issuer' || echo "Realm not available yet"
-          echo "Admin console:"
-          curl -s -I http://localhost:8080/admin/ | head -1 || echo "Admin console not available"
-
-      - name: 🗄️ Setup database
-        working-directory: ./server
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
-          NODE_ENV: development
-          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
-        run: |
-          npm run prisma:generate
-          npm run prisma:migrate
-
-      - name: 🚀 Start server in background
-        working-directory: ./server
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
-          NODE_ENV: development
-          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
-          KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
-          KEYCLOAK_REALM: ng-demo
-          KEYCLOAK_CLIENT_ID: ng-demo-client
-        run: |
-          npm run start:dev &
-          echo "Server starting in background..."
-
-      - name: ⏳ Wait for server
-        run: |
-          timeout 60 bash -c 'until curl -s -f http://localhost:3000/api/docs-json; do sleep 2; done'
-          echo "Server is ready!"
+          echo "🎉 All services are ready!"
 
       - name: 🧪 Run server e2e tests
         working-directory: ./server
@@ -187,11 +108,10 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./client
-          build: npm run build
-          start: npm start
+          install: false
           browser: chrome
           wait-on: 'http://localhost:4200'
-          wait-on-timeout: 120
+          wait-on-timeout: 60
         env:
           CYPRESS_baseUrl: http://localhost:4200
           CYPRESS_apiUrl: http://localhost:3000
@@ -214,5 +134,20 @@ jobs:
       - name: 🧹 Cleanup
         if: always()
         run: |
-          docker compose down
-          pkill -f "npm run start" || true 
+          echo "Cleaning up development environment..."
+          
+          # Stop the dev.js process if it's running
+          if [ ! -z "$DEV_PID" ]; then
+            echo "Stopping dev.js process (PID: $DEV_PID)..."
+            kill -SIGINT $DEV_PID 2>/dev/null || true
+            sleep 5
+            kill -SIGKILL $DEV_PID 2>/dev/null || true
+          fi
+          
+          # Stop any remaining Node processes
+          pkill -f "npm run start" || true
+          pkill -f "ng serve" || true
+          pkill -f "nest start" || true
+          
+          # Stop Docker containers
+          docker compose down || true 

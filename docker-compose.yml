@@ -59,9 +59,6 @@ services:
     command:
       - start-dev
       - --import-realm
-      - --http-enabled=true
-      - --hostname-strict=false
-      - --hostname-strict-https=false
     volumes:
       - ./keycloak/realm-config:/opt/keycloak/data/import:ro
     depends_on:
