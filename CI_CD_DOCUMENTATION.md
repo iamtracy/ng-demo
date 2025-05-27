@@ -1,6 +1,5 @@
 # CI/CD Pipeline Documentation
 
-
 ## 🚀 GitHub Actions Code Quality Pipeline
 
 This repository includes a comprehensive GitHub Actions pipeline that automatically runs code quality checks, tests, and security audits on every push and pull request.

@@ -5,6 +5,18 @@ import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } fr
 import { FormsModule } from '@angular/forms'
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async' 
 import { provideRouter } from '@angular/router'
+import { 
+  UserOutline, 
+  CrownOutline, 
+  LogoutOutline,
+  PlusOutline,
+  DeleteOutline,
+  EditOutline,
+  CheckCircleOutline,
+  CloseCircleOutline,
+  CheckOutline,
+  CloseOutline
+} from '@ant-design/icons-angular/icons'
 import {
   AutoRefreshTokenService,
   INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
@@ -14,6 +26,7 @@ import {
   withAutoRefreshToken,
 } from 'keycloak-angular'
 import { en_US, provideNzI18n } from 'ng-zorro-antd/i18n'
+import { provideNzIcons } from 'ng-zorro-antd/icon'
 
 import { environment } from '../environments/environment'
 
@@ -56,6 +69,18 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
     provideNzI18n(en_US),
+    provideNzIcons([
+      UserOutline,
+      CrownOutline,
+      LogoutOutline,
+      PlusOutline,
+      DeleteOutline,
+      EditOutline,
+      CheckCircleOutline,
+      CloseCircleOutline,
+      CheckOutline,
+      CloseOutline
+    ]),
     importProvidersFrom(FormsModule),
     provideAnimationsAsync()
   ]
