@@ -1,0 +1,131 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_run:
+    workflows: ["CI - Code Quality & Unit Tests"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+    
+    strategy:
+      matrix:
+        node-version: ['22.x']
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: 📦 Install client dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: 📦 Install server dependencies
+        working-directory: ./server
+        run: npm ci --force
+
+      - name: 🐳 Start Docker services
+        run: |
+          docker compose up -d postgres keycloak
+          echo "Waiting for services to be ready..."
+          
+      - name: ⏳ Wait for PostgreSQL
+        run: |
+          timeout 60 bash -c 'until docker exec ng-demo-postgres pg_isready -U postgres; do sleep 2; done'
+          echo "PostgreSQL is ready!"
+
+      - name: ⏳ Wait for Keycloak
+        run: |
+          timeout 120 bash -c 'until curl -s -f http://localhost:8080/health/ready; do sleep 3; done'
+          echo "Keycloak is ready!"
+
+      - name: 🗄️ Setup database
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
+          NODE_ENV: development
+          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
+        run: |
+          npm run prisma:generate
+          npm run prisma:migrate
+
+      - name: 🚀 Start server in background
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
+          NODE_ENV: development
+          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
+          KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
+          KEYCLOAK_REALM: ng-demo
+          KEYCLOAK_CLIENT_ID: ng-demo-client
+        run: |
+          npm run start:dev &
+          echo "Server starting in background..."
+
+      - name: ⏳ Wait for server
+        run: |
+          timeout 60 bash -c 'until curl -s -f http://localhost:3000/api/docs-json; do sleep 2; done'
+          echo "Server is ready!"
+
+      - name: 🧪 Run server e2e tests
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
+          NODE_ENV: test
+          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
+          KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
+          KEYCLOAK_REALM: ng-demo
+          KEYCLOAK_CLIENT_ID: ng-demo-client
+        run: npm run test:e2e
+
+      - name: 🎭 Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: ./client
+          build: npm run build
+          start: npm start
+          browser: chrome
+          wait-on: 'http://localhost:4200'
+          wait-on-timeout: 120
+        env:
+          CYPRESS_baseUrl: http://localhost:4200
+          CYPRESS_apiUrl: http://localhost:3000
+          CYPRESS_keycloakUrl: http://localhost:8080
+
+      - name: 📸 Upload Cypress screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: client/cypress/screenshots
+
+      - name: 📹 Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: client/cypress/videos
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          docker compose down
+          pkill -f "npm run start" || true 
