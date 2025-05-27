@@ -103,12 +103,35 @@ describe('MenuComponent', () => {
   })
 
   it('should not show admin items when user lacks admin role', () => {
-    // Update the mock to return user without admin role
-    menuServiceMock.userWithAutoLoad$ = of(mockUserWithoutAdmin)
-    spectator = createComponent()
-    spectator.detectChanges()
+    const menuServiceMockWithoutAdmin = {
+      userWithAutoLoad$: of(mockUserWithoutAdmin),
+      logout: jasmine.createSpy('logout').and.resolveTo()
+    }
+
+    const createComponentWithoutAdmin = createRoutingFactory({
+      component: MenuComponent,
+      providers: [
+        { provide: Keycloak, useValue: keycloakMock },
+        { provide: MenuService, useValue: menuServiceMockWithoutAdmin },
+        provideNzIcons([
+          UserOutline,
+          CrownOutline,
+          LogoutOutline,
+          PlusOutline,
+          DeleteOutline,
+          EditOutline,
+          CheckCircleOutline,
+          CloseCircleOutline,
+          CheckOutline,
+          CloseOutline
+        ])
+      ]
+    })
+
+    const spectatorWithoutAdmin = createComponentWithoutAdmin()
+    spectatorWithoutAdmin.detectChanges()
     
-    const adminElements = spectator.queryAll('[data-testid="admin-menu-item"]')
+    const adminElements = spectatorWithoutAdmin.queryAll('[data-testid="admin-menu-item"]')
     expect(adminElements.length).toBe(0)
   })
 })
