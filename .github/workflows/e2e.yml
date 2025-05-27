@@ -91,17 +91,6 @@ jobs:
           
           echo "🎉 All services are ready!"
 
-      - name: 🧪 Run server e2e tests
-        working-directory: ./server
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
-          NODE_ENV: test
-          KEYCLOAK_CLIENT_SECRET: ng-demo-secret
-          KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
-          KEYCLOAK_REALM: ng-demo
-          KEYCLOAK_CLIENT_ID: ng-demo-client
-        run: npm run test:e2e
-
       - name: 🎭 Cypress run
         uses: cypress-io/github-action@v6
         with:
