@@ -47,12 +47,12 @@ async function ensureDockerIsRunning() {
   } catch {
     console.error(`${COLORS.PANIC}
     ╔═══════════════════════════════════════════════════════════╗
-    ║     🚫 INFINITE IMPROBABILITY DRIVE MALFUNCTION          ║
+    ║     🚫 INFINITE IMPROBABILITY DRIVE MALFUNCTION           ║
     ╠═══════════════════════════════════════════════════════════╣
     ║  Please ensure Docker and Docker Compose v2 are running   ║
     ║  before attempting to traverse the galaxy.                ║
     ║                                                           ║
-    ║  Error Code: 42                                            ║
+    ║  Error Code: 42                                           ║
     ╚═══════════════════════════════════════════════════════════╝
 ${COLORS.NC}`)
     process.exit(1)
@@ -106,40 +106,73 @@ async function start() {
   execSync('docker compose up -d', { stdio: 'inherit' })
 
   console.log(`${COLORS.IMPROBABILITY}
-    ╔════════════════════════════════════════╗
-    ║     GALACTIC DEV LAUNCH SYSTEM         ║
-    ╠════════════════════════════════════════╣
-    ║    🚀 Powered by Infinite Improbability ║
-    ║    🪐 Consult your towel before launch  ║
-    ╚════════════════════════════════════════╝
-${COLORS.TOWEL}              🚨 DON'T PANIC 🚨${COLORS.NC}
+    ╔════════════════════════════════════════════════════════╗
+    ║              GALACTIC DEV LAUNCH SYSTEM                ║
+    ╠════════════════════════════════════════════════════════╣
+    ║    🚀 Powered by Infinite Improbability Drive          ║
+    ║    🪐 Consult your towel before launch                 ║
+    ╚════════════════════════════════════════════════════════╝
+${COLORS.TOWEL}                        🚨 DON'T PANIC 🚨${COLORS.NC}
 `)
 
   console.log(`${COLORS.CUP_OF_TEA}[☕] Brewing digital tea and warming up servers...${COLORS.NC}`)
 
   let clientPid, serverPid, watcherPid
 
+  // Helper function to cleanup and exit
+  const exitWithError = (component, error) => {
+    console.error(`${COLORS.PANIC}
+    ╔═══════════════════════════════════════════════════════════╗
+    ║                    🚨 LAUNCH FAILURE 🚨                   ║
+    ╠═══════════════════════════════════════════════════════════╣
+    ║  ${component.padEnd(55)}                                  ║
+    ║  ${error.message.slice(0, 55).padEnd(55)}                 ║
+    ║                                                           ║
+    ║  The Heart of Gold has suffered a critical malfunction.   ║
+    ║  Please check the logs above for more details.            ║
+    ╚═══════════════════════════════════════════════════════════╝
+${COLORS.NC}`)
+    
+    // Cleanup any running processes
+    for (const pid of [clientPid, serverPid, watcherPid]) {
+      if (pid) {
+        try {
+          process.kill(pid)
+        } catch {}
+      }
+    }
+    process.exit(1)
+  }
+
   // CLIENT
-  runCommand('npm', ['install'], { cwd: 'client', prefix: 'CLIENT', prefixColor: 'IMPROBABILITY' })
-    .then(() => runCommand('npm', ['run', 'start'], {
+  try {
+    await runCommand('npm', ['install'], { cwd: 'client', prefix: 'CLIENT', prefixColor: 'IMPROBABILITY' })
+    
+    runCommand('npm', ['run', 'start'], {
       cwd: 'client',
       prefix: 'CLIENT',
       prefixColor: 'IMPROBABILITY',
       capturePid: pid => (clientPid = pid),
-    }))
-    .catch(err => console.error(`${COLORS.PANIC}[CLIENT ERROR] │ ${err.message}${COLORS.NC}`))
+    }).catch(err => exitWithError('CLIENT FAILED TO START:', err))
+  } catch (err) {
+    exitWithError('CLIENT INSTALLATION FAILED:', err)
+  }
 
   // SERVER
-  await runCommand('npm', ['install', '--force'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
-  await runCommand('npm', ['run', 'prisma:generate'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
-  await runCommand('npm', ['run', 'prisma:migrate'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
+  try {
+    await runCommand('npm', ['install', '--force'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
+    await runCommand('npm', ['run', 'prisma:generate'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
+    await runCommand('npm', ['run', 'prisma:migrate'], { cwd: 'server', prefix: 'SERVER', prefixColor: 'HYPERINTELLIGENT' })
 
-  runCommand('npm', ['run', 'start:dev'], {
-    cwd: 'server',
-    prefix: 'SERVER',
-    prefixColor: 'HYPERINTELLIGENT',
-    capturePid: pid => (serverPid = pid),
-  })
+    runCommand('npm', ['run', 'start:dev'], {
+      cwd: 'server',
+      prefix: 'SERVER',
+      prefixColor: 'HYPERINTELLIGENT',
+      capturePid: pid => (serverPid = pid),
+    }).catch(err => exitWithError('SERVER FAILED TO START:', err))
+  } catch (err) {
+    exitWithError('SERVER SETUP FAILED:', err)
+  }
 
   await waitForServer()
 
@@ -148,6 +181,8 @@ ${COLORS.TOWEL}              🚨 DON'T PANIC 🚨${COLORS.NC}
     prefix: 'BABEL FISH',
     prefixColor: 'CUP_OF_TEA',
     capturePid: pid => (watcherPid = pid),
+  }).catch(err => {
+    console.warn(`${COLORS.SARCASM}[⚠️] API watcher failed, but continuing anyway: ${err.message}${COLORS.NC}`)
   })
 
   console.log(`${COLORS.TOWEL}[✨] Status: All Systems Go (unless the Vogons are involved)${COLORS.NC}`)
@@ -155,11 +190,11 @@ ${COLORS.TOWEL}              🚨 DON'T PANIC 🚨${COLORS.NC}
   console.log(`${COLORS.CUP_OF_TEA}[🧭] Press Ctrl+C to dematerialize gracefully${COLORS.NC}`)
 
   process.on('SIGINT', () => {
-    console.log(`\n${COLORS.PANIC}
+    console.log(`\n${COLORS.HYPERINTELLIGENT}
     ╔════════════════════════════════════════╗
-    ║     ✴️  Emergency Protocols Activated    ║
+    ║    ✴️  Emergency Protocols Activated    ║
     ╠════════════════════════════════════════╣
-    ║     🛬 Returning to Earth (or Magrathea) ║
+    ║    🛬 Returning to Earth (or Magrathea) ║
     ╚════════════════════════════════════════╝
 ${COLORS.NC}`)
     for (const pid of [clientPid, serverPid, watcherPid]) {
