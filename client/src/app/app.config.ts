@@ -11,7 +11,11 @@ import {
   LogoutOutline,
   PlusOutline,
   DeleteOutline,
-  EditOutline
+  EditOutline,
+  CheckCircleOutline,
+  CloseCircleOutline,
+  CheckOutline,
+  CloseOutline
 } from '@ant-design/icons-angular/icons'
 import {
   AutoRefreshTokenService,
@@ -71,7 +75,11 @@ export const appConfig: ApplicationConfig = {
       LogoutOutline,
       PlusOutline,
       DeleteOutline,
-      EditOutline
+      EditOutline,
+      CheckCircleOutline,
+      CloseCircleOutline,
+      CheckOutline,
+      CloseOutline
     ]),
     importProvidersFrom(FormsModule),
     provideAnimationsAsync()

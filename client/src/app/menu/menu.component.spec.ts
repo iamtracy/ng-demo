@@ -1,5 +1,18 @@
+import { 
+  UserOutline, 
+  CrownOutline, 
+  LogoutOutline,
+  PlusOutline,
+  DeleteOutline,
+  EditOutline,
+  CheckCircleOutline,
+  CloseCircleOutline,
+  CheckOutline,
+  CloseOutline
+} from '@ant-design/icons-angular/icons'
 import { SpectatorRouting, createRoutingFactory } from '@ngneat/spectator'
 import Keycloak from 'keycloak-js'
+import { provideNzIcons } from 'ng-zorro-antd/icon'
 import { of } from 'rxjs'
 
 import { UserDto } from '../api'
@@ -42,7 +55,19 @@ describe('MenuComponent', () => {
     component: MenuComponent,
     providers: [
       { provide: Keycloak, useValue: keycloakMock },
-      { provide: MenuService, useValue: menuServiceMock }
+      { provide: MenuService, useValue: menuServiceMock },
+      provideNzIcons([
+        UserOutline,
+        CrownOutline,
+        LogoutOutline,
+        PlusOutline,
+        DeleteOutline,
+        EditOutline,
+        CheckCircleOutline,
+        CloseCircleOutline,
+        CheckOutline,
+        CloseOutline
+      ])
     ]
   })
 

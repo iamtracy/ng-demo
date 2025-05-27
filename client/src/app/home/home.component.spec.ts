@@ -1,5 +1,12 @@
+import { 
+  DeleteOutline,
+  EditOutline,
+  CheckOutline,
+  CloseOutline
+} from '@ant-design/icons-angular/icons'
 import { SpectatorRouting, createRoutingFactory } from '@ngneat/spectator'
 import Keycloak from 'keycloak-js'
+import { provideNzIcons } from 'ng-zorro-antd/icon'
 import { of } from 'rxjs'
 
 import { MessageDto } from '../api'
@@ -48,7 +55,13 @@ describe('HomeComponent', () => {
     component: HomeComponent,
     providers: [
       { provide: Keycloak, useValue: keycloakMock },
-      { provide: HomeService, useValue: homeServiceMock }
+      { provide: HomeService, useValue: homeServiceMock },
+      provideNzIcons([
+        DeleteOutline,
+        EditOutline,
+        CheckOutline,
+        CloseOutline
+      ])
     ]
   })
 
