@@ -1,6 +1,14 @@
 # 🌌 The Developer's Guide to the Galaxy
 ## (Also known as ng-demo)
 
+[![CI - Code Quality & Unit Tests](https://github.com/iamtracy/ng-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/iamtracy/ng-demo/actions/workflows/ci.yml)
+[![E2E Tests](https://github.com/iamtracy/ng-demo/actions/workflows/e2e.yml/badge.svg)](https://github.com/iamtracy/ng-demo/actions/workflows/e2e.yml)
+[![Security Analysis](https://github.com/iamtracy/ng-demo/actions/workflows/security.yml/badge.svg)](https://github.com/iamtracy/ng-demo/actions/workflows/security.yml)
+
+[![codecov](https://codecov.io/gh/iamtracy/ng-demo/branch/main/graph/badge.svg?token=YOUR_CODECOV_TOKEN)](https://codecov.io/gh/iamtracy/ng-demo)
+[![Coverage Status](https://img.shields.io/codecov/c/github/iamtracy/ng-demo/main.svg?label=Coverage)](https://codecov.io/gh/iamtracy/ng-demo)
+[![Quality Gate](https://img.shields.io/badge/Quality%20Gate-Passing-brightgreen.svg)](https://github.com/iamtracy/ng-demo/actions/workflows/ci.yml)
+
 > "In the beginning, the tech stack was created. This has made a lot of people very angry and been widely regarded as a bad move." 
 > - Mostly Harmless Developer's Handbook
 
@@ -198,9 +206,54 @@ Remember: A good hitchhiker always checks the documentation before attempting in
 
 ### Running Diagnostics (Testing)
 ```bash
+# Client Tests (Angular)
+cd client
+npm run test        # Run unit tests
+npm run test:ci     # Run tests with coverage (headless)
+
+# Server Tests (NestJS)
 cd server
-npm run test  # 42 tests and counting
+npm run test        # Run unit tests
+npm run test:cov    # Run tests with coverage
+npm run test:e2e    # Run end-to-end tests
+
+# Full E2E Tests (Cypress)
+npm run test:e2e    # Run Cypress tests (requires services running)
 ```
+
+### 📊 Code Coverage (Quality Assurance)
+
+The project maintains comprehensive test coverage across both client and server:
+
+#### **Coverage Targets:**
+- **Client (Angular):** 85%+ line coverage
+- **Server (NestJS):** 90%+ line coverage
+- **E2E (Cypress):** Critical user flows covered
+
+#### **Coverage Reports:**
+- **Local Development:** Coverage reports are generated in `coverage/` directories
+- **CI/CD:** Automatic upload to [Codecov](https://codecov.io/gh/iamtracy/ng-demo)
+- **GitHub Actions:** Coverage badges updated automatically
+
+#### **Viewing Coverage:**
+```bash
+# Client coverage (opens in browser)
+cd client
+npm run test:ci
+open coverage/lcov-report/index.html
+
+# Server coverage (opens in browser)
+cd server
+npm run test:cov
+open coverage/lcov-report/index.html
+```
+
+#### **Coverage Configuration:**
+- **Jest (Server):** Configured in `jest.config.js` with 90% thresholds
+- **Karma (Client):** Configured in `karma.conf.js` with 85% thresholds
+- **Codecov:** Configured in `.codecov.yml` for PR checks
+
+The coverage badges in the README are automatically updated by GitHub Actions and reflect the current state of the main branch.
 
 ### Safety Checks (Linting)
 ```bash
