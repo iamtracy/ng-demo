@@ -5,10 +5,11 @@ type UserType = 'admin' | 'user' | 'user2'
 Cypress.Commands.add('login', (userType: UserType) => {
   cy.fixture('users').then((users) => {
     const user = users[userType]
+    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
     
     cy.visit('/')
     
-    cy.origin('http://localhost:8080', { args: { username: user.username, password: user.password } }, ({ username, password }) => {
+    cy.origin(keycloakUrl, { args: { username: user.username, password: user.password } }, ({ username, password }) => {
       cy.log(`Logging in user: ${username}`)
       cy.url().then((currentUrl) => cy.log(`Current URL: ${currentUrl}`))
 

@@ -20,13 +20,17 @@ describe('Authentication', () => {
     
     cy.get('[data-cy="logout-button"]').click()
     
-    cy.url().should('include', 'localhost:8080', { timeout: 15000 })
+    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
+    const keycloakHost = new URL(keycloakUrl).host
+    cy.url().should('include', keycloakHost, { timeout: 15000 })
   })
 
   it('should handle invalid credentials', () => {
+    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
+    
     cy.visit('/')
     
-    cy.origin('http://localhost:8080', () => {
+    cy.origin(keycloakUrl, () => {
       cy.visit('/realms/ng-demo/protocol/openid-connect/auth?client_id=ng-demo-client&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2F&response_type=code&scope=openid')
       
       cy.get('#username').type('invalid')

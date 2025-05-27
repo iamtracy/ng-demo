@@ -59,9 +59,9 @@ jobs:
           DEV_PID=$!
           echo "DEV_PID=$DEV_PID" >> $GITHUB_ENV
           
-          # Give Keycloak extra time to start and import realm
-          echo "⏳ Giving Keycloak 2 minutes to start and import realm configuration..."
-          sleep 120
+          # Give services time to start up
+          echo "⏳ Giving services 10 seconds to start up..."
+          sleep 10
           
           # Wait for services to be ready
           echo "Waiting for application services to be ready..."
