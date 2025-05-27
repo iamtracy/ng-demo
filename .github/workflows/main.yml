@@ -93,13 +93,14 @@ jobs:
           KEYCLOAK_CLIENT_SECRET: test-secret
         run: npm run test:ci
 
-      - name: 🧪 Run server e2e tests
-        working-directory: ./server
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
-          NODE_ENV: test
-          KEYCLOAK_CLIENT_SECRET: test-secret
-        run: npm run test:e2e
+      # TODO: Uncomment this when we have e2e tests
+      # - name: 🧪 Run server e2e tests
+      #   working-directory: ./server
+      #   env:
+      #     DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
+      #     NODE_ENV: test
+      #     KEYCLOAK_CLIENT_SECRET: test-secret
+      #   run: npm run test:e2e
 
       - name: 🏗️ Build client
         working-directory: ./client
