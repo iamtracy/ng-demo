@@ -47,10 +47,6 @@ jobs:
         working-directory: ./server
         run: npm ci
 
-      - name: 🔒 Security audit - Root
-        run: npm audit --audit-level=moderate
-        continue-on-error: true
-
       - name: 🔒 Security audit - Client
         working-directory: ./client
         run: npm audit --audit-level=moderate
@@ -79,19 +75,19 @@ jobs:
 
       - name: 💅 Check Prettier formatting - Client
         working-directory: ./client
-        run: npx prettier --check "src/**/*.{ts,html,scss,json}"
+        run: npm run lint
 
       - name: 💅 Check Prettier formatting - Server
         working-directory: ./server
-        run: npx prettier --check "src/**/*.{ts,json}"
+        run: npm run lint
 
       - name: 🗄️ Setup test database
         working-directory: ./server
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
         run: |
-          npx prisma generate
-          npx prisma db push
+          npm run prisma:generate
+          npm run prisma:migrate
 
       - name: 🧪 Run client tests
         working-directory: ./client
@@ -103,7 +99,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
           NODE_ENV: test
           KEYCLOAK_CLIENT_SECRET: test-secret
-        run: npm run test
+        run: npm run test:ci
 
       - name: 🧪 Run server e2e tests
         working-directory: ./server
