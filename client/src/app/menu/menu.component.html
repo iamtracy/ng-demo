@@ -1,17 +1,19 @@
 <div class="menu-container">
-<ul nz-menu nzMode="horizontal">
-    <li nz-menu-item [nzSelected]="isActiveRoute('/')" data-testid="auth-menu-item">
-      <a routerLink="/">Home</a>
-  </li>
-    <li nz-menu-item *ngIf="hasAdminRole()" [nzSelected]="isActiveRoute('/admin')" data-testid="admin-menu-item">
-    <a routerLink="/admin">Admin</a>
-  </li>
-</ul>
+  <ul nz-menu nzMode="horizontal">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [routerLinkActiveOptions]="{exact: true}" data-testid="auth-menu-item">
+        <a routerLink="/">Home</a>
+    </li>
+      <li nz-menu-item *ngIf="hasAdminRole$ | async" routerLinkActive="ant-menu-item-selected" data-testid="admin-menu-item">
+      <a routerLink="/admin">Admin</a>
+    </li>
+  </ul>
   
   <div>
     <span data-testid="user-display">
-      <nz-icon [nzType]="hasAdminRole() ? 'crown' : 'user'" nzTheme="outline" />
-      {{ getUserDisplayName() }}
+      <nz-icon [nzType]="(hasAdminRole$ | async) ? 'crown' : 'user'" nzTheme="outline" />
+      <ng-container *ngIf="user$ | async as user">
+        {{ user.firstName }} {{ user.lastName }}
+      </ng-container>
     </span>
     <button nz-button nzType="default" (click)="logout()" data-testid="logout-button">
       <nz-icon nzType="logout" nzTheme="outline" />

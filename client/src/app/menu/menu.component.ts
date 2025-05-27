@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common'
-import { Component, inject, OnInit } from '@angular/core'
-import { Router, RouterModule } from '@angular/router'
-import { CrownOutline, LogoutOutline, UserOutline } from '@ant-design/icons-angular/icons'
-import Keycloak from 'keycloak-js'
+import { Component, inject } from '@angular/core'
+import { RouterModule } from '@angular/router'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzIconModule } from 'ng-zorro-antd/icon'
-import { NzIconService } from 'ng-zorro-antd/icon'
 import { NzMenuModule } from 'ng-zorro-antd/menu'
+import { map } from 'rxjs'
+
+import { MenuService } from './menu.service'
 
 @Component({
   selector: 'app-menu',
@@ -24,43 +24,17 @@ import { NzMenuModule } from 'ng-zorro-antd/menu'
     }
   `]
 })
-export class MenuComponent implements OnInit {
-  private iconService = inject(NzIconService)
-  keycloak = inject(Keycloak)
-  router = inject(Router)
-  realmRoles: string[] = []
+export class MenuComponent {
+  private menuService = inject(MenuService)
 
-  constructor() {
-    this.iconService.addIcon(...[CrownOutline, LogoutOutline, UserOutline])
-  }
-
-  async ngOnInit() {
-    try {
-      this.realmRoles = this.keycloak.realmAccess?.roles || []
-    } catch (error) {
-      console.error('Error checking realm roles:', error)
-    }
-  }
-
-  hasAdminRole(): boolean {
-    return this.keycloak.hasRealmRole('admin')
-  }
-
-  isActiveRoute(route: string): boolean {
-    return this.router.url === route
-  }
-
-  getUserDisplayName(): string {
-    const token = this.keycloak.tokenParsed
-    if (token?.['given_name'] && token?.['family_name']) {
-      return `${token['given_name']} ${token['family_name']}`
-    }
-    return token?.['preferred_username'] || token?.['name'] || 'User'
-  }
+  user$ = this.menuService.userWithAutoLoad$
+  hasAdminRole$ = this.user$.pipe(
+    map(user => ((user?.roles as unknown) as string[])?.includes('admin') ?? false)
+  )
 
   async logout() {
     try {
-      await this.keycloak.logout()
+      await this.menuService.logout()
     } catch (error) {
       console.error('Error during logout:', error)
     }
