@@ -19,7 +19,6 @@ import { environment } from '../environments/environment'
 
 import { routes } from './app.routes'
 
-
 registerLocaleData(en)
 
 export const appConfig: ApplicationConfig = {
@@ -55,7 +54,10 @@ export const appConfig: ApplicationConfig = {
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])), provideNzI18n(en_US), importProvidersFrom(FormsModule), provideAnimationsAsync(), provideHttpClient()
+    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
+    provideNzI18n(en_US),
+    importProvidersFrom(FormsModule),
+    provideAnimationsAsync()
   ]
 }
 

@@ -28,7 +28,6 @@ async function bootstrap() {
     .setTitle("The Hitchhiker's Guide to the Galaxy API")
     .setDescription('A mostly harmless API for intergalactic message sharing')
     .setVersion('42.0')
-    .addServer(`http://localhost:${portStr}/api`)
     .addBearerAuth(
       {
         type: 'http',
