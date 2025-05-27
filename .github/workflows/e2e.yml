@@ -44,13 +44,28 @@ jobs:
 
       - name: 🐳 Start Docker services
         run: |
-          docker compose up -d postgres keycloak
-          echo "Waiting for services to be ready..."
+          echo "Starting Docker services..."
+          # Set CI-optimized environment variables
+          export KC_LOG_LEVEL=INFO
+          docker compose up -d postgres keycloak-db keycloak
+          echo "Services started, checking status..."
+          docker compose ps
           
-      - name: ⏳ Wait for PostgreSQL
+          # Show any immediate errors
+          echo "Checking for any failed containers:"
+          docker compose ps --filter "status=exited"
+
+      - name: ⏳ Wait for PostgreSQL (Main DB)
         run: |
+          echo "Waiting for main PostgreSQL database..."
           timeout 60 bash -c 'until docker exec ng-demo-postgres pg_isready -U postgres; do sleep 2; done'
-          echo "PostgreSQL is ready!"
+          echo "Main PostgreSQL is ready!"
+
+      - name: ⏳ Wait for Keycloak Database
+        run: |
+          echo "Waiting for Keycloak PostgreSQL database..."
+          timeout 60 bash -c 'until docker exec keycloak-postgres pg_isready -U keycloak; do sleep 2; done'
+          echo "Keycloak PostgreSQL is ready!"
 
       - name: ⏳ Wait for Keycloak
         run: |
@@ -61,25 +76,73 @@ jobs:
           docker ps -a
           
           # Wait for Keycloak container to be running
-          timeout 60 bash -c 'until docker ps | grep keycloak | grep -q "Up"; do sleep 2; done'
+          echo "Waiting for Keycloak container to be in 'Up' state..."
+          timeout 60 bash -c 'until docker ps | grep keycloak | grep -q "Up"; do 
+            echo "Keycloak container not up yet..."
+            docker ps | grep keycloak || echo "Keycloak container not found"
+            sleep 3
+          done'
           
           # Show Keycloak logs for debugging
-          echo "Keycloak container logs (last 20 lines):"
-          docker logs keycloak --tail 20 || true
+          echo "Keycloak container logs (last 50 lines):"
+          docker logs keycloak --tail 50 || true
           
-          # Wait for Keycloak to be responsive (try multiple endpoints)
-          timeout 180 bash -c '
-            until curl -s -f http://localhost:8080/health/ready || 
-                  curl -s -f http://localhost:8080/health || 
-                  curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | grep -q "issuer"; do 
-              echo "Keycloak not ready yet, waiting... ($(date))"
-              sleep 5
+          # Wait for Keycloak to be responsive with more detailed checking
+          echo "Waiting for Keycloak service to be responsive..."
+          timeout 300 bash -c '
+            while true; do
+              echo "Checking Keycloak endpoints... ($(date))"
+              
+              # Try the health endpoint first
+              if curl -s -f http://localhost:8080/health/ready; then
+                echo "Health endpoint responded successfully!"
+                break
+              fi
+              
+              # Try basic health endpoint
+              if curl -s -f http://localhost:8080/health; then
+                echo "Basic health endpoint responded!"
+                break
+              fi
+              
+              # Try the root endpoint
+              if curl -s http://localhost:8080/ | grep -q "Keycloak"; then
+                echo "Keycloak root page is accessible!"
+                break
+              fi
+              
+              # Show what we got from the health endpoint
+              echo "Health endpoint response:"
+              curl -s http://localhost:8080/health/ready || echo "Health endpoint not accessible"
+              
+              echo "Waiting 10 seconds before next check..."
+              sleep 10
             done
           '
           
           echo "Keycloak is ready!"
-          echo "Final verification - checking OIDC configuration:"
-          curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | head -5 || true
+          
+          # Verify realm import was successful
+          echo "Verifying realm configuration import..."
+          timeout 60 bash -c '
+            while true; do
+              echo "Checking ng-demo realm availability..."
+              if curl -s -f http://localhost:8080/realms/ng-demo/.well-known/openid_configuration > /dev/null; then
+                echo "✅ ng-demo realm is accessible!"
+                break
+              fi
+              echo "Realm not yet available, waiting..."
+              sleep 5
+            done
+          '
+          
+          echo "Final verification - checking available endpoints:"
+          echo "Health endpoint:"
+          curl -s http://localhost:8080/health || echo "Health endpoint not available"
+          echo "Realm endpoint:"
+          curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | jq '.issuer' || echo "Realm not available yet"
+          echo "Admin console:"
+          curl -s -I http://localhost:8080/admin/ | head -1 || echo "Admin console not available"
 
       - name: 🗄️ Setup database
         working-directory: ./server

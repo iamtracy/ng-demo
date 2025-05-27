@@ -48,32 +48,31 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: true
-      KC_REALM: ng-demo
-      KC_CLIENT_ID: ng-demo-client
-      KC_CLIENT_SECRET: ng-demo-secret
-      KC_CLIENT_ROLES: "user,admin"
-      KC_REDIRECT_URIS: "http://localhost:4200/*"
-      KC_DEV: "true"
-      KC_FEATURES: "preview"
-      KC_LOG_LEVEL: DEBUG
-      KEYCLOAK_LOGLEVEL: DEBUG
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY: edge
+      # Use INFO level for better CI performance, can be overridden locally
+      KC_LOG_LEVEL: ${KC_LOG_LEVEL:-INFO}
     ports:
       - 8080:8080
     command:
       - start-dev
       - --import-realm
+      - --http-enabled=true
+      - --hostname-strict=false
+      - --hostname-strict-https=false
     volumes:
-      - ./keycloak/realm-config:/opt/keycloak/data/import
+      - ./keycloak/realm-config:/opt/keycloak/data/import:ro
     depends_on:
       keycloak-db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     networks:
       - app-network
 
