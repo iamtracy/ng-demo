@@ -54,8 +54,32 @@ jobs:
 
       - name: ⏳ Wait for Keycloak
         run: |
-          timeout 120 bash -c 'until curl -s -f http://localhost:8080/health/ready; do sleep 3; done'
+          echo "Waiting for Keycloak to start..."
+          
+          # Check Docker containers status
+          echo "Docker containers status:"
+          docker ps -a
+          
+          # Wait for Keycloak container to be running
+          timeout 60 bash -c 'until docker ps | grep keycloak | grep -q "Up"; do sleep 2; done'
+          
+          # Show Keycloak logs for debugging
+          echo "Keycloak container logs (last 20 lines):"
+          docker logs keycloak --tail 20 || true
+          
+          # Wait for Keycloak to be responsive (try multiple endpoints)
+          timeout 180 bash -c '
+            until curl -s -f http://localhost:8080/health/ready || 
+                  curl -s -f http://localhost:8080/health || 
+                  curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | grep -q "issuer"; do 
+              echo "Keycloak not ready yet, waiting... ($(date))"
+              sleep 5
+            done
+          '
+          
           echo "Keycloak is ready!"
+          echo "Final verification - checking OIDC configuration:"
+          curl -s http://localhost:8080/realms/ng-demo/.well-known/openid_configuration | head -5 || true
 
       - name: 🗄️ Setup database
         working-directory: ./server
