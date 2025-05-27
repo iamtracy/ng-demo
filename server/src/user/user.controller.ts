@@ -7,7 +7,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { User as PrismaUser } from '@prisma/client'
-import { User as KeycloakUser } from '@types'
+import { OIDCTokenPayload } from '@types'
 import { Roles } from 'nest-keycloak-connect'
 
 import { UserDto } from './dto/user.dto'
@@ -19,7 +19,7 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  private toUserDto(user: PrismaUser | KeycloakUser): UserDto {
+  private toUserDto(user: PrismaUser | OIDCTokenPayload): UserDto {
     if ('createdAt' in user && 'updatedAt' in user) {
       const prismaUser = user as PrismaUser
       return {
@@ -37,13 +37,13 @@ export class UserController {
     }
 
     return {
-      email: user.email,
-      emailVerified: user.email_verified,
+      email: user.email ?? '',
+      emailVerified: user.email_verified ?? false,
       roles: user.realm_access?.roles ?? [],
-      id: user.sub,
-      username: user.preferred_username,
-      firstName: user.given_name,
-      lastName: user.family_name,
+      id: user.sub ?? '',
+      username: user.preferred_username ?? '',
+      firstName: user.given_name ?? '',
+      lastName: user.family_name ?? '',
       createdAt: new Date(),
       updatedAt: new Date(),
     }
@@ -57,7 +57,7 @@ export class UserController {
     type: UserDto,
   })
   async getCurrentUser(
-    @CurrentUser() keycloakUser: KeycloakUser,
+    @CurrentUser() keycloakUser: OIDCTokenPayload,
   ): Promise<Omit<UserDto, 'createdAt' | 'updatedAt'>> {
     const user = await this.userService.syncUserFromKeycloak(keycloakUser)
     return this.toUserDto(user)
@@ -71,7 +71,7 @@ export class UserController {
     type: UserDto,
   })
   async syncCurrentUser(
-    @CurrentUser() keycloakUser: KeycloakUser,
+    @CurrentUser() keycloakUser: OIDCTokenPayload,
   ): Promise<Omit<UserDto, 'createdAt' | 'updatedAt'>> {
     const user = await this.userService.syncUserFromKeycloak(keycloakUser)
     return this.toUserDto(user)

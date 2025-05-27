@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common'
 import { Message, Prisma } from '@prisma/client'
-import { User } from '@types'
+import { OIDCTokenPayload } from '@types'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -14,7 +14,7 @@ import { CreateMessageDto } from './dto/create-message.dto'
 export class MessageService {
   constructor(private prisma: PrismaService) {}
 
-  async messages(user: User, isAdmin = false): Promise<Message[]> {
+  async messages(user: OIDCTokenPayload, isAdmin = false): Promise<Message[]> {
     if (isAdmin) {
       return this.prisma.message.findMany({
         orderBy: { createdAt: 'desc' },
@@ -41,7 +41,7 @@ export class MessageService {
 
   async createMessage(
     createMessageDto: CreateMessageDto,
-    user: User,
+    user: OIDCTokenPayload,
   ): Promise<Message> {
     const data: Prisma.MessageCreateInput = {
       message: createMessageDto.message,
@@ -60,7 +60,7 @@ export class MessageService {
   async updateMessage(
     id: number,
     updateMessageDto: CreateMessageDto,
-    user: User,
+    user: OIDCTokenPayload,
   ): Promise<Message> {
     const message = await this.prisma.message.findUnique({
       where: { id },
@@ -83,7 +83,7 @@ export class MessageService {
     })
   }
 
-  async deleteMessage(id: number, user: User): Promise<void> {
+  async deleteMessage(id: number, user: OIDCTokenPayload): Promise<void> {
     const message = await this.prisma.message.findUnique({
       where: { id },
     })

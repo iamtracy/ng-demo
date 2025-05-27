@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { User } from '@prisma/client'
-import { User as KeycloakUser } from '@types'
+import { OIDCTokenPayload } from '@types'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -16,14 +16,14 @@ export class UserService {
    * Sync user data from Keycloak token to local database
    * This should be called on every login/token refresh
    */
-  async syncUserFromKeycloak(keycloakUser: KeycloakUser): Promise<User> {
+  async syncUserFromKeycloak(keycloakUser: OIDCTokenPayload): Promise<User> {
     const syncData: SyncUserDto = {
-      id: keycloakUser.sub,
-      email: keycloakUser.email,
-      username: keycloakUser.preferred_username,
-      firstName: keycloakUser.given_name,
-      lastName: keycloakUser.family_name,
-      emailVerified: keycloakUser.email_verified,
+      id: keycloakUser.sub ?? '',
+      email: keycloakUser.email ?? '',
+      username: keycloakUser.preferred_username ?? '',
+      firstName: keycloakUser.given_name ?? '',
+      lastName: keycloakUser.family_name ?? '',
+      emailVerified: keycloakUser.email_verified ?? false,
       roles: keycloakUser.realm_access?.roles ?? [],
     }
 

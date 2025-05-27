@@ -8,7 +8,6 @@ import {
   Param,
   Body,
   ParseIntPipe,
-  Req,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -16,9 +15,8 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { Message } from '@prisma/client'
-import { User } from '@types'
-import { Request } from 'express'
+import { Message, User } from '@prisma/client'
+import { OIDCTokenPayload } from '@types'
 
 import { CreateMessageDto } from './dto/create-message.dto'
 import { MessageDto } from './dto/message.dto'
@@ -49,12 +47,8 @@ export class MessageController {
     description: 'List of messages',
     type: [MessageDto],
   })
-  async findAll(
-    @CurrentUser() user: User,
-    @Req() request: Request,
-  ): Promise<MessageDto[]> {
-    const requestUser = (request as unknown as { user: User }).user
-    const isAdmin = requestUser.realm_access?.roles.includes('admin') ?? false
+  async findAll(@CurrentUser() user: OIDCTokenPayload): Promise<MessageDto[]> {
+    const isAdmin = user.realm_access?.roles.includes('admin') ?? false
 
     const messages = await this.messageService.messages(user, isAdmin)
     return messages.map((message) => this.toMessageDto(message))
