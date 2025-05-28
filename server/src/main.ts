@@ -119,7 +119,6 @@ function createServerBanner(port: string): string {
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
-  app.useLogger(app.get(Logger))
   const port = process.env.PORT ?? '3000'
 
   app.setGlobalPrefix('api')

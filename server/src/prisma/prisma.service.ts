@@ -8,7 +8,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     this.logger.log('Connecting to database...')
     try {
-      await this.$connect()
+    await this.$connect()
       this.logger.log('Successfully connected to database')
     } catch (error) {
       this.logger.error('Failed to connect to database:', error)
@@ -19,7 +19,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Disconnecting from database...')
     try {
-      await this.$disconnect()
+    await this.$disconnect()
       this.logger.log('Successfully disconnected from database')
     } catch (error) {
       this.logger.error('Failed to disconnect from database:', error)

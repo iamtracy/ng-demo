@@ -51,7 +51,22 @@ const KEYCLOAK_CONFIG = {
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    LoggerModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        ...(isProduction
+          ? {
+              level: 'info',
+            }
+          : {
+              transport: {
+                target: 'pino-pretty',
+                options: {
+                  singleLine: true,
+                },
+              },
+            }),
+      },
+    }),
     KeycloakConnectModule.register({
       authServerUrl: KEYCLOAK_CONFIG.authServerUrl,
       realm: KEYCLOAK_CONFIG.realm,
