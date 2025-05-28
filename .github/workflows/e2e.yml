@@ -19,6 +19,9 @@ env:
   KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
   KEYCLOAK_REALM: ng-demo
   KEYCLOAK_CLIENT_ID: ng-demo-client
+  # CI-specific Keycloak configuration for proper JWT validation
+  KC_HOSTNAME: host.docker.internal
+  KC_HOSTNAME_URL: http://host.docker.internal:8080
 
 jobs:
   e2e-tests:
