@@ -7,8 +7,8 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "dev": "tsx dev.ts",
-    "test:e2e": "tsx test-e2e.ts",
+    "dev": "tsx scripts/dev.ts",
+    "test:e2e": "tsx scripts/test-e2e.ts",
     "cypress:open": "cypress open",
     "build": "tsc",
     "type-check": "tsc --noEmit"

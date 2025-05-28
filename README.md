@@ -50,13 +50,20 @@ The project now includes a **TypeScript-native root workspace** for better devel
 - **Modern Tooling:** Uses `tsx` for native TypeScript execution
 - **Environment Management:** Centralized `.env` configuration with comprehensive validation
 
-**Available Commands:**
+**Available Root Commands:**
 ```bash
-npm run dev        # Start development environment (TypeScript)
-npm run test:e2e   # Run production tests (TypeScript)
-npm run build      # Compile TypeScript files
+npm install        # Install all dependencies (root, client, server)
+npm run dev        # Start full development environment
+npm run test:e2e   # Run production E2E tests
+npm run build      # Build all TypeScript projects
 npm run type-check # Validate TypeScript without compilation
 ```
+
+**Development Scripts:**
+- All development automation is now written in TypeScript
+- Scripts use shared utilities for consistent behavior
+- Environment validation and error handling built-in
+- Colored output and progress indicators for better UX
 
 ### Core Technologies
 - **Frontend:** Angular (because space is infinite, and so are our modules)
@@ -174,8 +181,6 @@ KC_LOG_LEVEL=INFO
 ### Option A: One-Command Launch (Recommended)
 ```bash
 npm run dev    # TypeScript-powered development launch
-# or the classic way:
-node dev.js    # JavaScript version (still works)
 ```
 
 The development script will:
@@ -207,8 +212,6 @@ npm run dev
 ### Option C: Production Mode Testing
 ```bash
 npm run test:e2e    # TypeScript-powered production testing
-# or the classic way:
-node test-e2e.js    # JavaScript version (still works)
 ```
 
 This production test mode will:
@@ -236,7 +239,7 @@ Your local instance of the galaxy will be available at:
 | trillian | user | hoopy123! | Standard user access |
 
 ### Quick Setup Tips
-1. The `dev.js` script will automatically:
+1. The `npm run dev` command will automatically:
    - Start all required services (PostgreSQL, Keycloak)
    - Run database migrations
    - Import test users into Keycloak
