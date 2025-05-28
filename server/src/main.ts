@@ -3,9 +3,12 @@ import { INestApplication, Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import chalk from 'chalk'
+import * as dotenv from 'dotenv'
 import { Response } from 'express'
 
 import { AppModule } from './app.module'
+
+dotenv.config()
 
 void bootstrap()
 
@@ -79,11 +82,14 @@ function getRandomHitchhikerLog(): string {
 }
 
 function createServerBanner(port: string): string {
+  const clientPort = process.env.CLIENT_PORT ?? '4200'
+  const nodeEnv = process.env.NODE_ENV ?? 'mostly harmless'
+
   return `
       ${chalk.hex('#FF0000')(`
     ╔════════════════════════════════════════════════════════════════════════════════════╗
     ║                                                                                    ║
-    ║  ██████╗  ██████╗ ███╗   ██╗██╗████████╗    ██████╗  █████╗ ███╗   ██╗██╗ ██████╗  ║
+    ║  ██████╗  ██████╗ ███╗   ██╗██╗████████╗    ██████╗  █████╗ ███╗   ██║██╗ ██████╗  ║
     ║  ██╔══██╗██╔═══██╗████╗  ██║╚═╝╚══██╔══╝    ██╔══██╗██╔══██╗████╗  ██║██║██╔════╝  ║
     ║  ██║  ██║██║   ██║██╔██╗ ██║       ██║       ██████╔╝███████║██╔██╗ ██║██║██║      ║
     ║  ██║  ██║██║   ██║██║╚██╗██║       ██║       ██╔═══╝ ██╔══██║██║╚██╗██║██║██║      ║
@@ -92,23 +98,28 @@ function createServerBanner(port: string): string {
     ║                                                                                    ║
     ╚════════════════════════════════════════════════════════════════════════════════════╝
       `)}
+
     ${chalk.hex('#26A7DE')('════════════════════════ SYSTEM STATUS ═══════════════════════════════════════════════')}
-    ${chalk.hex('#FFFFFF')('🐋 Universe Mode:       ')} ${chalk.hex('#FFD700')(process.env.NODE_ENV ?? 'mostly harmless')}
-    ${process.env.NODE_ENV !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')('http://localhost:4200') : ''}
+
+    ${chalk.hex('#FFFFFF')('🐋 Universe Mode:       ')} ${chalk.hex('#FFD700')(nodeEnv)}
+    ${nodeEnv !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')(`http://localhost:${clientPort}`) : ''}
     ${chalk.hex('#FFD700')('🌌 Space-Time Port:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}`)}
     ${chalk.hex('#FFD700')('📖 Guide Entry:         ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}/api/docs`)}
     ${chalk.hex('#FFD700')('🐬 Babel Fish JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}/api/docs-json`)}
+
     ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
+
     ${chalk.hex('#FFD700')('🤖 Deep Thought:        ')} ${chalk.hex('#FFFFFF')(getRandomHitchhikerLog())}
+
     ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
+
     ${chalk.hex('#FFD700')('💡 Tip:')} ${chalk.hex('#FFFFFF')('The answer to life, the universe, and everything is 42!')}
     `
 }
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule)
-  const port = process.env.PORT ?? 3000
-  const portStr = String(port)
+  const port = process.env.PORT ?? '3000'
 
   app.setGlobalPrefix('api')
 
@@ -123,8 +134,8 @@ async function bootstrap(): Promise<void> {
   const config = createSwaggerConfig()
   setupSwagger(app, config)
 
-  const serverBanner = createServerBanner(portStr)
+  const serverBanner = createServerBanner(port)
 
-  await app.listen(port)
+  await app.listen(Number(port))
   Logger.log(serverBanner)
 }

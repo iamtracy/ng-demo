@@ -18,8 +18,8 @@ RUN npx prisma generate && \
 FROM node:24-slim AS production
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update -y && apt-get install -y openssl
+# Install OpenSSL for Prisma and curl for health checks
+RUN apt-get update -y && apt-get install -y openssl curl
 
 COPY server/package*.json ./
 RUN npm ci --only=production --legacy-peer-deps
@@ -27,7 +27,7 @@ RUN npm ci --only=production --legacy-peer-deps
 COPY --from=server-builder /app/server/dist ./dist
 COPY --from=server-builder /app/server/prisma ./prisma
 COPY --from=server-builder /app/server/node_modules/.prisma ./node_modules/.prisma
-COPY --from=client-builder /app/client/dist/* ./public/
+COPY --from=client-builder /app/client/dist/ng-demo/browser ./public/browser
 
 RUN addgroup --system appgroup && \
     adduser --system appuser --ingroup appgroup && \
@@ -38,8 +38,8 @@ ENV NODE_ENV=production \
     PORT=3000
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+    CMD curl --fail http://localhost:${PORT}/api/docs-json || exit 1
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/main"]
+CMD ["node", "dist/src/main.js"]

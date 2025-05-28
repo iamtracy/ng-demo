@@ -42,6 +42,22 @@ Think of it as a small piece of the galaxy where messages can be shared safely, 
 ## 🧰 The Improbability Drive (Technical Architecture)
 Through a remarkable coincidence, exactly the kind that the Infinite Improbability Drive was designed to generate, our stack consists of:
 
+### Root TypeScript Structure
+The project now includes a **TypeScript-native root workspace** for better development experience:
+
+- **Root Package.json:** Manages TypeScript tooling and shared dependencies
+- **TypeScript Configuration:** Full type safety for development scripts
+- **Modern Tooling:** Uses `tsx` for native TypeScript execution
+- **Environment Management:** Centralized `.env` configuration with comprehensive validation
+
+**Available Commands:**
+```bash
+npm run dev        # Start development environment (TypeScript)
+npm run test:e2e   # Run production tests (TypeScript)
+npm run build      # Compile TypeScript files
+npm run type-check # Validate TypeScript without compilation
+```
+
 ### Core Technologies
 - **Frontend:** Angular (because space is infinite, and so are our modules)
   - Type-safe API client generation
@@ -68,7 +84,7 @@ Through a remarkable coincidence, exactly the kind that the Infinite Improbabili
 - **Docker & Scripts** (contains entire worlds in boxes)
   - Containerized development environment
   - Hot reload for both frontend and backend
-  - One-command setup with `dev.js`
+  - One-command setup with TypeScript-powered scripts
 
 - **Testing & Quality**
   - Jest for unit and integration tests (42% accuracy guaranteed)
@@ -93,29 +109,59 @@ cd ng-demo
 
 2. Configure your local sector of space:
 
-Create two configuration files:
+**Environment Configuration** is now fully centralized and environment-driven. Create your configuration file:
+
+```bash
+# Copy the template and customize
+cp env.template .env
+```
+
+**Required Environment Variables:**
+- `DATABASE_URL` - PostgreSQL connection string
+- `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+
+**Key Configuration Sections:**
 
 ```env
-# .env
+# 🚀 Server Configuration
 PORT=3000
+CLIENT_PORT=4200
 NODE_ENV=development
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-POSTGRES_DB=ng_demo_db
 
-# Keycloak Configuration
+# 🗄️ Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ng_demo_db
+
+# 🔐 Keycloak Configuration
 KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
 KEYCLOAK_REALM=ng-demo
 KEYCLOAK_CLIENT_ID=ng-demo-client
 KEYCLOAK_CLIENT_SECRET=ng-demo-secret
+
+# 🏥 Health Check Configuration
+HEALTH_CHECK_TIMEOUT=2000
+HEALTH_CHECK_MAX_RETRIES=30
+
+# 📝 Logging Configuration
+KC_LOG_LEVEL=INFO
 ```
 
-```env
-# server/.env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ng_demo_db?schema=public"
-```
+**Environment Variables Reference:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | NestJS API server port |
+| `CLIENT_PORT` | `4200` | Angular development server port |
+| `NODE_ENV` | `development` | Environment mode |
+| `DATABASE_URL` | **[REQUIRED]** | PostgreSQL connection string |
+| `KEYCLOAK_CLIENT_SECRET` | **[REQUIRED]** | Keycloak client secret |
+| `KEYCLOAK_AUTH_SERVER_URL` | `http://localhost:8080` | Keycloak server URL |
+| `KEYCLOAK_REALM` | `ng-demo` | Keycloak realm name |
+| `KEYCLOAK_CLIENT_ID` | `ng-demo-client` | Keycloak client ID |
+| `HEALTH_CHECK_TIMEOUT` | `2000` | Health check interval (ms) |
+| `HEALTH_CHECK_MAX_RETRIES` | `30` | Max health check attempts |
+| `KC_LOG_LEVEL` | `INFO` | Keycloak logging level |
+
+> **📋 Complete Configuration:** See `env.template` for all available environment variables including optional monitoring, security, and deployment settings.
 
 3. Choose your launch sequence:
 
@@ -127,8 +173,18 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ng_demo_db?schema=pu
 
 ### Option A: One-Command Launch (Recommended)
 ```bash
-node dev.js    # Handles all setup and startup automatically
+npm run dev    # TypeScript-powered development launch
+# or the classic way:
+node dev.js    # JavaScript version (still works)
 ```
+
+The development script will:
+- Validate all required environment variables
+- Display current configuration
+- Start Docker services (PostgreSQL + Keycloak)
+- Set up and start the NestJS server
+- Set up and start the Angular client
+- Monitor all services with colored output
 
 ### Option B: Manual Launch
 ```bash
@@ -140,13 +196,27 @@ cd server
 npm install
 npm run prisma:generate
 npm run prisma:migrate
-npm run start:dev
+npm run start
 
 # 3. Setup Client
 cd ../client
 npm install
 npm run dev
 ```
+
+### Option C: Production Mode Testing
+```bash
+npm run test:e2e    # TypeScript-powered production testing
+# or the classic way:
+node test-e2e.js    # JavaScript version (still works)
+```
+
+This production test mode will:
+- Build the Angular client for production
+- Build the NestJS server for production
+- Start the server in production mode (serves static files)
+- Run basic health checks
+- Test API endpoints and static file serving
 
 Your local instance of the galaxy will be available at:
 
@@ -220,208 +290,3 @@ npm run test:e2e    # Run end-to-end tests
 # Full E2E Tests (Cypress)
 npm run test:e2e    # Run Cypress tests (requires services running)
 ```
-
-### 📊 Code Coverage (Quality Assurance)
-
-The project maintains comprehensive test coverage across both client and server:
-
-#### **Coverage Targets:**
-- **Client (Angular):** 85%+ line coverage
-- **Server (NestJS):** 90%+ line coverage
-- **E2E (Cypress):** Critical user flows covered
-
-#### **Coverage Reports:**
-- **Local Development:** Coverage reports are generated in `coverage/` directories
-- **CI/CD:** Automatic upload to [Codecov](https://codecov.io/gh/iamtracy/ng-demo)
-- **GitHub Actions:** Coverage badges updated automatically
-
-#### **Viewing Coverage:**
-```bash
-# Client coverage (opens in browser)
-cd client
-npm run test:ci
-open coverage/lcov-report/index.html
-
-# Server coverage (opens in browser)
-cd server
-npm run test:cov
-open coverage/lcov-report/index.html
-```
-
-#### **Coverage Configuration:**
-- **Jest (Server):** Configured in `jest.config.js` with 90% thresholds
-- **Karma (Client):** Configured in `karma.conf.js` with 85% thresholds
-- **Codecov:** Configured in `.codecov.yml` for PR checks
-
-The coverage badges in the README are automatically updated by GitHub Actions and reflect the current state of the main branch.
-
-### Safety Checks (Linting)
-```bash
-cd server
-npm run lint  # Checks if your code is poetry to a Vogon
-```
-
-## 🛡️ Defense Systems (Security Features)
-
-- JWT tokens (better than Babel fish for authentication)
-- User-specific access (like having your own infinite improbability sphere)
-- Ownership verification (stricter than a Vogon guard)
-- Input validation (catches things even Deep Thought would miss)
-- Error handling (more helpful than Marvin, less depressing)
-- Environment-specific configurations (works in any parallel universe)
-
-## 📊 Database Schema (The Universal Data Structure)
-
-Our database models are defined using Prisma's schema language, which is more elegant than Vogon poetry:
-
-```prisma
-model Message {
-  id        Int      @default(autoincrement()) @id
-  message   String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@map("messages")
-}
-
-model User {
-  id            String    @id  // Keycloak sub (user ID)
-  email         String    @unique
-  username      String    @unique
-  firstName     String?
-  lastName      String?
-  emailVerified Boolean   @default(false)
-  roles         String[]  @default([])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastLoginAt   DateTime?
-  
-  // Relations
-  messages      Message[]
-  
-  @@map("users")
-}
-```
-
-## 🎯 Type Safety Across the Galaxy
-
-The project maintains type safety throughout the stack:
-
-1. **Database Layer:**
-   ```typescript
-   // Prisma provides fully typed models
-   import { Message, User } from '@prisma/client'
-   ```
-
-2. **API Layer:**
-   ```typescript
-   // DTOs ensure type safety in requests/responses
-   export class MessageDto {
-     id: number
-     message: string
-     userId: string
-     createdAt: Date
-     updatedAt: Date
-   }
-   ```
-
-3. **Frontend Layer:**
-   ```typescript
-   // Auto-generated Angular services with type safety
-   this.messageService.findAll().subscribe((messages: Message[]) => {
-     // TypeScript knows the shape of 'messages'
-   })
-   ```
-
-## 💡 Development Tips (A Hitchhiker's Guide to Not Panicking)
-
-1. **Database Operations:**
-   ```bash
-   # Reset your local database (in case of existential crisis)
-   cd server
-   npm run prisma:reset
-   
-   # View your data through Prisma Studio
-   npm run prisma:studio  # Opens at http://localhost:5555
-   ```
-
-2. **Common Issues:**
-   - If Keycloak acts up, try `docker-compose restart keycloak`
-   - Database connection issues? Check your towel (DATABASE_URL)
-   - Types out of sync? Run generators manually (see Babel Fish section)
-
-3. **Development Flow:**
-   ```bash
-   # Start everything with a single command
-   node dev.js
-   
-   # Or start services individually (for the bureaucratically inclined)
-   docker-compose up -d    # Infrastructure
-   cd server && npm run start:dev
-   cd client && npm start
-   ```
-
-## 🐠 The Babel Fish API Generator
-
-> "The Babel fish is small, yellow, leech-like, and probably the oddest thing in the Universe..." - The Hitchhiker's Guide to the Galaxy
-
-Our Babel Fish is a sophisticated piece of technology that translates your NestJS API definitions into TypeScript interfaces and services that Angular can understand. Much like its biological counterpart, it sits between two different frameworks (NestJS and Angular) and makes them perfectly comprehensible to each other.
-
-### How it Works
-
-1. When you run `node dev.js`, the Babel Fish activates automatically and:
-   - Waits for the NestJS server to be ready
-   - Generates Angular-compatible TypeScript code when the API is available
-
-2. The generated code lives in `client/src/app/api/` and includes:
-   - TypeScript interfaces matching your server DTOs
-   - Angular services for API communication
-   - Type-safe request/response handling
-
-### Manual Generation
-
-Sometimes the Babel Fish needs a gentle nudge. Run this when:
-
-```bash
-cd client
-npm run generate
-```
-
-You might need this when:
-- After pulling changes that modify the API
-- If the automatic generation was interrupted
-- If the API code gets out of sync with the server
-- If Deep Thought is having an existential crisis (rare, but it happens)
-
-### Troubleshooting
-
-If you see TypeScript errors about missing API types:
-
-1. Ensure the NestJS server is running (`http://localhost:3000`)
-2. Check that the API documentation is accessible:
-   ```bash
-   curl http://localhost:3000/api/docs-json
-   ```
-3. Run the generate command manually (see above)
-4. If problems persist, remember: DON'T PANIC! Just restart the dev server by running `node dev.js`
-
-### Technical Details
-
-The generation process:
-1. Fetches OpenAPI specs from `http://localhost:3000/api/docs-json`
-2. Uses `@openapitools/openapi-generator-cli` for code generation
-3. Outputs to `client/src/app/api/`
-4. Runs automatically during development via the dev script
-5. Takes approximately 42 milliseconds (results may vary)
-
-Remember: The Answer to the Ultimate Question of Life, the Universe, and your API types is automated code generation! 🚀
-
-## 📜 License
-
-MIT (More Improbable Than the Infinite Improbability Drive)
-
-Remember: DON'T PANIC, and always know where your API documentation is! 🌌✨

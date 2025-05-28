@@ -2,10 +2,10 @@ import { defineConfig } from "cypress"
 
 export default defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:4200',
+    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:4200',
     env: {
-      apiUrl: 'http://localhost:3000',
-      keycloakUrl: 'http://localhost:8080',
+      apiUrl: process.env.CYPRESS_API_URL || 'http://localhost:3000',
+      keycloakUrl: process.env.CYPRESS_KEYCLOAK_URL || 'http://localhost:8080',
     },
     video: true,
     screenshotOnRunFailure: true,

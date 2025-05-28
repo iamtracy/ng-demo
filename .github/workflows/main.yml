@@ -27,7 +27,6 @@ jobs:
           echo "✨ All individual workflows will run automatically"
           echo "🎯 Check the Actions tab for detailed results"
 
-  # This job will only run if all required workflows pass
   all-checks-passed:
     name: All Checks Passed
     runs-on: ubuntu-latest
