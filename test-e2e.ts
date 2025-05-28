@@ -261,27 +261,18 @@ ${COLORS.NC}`)
   // =============================================================================
   // CYPRESS E2E TESTS
   // =============================================================================
-  console.log(`${COLORS.IMPROBABILITY}[🧪] Running Cypress E2E tests against production container...${COLORS.NC}`)
-  
-  // Set environment variables for Cypress to point to the running container
-  const cypressEnv = {
-    ...process.env,
-    CYPRESS_BASE_URL: `http://localhost:${ENV.PORT}`,
-    CYPRESS_API_URL: `http://localhost:${ENV.PORT}`,
-    CYPRESS_KEYCLOAK_URL: ENV.KEYCLOAK_AUTH_SERVER_URL, // Keep pointing to host Keycloak
-    NODE_ENV: 'production', // Tell Cypress we're in production mode
-  }
+  console.log(`${COLORS.IMPROBABILITY}[🧪] Running Cypress E2E tests via Docker Compose...${COLORS.NC}`)
   
   console.log(`${COLORS.HYPERINTELLIGENT}
 ╔══════════════════════════════════════════════════════════════════════════╗
-║                    🌌 CYPRESS ENVIRONMENT CONFIGURATION 🌌               ║
+║                    🌌 CYPRESS DOCKER COMPOSE EXECUTION 🌌               ║
 ║                                                                          ║
 ║  "The ships hung in the sky in much the same way that bricks don't."    ║
 ║                                                                          ║
 ╠══════════════════════════════════════════════════════════════════════════╣
-║  🚀 Base URL:     ${(cypressEnv.CYPRESS_BASE_URL || 'undefined').padEnd(45)} ║
-║  🛸 API URL:      ${(cypressEnv.CYPRESS_API_URL || 'undefined').padEnd(45)} ║
-║  🔐 Keycloak URL: ${(cypressEnv.CYPRESS_KEYCLOAK_URL || 'undefined').padEnd(45)} ║
+║  🚀 Base URL:     ${'http://host.docker.internal:3000'.padEnd(45)} ║
+║  🛸 API URL:      ${'http://host.docker.internal:3000'.padEnd(45)} ║
+║  🔐 Keycloak URL: ${'http://host.docker.internal:8080'.padEnd(45)} ║
 ║  🌍 Environment:  ${'production'.padEnd(45)} ║
 ║                                                                          ║
 ║  "Don't Panic" - The Hitchhiker's Guide to the Galaxy                   ║
@@ -299,18 +290,17 @@ ${COLORS.NC}`)
   }
   
   try {
-    // Run Cypress tests from root directory
-    execSync('npx cypress run --spec "cypress/e2e/**/*.cy.ts"', { 
+    // Run Cypress tests using Docker Compose service
+    console.log(`${COLORS.IMPROBABILITY}[🐳] Starting Cypress container via Docker Compose...${COLORS.NC}`)
+    
+    execSync('docker compose --profile testing run --rm cypress', { 
       stdio: 'inherit',
-      env: cypressEnv,
-      timeout: 120000 // 2 minute timeout
+      timeout: 180000 // 3 minute timeout
     })
     
     console.log(`${COLORS.TOWEL}[🎉] Cypress E2E tests passed! All systems are go!${COLORS.NC}`)
   } catch (err) {
-    console.log(`${COLORS.SARCASM}[⚠️] Cypress E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
-    console.log(`${COLORS.CUP_OF_TEA}[💡] This is expected for the first run - Keycloak and app need time to sync${COLORS.NC}`)
-    console.log(`${COLORS.CUP_OF_TEA}[🔧] Try running the tests again manually: npm run test:cypress${COLORS.NC}`)
+    console.log(`${COLORS.PANIC}[💥] Cypress E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
     
     // Show some debugging info
     try {
@@ -319,6 +309,20 @@ ${COLORS.NC}`)
     } catch {
       // Ignore if directories don't exist
     }
+    
+    // Clean up container before exiting
+    if (containerName) {
+      try {
+        console.log(`${COLORS.SARCASM}[🧹] Cleaning up Docker container: ${containerName}${COLORS.NC}`)
+        execSync(`docker stop ${containerName}`, { stdio: 'ignore' })
+        execSync(`docker rm ${containerName}`, { stdio: 'ignore' })
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+    
+    // Exit with error code to fail CI
+    exitWithError('CYPRESS E2E TESTS FAILED:', err as Error)
   }
 
   process.on('SIGINT', cleanupHandler)
