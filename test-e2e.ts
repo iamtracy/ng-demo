@@ -7,6 +7,7 @@ import {
   createErrorHandler,
   showProductionBanner,
   showColorfulDockerLogs,
+  startContinuousLogMonitoring,
 } from './utils.js'
 import { config } from 'dotenv'
 
@@ -118,6 +119,12 @@ ${COLORS.NC}`)
     })
     
     console.log(`${COLORS.HYPERINTELLIGENT}[✅] Docker container started: ${containerName}${COLORS.NC}`)
+    
+    // Show initial container logs to verify startup
+    console.log(`${COLORS.CUP_OF_TEA}[📋] Initial container logs:${COLORS.NC}`)
+    if (containerName) {
+      showColorfulDockerLogs(containerName, '🚀 CONTAINER STARTUP LOGS 🚀', 'HYPERINTELLIGENT', 30)
+    }
   } catch (err) {
     exitWithError('DOCKER RUN FAILED:', err as Error)
   }
@@ -185,6 +192,12 @@ ${COLORS.NC}`)
           console.log(`${COLORS.SARCASM}[🔍] HTTP response: ${response}${COLORS.NC}`)
         } catch {
           console.log(`${COLORS.SARCASM}[🔍] No HTTP response (connection refused)${COLORS.NC}`)
+        }
+        
+        // Show recent container logs every few attempts to track NestJS startup
+        if (retries % 3 === 0 && containerName) {
+          console.log(`${COLORS.CUP_OF_TEA}[📋] Recent container logs (attempt ${retries}):${COLORS.NC}`)
+          showColorfulDockerLogs(containerName, '🔍 HEALTH CHECK LOGS 🔍', 'CUP_OF_TEA', 15)
         }
       }
     } catch (error) {
@@ -269,6 +282,12 @@ ${COLORS.NC}`)
   // =============================================================================
   console.log(`${COLORS.IMPROBABILITY}[🧪] Running Cypress E2E tests via Docker Compose...${COLORS.NC}`)
   
+  // Show container logs before starting Cypress tests
+  console.log(`${COLORS.CUP_OF_TEA}[📋] Container logs before Cypress tests:${COLORS.NC}`)
+  if (containerName) {
+    showColorfulDockerLogs(containerName, '🧪 PRE-CYPRESS LOGS 🧪', 'IMPROBABILITY', 20)
+  }
+  
   console.log(`${COLORS.HYPERINTELLIGENT}
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║                    🌌 CYPRESS DOCKER COMPOSE EXECUTION 🌌               ║
@@ -300,21 +319,27 @@ ${COLORS.NC}`)
     // Run Cypress tests using Docker Compose service
     console.log(`${COLORS.IMPROBABILITY}[🐳] Starting Cypress container via Docker Compose...${COLORS.NC}`)
     
-    execSync('docker compose --profile testing run --rm cypress', { 
-      stdio: 'inherit',
-      timeout: 180000 // 3 minute timeout
-    })
+    // Start continuous log monitoring during tests
+    const stopLogMonitoring = containerName ? startContinuousLogMonitoring(containerName) : () => {}
     
-    console.log(`${COLORS.TOWEL}[🎉] Cypress E2E tests passed! All systems are go!${COLORS.NC}`)
+    try {
+      execSync('docker compose --profile testing run --rm cypress', { 
+        stdio: 'inherit',
+        timeout: 180000 // 3 minute timeout
+      })
+      
+      console.log(`${COLORS.TOWEL}[🎉] Cypress E2E tests passed! All systems are go!${COLORS.NC}`)
+    } finally {
+      // Stop log monitoring regardless of test outcome
+      stopLogMonitoring()
+    }
   } catch (err) {
     console.log(`${COLORS.PANIC}[💥] Cypress E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
     
-    // Show some debugging info
-    try {
-      console.log(`${COLORS.SARCASM}[📋] Checking if Cypress artifacts were created...${COLORS.NC}`)
-      execSync('ls -la cypress/videos/ cypress/screenshots/ 2>/dev/null || echo "No artifacts found"', { stdio: 'inherit' })
-    } catch {
-      // Ignore if directories don't exist
+    // Show container logs when tests fail
+    console.log(`${COLORS.PANIC}[📋] Container logs during test failure:${COLORS.NC}`)
+    if (containerName) {
+      showColorfulDockerLogs(containerName, '💥 CYPRESS FAILURE LOGS 💥', 'PANIC', 50)
     }
     
     // Clean up container before exiting
@@ -339,3 +364,4 @@ start().catch(err => {
   console.error(`${COLORS.PANIC}[FATAL ERROR] │ ${err.message}${COLORS.NC}`)
   process.exit(1)
 })
+ 

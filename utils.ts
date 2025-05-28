@@ -349,46 +349,114 @@ export function getDevelopmentEnvironment(): NodeJS.ProcessEnv {
 // =============================================================================
 
 export function showColorfulDockerLogs(
-  containerName: string, 
-  title: string, 
-  titleColor: keyof Colors = 'HYPERINTELLIGENT',
-  tailLines?: number
+  containerName: string,
+  title: string,
+  color: keyof typeof COLORS,
+  lines: number = 50
 ): void {
   try {
-    console.log(`${COLORS[titleColor]}╔════════════════════════════════════════════════════════════════════════════╗${COLORS.NC}`)
-    console.log(`${COLORS[titleColor]}║${title.padStart(Math.floor((76 + title.length) / 2)).padEnd(76)}║${COLORS.NC}`)
-    console.log(`${COLORS[titleColor]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
+    console.log(`${COLORS[color]}
+╔════════════════════════════════════════════════════════════════════════════╗
+║                           ${title.padEnd(42)} ║
+╚════════════════════════════════════════════════════════════════════════════╝
+${COLORS.NC}`)
     
-    const logCommand = tailLines ? `docker logs --tail ${tailLines} ${containerName}` : `docker logs ${containerName}`
-    const logs = execSync(logCommand, { encoding: 'utf8' })
+    const logs = execSync(`docker logs --tail ${lines} ${containerName}`, { encoding: 'utf8' })
     
-    // Add color to different log levels
+    // Color-code different log levels
     const coloredLogs = logs
       .split('\n')
       .map(line => {
-        if (line.includes('ERROR') || line.includes('error') || line.includes('Error')) {
+        if (line.includes('ERROR') || line.includes('error')) {
           return `${COLORS.PANIC}${line}${COLORS.NC}`
-        } else if (line.includes('WARN') || line.includes('warn') || line.includes('Warning')) {
+        } else if (line.includes('WARN') || line.includes('warn')) {
           return `${COLORS.SARCASM}${line}${COLORS.NC}`
-        } else if (line.includes('INFO') || line.includes('info') || line.includes('Info')) {
+        } else if (line.includes('INFO') || line.includes('info')) {
           return `${COLORS.HYPERINTELLIGENT}${line}${COLORS.NC}`
-        } else if (line.includes('DEBUG') || line.includes('debug') || line.includes('Debug')) {
+        } else if (line.includes('DEBUG') || line.includes('debug')) {
           return `${COLORS.CUP_OF_TEA}${line}${COLORS.NC}`
-        } else if (line.includes('✅') || line.includes('SUCCESS') || line.includes('success')) {
-          return `${COLORS.TOWEL}${line}${COLORS.NC}`
-        } else if (line.includes('Starting') || line.includes('Listening') || line.includes('Ready')) {
-          return `${COLORS.IMPROBABILITY}${line}${COLORS.NC}`
-        } else if (line.trim() === '') {
-          return line // Keep empty lines as-is
         } else {
-          return `${COLORS.CUP_OF_TEA}${line}${COLORS.NC}` // Default color for other lines
+          return line
         }
       })
       .join('\n')
     
     console.log(coloredLogs)
-    console.log(`${COLORS[titleColor]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
-  } catch {
-    console.log(`${COLORS.PANIC}[❌] Could not retrieve container logs for ${containerName}${COLORS.NC}`)
+    console.log(`${COLORS[color]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
+  } catch (error) {
+    console.log(`${COLORS.PANIC}[❌] Could not retrieve logs for container ${containerName}: ${(error as Error).message}${COLORS.NC}`)
+  }
+}
+
+export function startContinuousLogMonitoring(containerName: string): () => void {
+  console.log(`${COLORS.IMPROBABILITY}[📡] Starting continuous log monitoring for ${containerName}...${COLORS.NC}`)
+  
+  let isMonitoring = true
+  let logProcess: any
+  
+  const startMonitoring = () => {
+    try {
+      // Use docker logs -f to follow logs in real-time
+      logProcess = spawn('docker', ['logs', '-f', '--tail', '10', containerName], {
+        stdio: ['ignore', 'pipe', 'pipe']
+      })
+      
+      logProcess.stdout?.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n').filter(line => line.trim())
+        lines.forEach(line => {
+          const timestamp = new Date().toISOString().substring(11, 19)
+          if (line.includes('ERROR') || line.includes('error')) {
+            console.log(`${COLORS.PANIC}[${timestamp}] 🔴 ${line}${COLORS.NC}`)
+          } else if (line.includes('WARN') || line.includes('warn')) {
+            console.log(`${COLORS.SARCASM}[${timestamp}] 🟡 ${line}${COLORS.NC}`)
+          } else if (line.includes('INFO') || line.includes('info')) {
+            console.log(`${COLORS.HYPERINTELLIGENT}[${timestamp}] 🔵 ${line}${COLORS.NC}`)
+          } else if (line.trim()) {
+            console.log(`${COLORS.CUP_OF_TEA}[${timestamp}] 📝 ${line}${COLORS.NC}`)
+          }
+        })
+      })
+      
+      logProcess.stderr?.on('data', (data: Buffer) => {
+        const lines = data.toString().split('\n').filter(line => line.trim())
+        lines.forEach(line => {
+          const timestamp = new Date().toISOString().substring(11, 19)
+          console.log(`${COLORS.PANIC}[${timestamp}] 🚨 ${line}${COLORS.NC}`)
+        })
+      })
+      
+      logProcess.on('close', (code: number) => {
+        if (isMonitoring && code !== 0) {
+          console.log(`${COLORS.SARCASM}[📡] Log monitoring process exited with code ${code}, restarting...${COLORS.NC}`)
+          setTimeout(startMonitoring, 1000)
+        }
+      })
+      
+      logProcess.on('error', (error: Error) => {
+        if (isMonitoring) {
+          console.log(`${COLORS.SARCASM}[📡] Log monitoring error: ${error.message}, restarting...${COLORS.NC}`)
+          setTimeout(startMonitoring, 1000)
+        }
+      })
+    } catch (error) {
+      if (isMonitoring) {
+        console.log(`${COLORS.PANIC}[❌] Failed to start log monitoring: ${(error as Error).message}${COLORS.NC}`)
+      }
+    }
+  }
+  
+  startMonitoring()
+  
+  // Return cleanup function
+  return () => {
+    isMonitoring = false
+    if (logProcess) {
+      try {
+        logProcess.kill('SIGTERM')
+        console.log(`${COLORS.IMPROBABILITY}[📡] Stopped continuous log monitoring${COLORS.NC}`)
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
   }
 } 
