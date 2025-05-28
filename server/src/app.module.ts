@@ -13,31 +13,59 @@ import {
   RoleGuard,
   TokenValidation,
 } from 'nest-keycloak-connect'
+import { LoggerModule } from 'nestjs-pino'
 
 import { MessagesModule } from './messages/message.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserSyncInterceptor } from './user/user-sync.interceptor'
 import { UserModule } from './user/user.module'
 
-dotenv.config({ path: '../.env' })
+dotenv.config()
 
 const isProduction = process.env.NODE_ENV === 'production'
-const KEYCLOAK_CONFIG = {
-  authServerUrl:
-    process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080',
-  realm: process.env.KEYCLOAK_REALM ?? 'ng-demo',
-  clientId: process.env.KEYCLOAK_CLIENT_ID ?? 'ng-demo-client',
-  secret: process.env.KEYCLOAK_CLIENT_SECRET,
+
+const KEYCLOAK_AUTH_SERVER_URL =
+  process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080'
+
+const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM ?? 'ng-demo'
+
+const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID ?? 'ng-demo-client'
+
+const KEYCLOAK_CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET
+
+if (KEYCLOAK_CLIENT_SECRET === undefined || KEYCLOAK_CLIENT_SECRET === '') {
+  throw new Error(
+    'KEYCLOAK_CLIENT_SECRET is required. Please set it in your .env file.',
+  )
 }
 
-if (KEYCLOAK_CONFIG.secret === undefined || KEYCLOAK_CONFIG.secret === '') {
-  throw new Error('Missing Keycloak client secret')
+const KEYCLOAK_CONFIG = {
+  authServerUrl: KEYCLOAK_AUTH_SERVER_URL,
+  realm: KEYCLOAK_REALM,
+  clientId: KEYCLOAK_CLIENT_ID,
+  secret: KEYCLOAK_CLIENT_SECRET,
 }
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        ...(isProduction
+          ? {
+              level: 'info',
+            }
+          : {
+              transport: {
+                target: 'pino-pretty',
+                options: {
+                  singleLine: true,
+                },
+              },
+            }),
+      },
     }),
     KeycloakConnectModule.register({
       authServerUrl: KEYCLOAK_CONFIG.authServerUrl,

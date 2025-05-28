@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  apiUrl: 'http://localhost:3000',
+  production: true,
+  apiUrl: '',
   keycloak: {
     url: 'http://localhost:8080',
     realm: 'ng-demo',

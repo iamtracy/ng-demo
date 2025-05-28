@@ -5,6 +5,8 @@ describe('Authentication', () => {
 
   it('should login as admin user via UI flow', () => {
     cy.login('admin')
+    
+    // Wait for the user data to load and admin menu to appear
     cy.get('[data-cy="admin-menu-item"]').should('be.visible')
   })
 
@@ -20,18 +22,23 @@ describe('Authentication', () => {
     
     cy.get('[data-cy="logout-button"]').click()
     
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
-    const keycloakHost = new URL(keycloakUrl).host
-    cy.url().should('include', keycloakHost, { timeout: 15000 })
+    const keycloakUrl = 'http://localhost:8080'
+    
+    // After logout, we're redirected to Keycloak, so we need to handle the cross-origin
+    cy.origin(keycloakUrl, () => {
+      cy.url().should('include', 'localhost:8080')
+    })
   })
 
   it('should handle invalid credentials', () => {
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
+    const keycloakUrl = 'http://localhost:8080'
+    const baseUrl = Cypress.config('baseUrl') || 'http://localhost:4200'
+    const redirectUri = encodeURIComponent(`${baseUrl}/`)
     
     cy.visit('/')
     
-    cy.origin(keycloakUrl, () => {
-      cy.visit('/realms/ng-demo/protocol/openid-connect/auth?client_id=ng-demo-client&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2F&response_type=code&scope=openid')
+    cy.origin(keycloakUrl, { args: { redirectUri } }, ({ redirectUri }) => {
+      cy.visit(`/realms/ng-demo/protocol/openid-connect/auth?client_id=ng-demo-client&redirect_uri=${redirectUri}&response_type=code&scope=openid`)
       
       cy.get('#username').type('invalid')
       cy.get('#password').type('invalid')

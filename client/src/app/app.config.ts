@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
       initOptions: {
         onLoad: 'login-required',
         checkLoginIframe: false,
-        pkceMethod: 'S256',
+        silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
         scope: 'openid profile email roles'
       },
       features: [
@@ -60,7 +60,7 @@ export const appConfig: ApplicationConfig = {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [
         {
-          urlPattern: /^\/api/i,
+          urlPattern: /\/api/i,
           httpMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
         }
       ]

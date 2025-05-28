@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Logger,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -26,6 +27,8 @@ import { MessageService } from './message.service'
 @ApiBearerAuth('access-token')
 @Controller('messages')
 export class MessageController {
+  private readonly logger = new Logger(MessageController.name)
+
   constructor(private readonly messageService: MessageService) {}
 
   private toMessageDto(message: Message): MessageDto {
@@ -49,9 +52,25 @@ export class MessageController {
   })
   async findAll(@CurrentUser() user: OIDCTokenPayload): Promise<MessageDto[]> {
     const isAdmin = user.realm_access?.roles.includes('admin') ?? false
+    this.logger.log(
+      `GET /messages - User ${user.preferred_username ?? 'unknown'} (admin: ${String(isAdmin)})`,
+    )
 
-    const messages = await this.messageService.messages(user, isAdmin)
-    return messages.map((message) => this.toMessageDto(message))
+    try {
+      const messages = await this.messageService.messages(user, isAdmin)
+      const result = messages.map((message) => this.toMessageDto(message))
+
+      this.logger.log(
+        `GET /messages - Successfully returned ${String(result.length)} messages for user ${user.preferred_username ?? 'unknown'}`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error(
+        `GET /messages - Failed for user ${user.preferred_username ?? 'unknown'}:`,
+        error,
+      )
+      throw error
+    }
   }
 
   @Post()
@@ -65,11 +84,26 @@ export class MessageController {
     @Body() createMessageDto: CreateMessageDto,
     @CurrentUser() user: User,
   ): Promise<MessageDto> {
-    const message = await this.messageService.createMessage(
-      createMessageDto,
-      user,
-    )
-    return this.toMessageDto(message)
+    this.logger.log(`POST /messages - User ${user.username} creating message`)
+
+    try {
+      const message = await this.messageService.createMessage(
+        createMessageDto,
+        user,
+      )
+      const result = this.toMessageDto(message)
+
+      this.logger.log(
+        `POST /messages - Successfully created message ${String(message.id)} for user ${user.username}`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error(
+        `POST /messages - Failed to create message for user ${user.username}:`,
+        error,
+      )
+      throw error
+    }
   }
 
   @Put(':id')
@@ -92,12 +126,29 @@ export class MessageController {
     @Body() updateMessageDto: CreateMessageDto,
     @CurrentUser() user: User,
   ): Promise<MessageDto> {
-    const message = await this.messageService.updateMessage(
-      id,
-      updateMessageDto,
-      user,
+    this.logger.log(
+      `PUT /messages/${String(id)} - User ${user.username} updating message`,
     )
-    return this.toMessageDto(message)
+
+    try {
+      const message = await this.messageService.updateMessage(
+        id,
+        updateMessageDto,
+        user,
+      )
+      const result = this.toMessageDto(message)
+
+      this.logger.log(
+        `PUT /messages/${String(id)} - Successfully updated message for user ${user.username}`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error(
+        `PUT /messages/${String(id)} - Failed to update message for user ${user.username}:`,
+        error,
+      )
+      throw error
+    }
   }
 
   @Delete(':id')
@@ -124,7 +175,23 @@ export class MessageController {
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: User,
   ): Promise<{ id: number }> {
-    await this.messageService.deleteMessage(id, user)
-    return { id }
+    this.logger.log(
+      `DELETE /messages/${String(id)} - User ${user.username} deleting message`,
+    )
+
+    try {
+      await this.messageService.deleteMessage(id, user)
+
+      this.logger.log(
+        `DELETE /messages/${String(id)} - Successfully deleted message for user ${user.username}`,
+      )
+      return { id }
+    } catch (error) {
+      this.logger.error(
+        `DELETE /messages/${String(id)} - Failed to delete message for user ${user.username}:`,
+        error,
+      )
+      throw error
+    }
   }
 }

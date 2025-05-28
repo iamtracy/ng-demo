@@ -1,5 +1,12 @@
 import { CurrentUser } from '@auth'
-import { Controller, Get, Post, Param, NotFoundException } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
@@ -17,6 +24,8 @@ import { UserService } from './user.service'
 @Controller('users')
 @ApiBearerAuth('access-token')
 export class UserController {
+  private readonly logger = new Logger(UserController.name)
+
   constructor(private readonly userService: UserService) {}
 
   private toUserDto(user: PrismaUser | OIDCTokenPayload): UserDto {
@@ -71,8 +80,25 @@ export class UserController {
   async getCurrentUser(
     @CurrentUser() keycloakUser: OIDCTokenPayload,
   ): Promise<Omit<UserDto, 'createdAt' | 'updatedAt'>> {
-    const user = await this.userService.syncUserFromKeycloak(keycloakUser)
-    return this.toUserDto(user)
+    this.logger.log(
+      `GET /users/me - User ${keycloakUser.preferred_username ?? 'unknown'} requesting profile`,
+    )
+
+    try {
+      const user = await this.userService.syncUserFromKeycloak(keycloakUser)
+      const result = this.toUserDto(user)
+
+      this.logger.log(
+        `GET /users/me - Successfully returned profile for user ${keycloakUser.preferred_username ?? 'unknown'}`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error(
+        `GET /users/me - Failed to get profile for user ${keycloakUser.preferred_username ?? 'unknown'}:`,
+        error,
+      )
+      throw error
+    }
   }
 
   @Post('sync')
@@ -85,8 +111,25 @@ export class UserController {
   async syncCurrentUser(
     @CurrentUser() keycloakUser: OIDCTokenPayload,
   ): Promise<Omit<UserDto, 'createdAt' | 'updatedAt'>> {
-    const user = await this.userService.syncUserFromKeycloak(keycloakUser)
-    return this.toUserDto(user)
+    this.logger.log(
+      `POST /users/sync - User ${keycloakUser.preferred_username ?? 'unknown'} requesting sync`,
+    )
+
+    try {
+      const user = await this.userService.syncUserFromKeycloak(keycloakUser)
+      const result = this.toUserDto(user)
+
+      this.logger.log(
+        `POST /users/sync - Successfully synced user ${keycloakUser.preferred_username ?? 'unknown'}`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error(
+        `POST /users/sync - Failed to sync user ${keycloakUser.preferred_username ?? 'unknown'}:`,
+        error,
+      )
+      throw error
+    }
   }
 
   @Get(':id')
@@ -106,11 +149,27 @@ export class UserController {
     description: 'User not found',
   })
   async getUserById(@Param('id') id: string): Promise<UserDto> {
-    const user = await this.userService.findById(id)
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`)
+    this.logger.log(`GET /users/${id} - Admin requesting user by ID`)
+
+    try {
+      const user = await this.userService.findById(id)
+      if (!user) {
+        this.logger.warn(`GET /users/${id} - User not found`)
+        throw new NotFoundException(`User with ID ${id} not found`)
+      }
+
+      const result = this.toUserDto(user)
+      this.logger.log(
+        `GET /users/${id} - Successfully returned user ${user.username}`,
+      )
+      return result
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error
+      }
+      this.logger.error(`GET /users/${id} - Failed to get user:`, error)
+      throw error
     }
-    return this.toUserDto(user)
   }
 
   @Get()
@@ -126,7 +185,19 @@ export class UserController {
     description: 'Forbidden - Admin role required',
   })
   async getAllUsers(): Promise<UserDto[]> {
-    const users = await this.userService.findAll()
-    return users.map((user) => this.toUserDto(user))
+    this.logger.log('GET /users - Admin requesting all users')
+
+    try {
+      const users = await this.userService.findAll()
+      const result = users.map((user) => this.toUserDto(user))
+
+      this.logger.log(
+        `GET /users - Successfully returned ${String(result.length)} users`,
+      )
+      return result
+    } catch (error) {
+      this.logger.error('GET /users - Failed to get all users:', error)
+      throw error
+    }
   }
 }

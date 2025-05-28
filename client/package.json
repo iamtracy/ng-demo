@@ -10,8 +10,6 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --no-watch --no-progress --browsers=ChromeHeadless --code-coverage",
-    "test:e2e": "cypress open",
-    "test:e2e:ci": "cypress run",
     "lint": "ng lint"
   },
   "private": true,
@@ -39,7 +37,6 @@
     "@openapitools/openapi-generator-cli": "^2.20.2",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "19.5.0",
-    "cypress": "^14.4.0",
     "eslint": "^9.27.0",
     "eslint-plugin-import": "^2.31.0",
     "jasmine-core": "~5.6.0",

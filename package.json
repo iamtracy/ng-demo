@@ -1,0 +1,28 @@
+{
+  "name": "ng-demo-root",
+  "version": "1.0.0",
+  "description": "The Developer's Guide to the Galaxy - Root workspace",
+  "author": "The Developer's Guide to the Galaxy",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx dev.ts",
+    "test:e2e": "tsx test-e2e.ts",
+    "cypress:open": "cypress open",
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "cypress": "^13.17.0",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
