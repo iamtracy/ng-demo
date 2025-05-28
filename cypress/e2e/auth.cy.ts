@@ -7,7 +7,7 @@ describe('Authentication', () => {
     cy.login('admin')
     
     // Wait for the user data to load and admin menu to appear
-    cy.get('[data-cy="admin-menu-item"]', { timeout: 10000 }).should('be.visible')
+    cy.get('[data-cy="admin-menu-item"]').should('be.visible')
   })
 
   it('should login as regular user via UI flow', () => {
@@ -24,7 +24,7 @@ describe('Authentication', () => {
     
     const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
     const keycloakHost = new URL(keycloakUrl).host
-    cy.url().should('include', keycloakHost, { timeout: 15000 })
+    cy.url().should('include', keycloakHost)
   })
 
   it('should handle invalid credentials', () => {

@@ -45,7 +45,7 @@ export const appConfig: ApplicationConfig = {
       initOptions: {
         onLoad: 'login-required',
         checkLoginIframe: false,
-        pkceMethod: 'S256',
+        silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
         scope: 'openid profile email roles'
       },
       features: [

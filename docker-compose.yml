@@ -70,7 +70,7 @@ services:
       KC_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-ng-demo-client}
       KC_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-ng-demo-secret}
       KC_CLIENT_ROLES: "user,admin"
-      KC_REDIRECT_URIS: "http://localhost:${CLIENT_PORT:-4200}/*"
+      KC_REDIRECT_URIS: "http://localhost:${CLIENT_PORT:-4200}/*,http://host.docker.internal:3000/*,http://localhost:3000/*"
       
       # Development Configuration
       KC_DEV: "true"
@@ -108,11 +108,12 @@ services:
     volumes:
       - .:/e2e
     environment:
-      - CYPRESS_BASE_URL=http://host.docker.internal:3000
-      - CYPRESS_API_URL=http://host.docker.internal:3000
-      - CYPRESS_KEYCLOAK_URL=http://host.docker.internal:8080
+      - CYPRESS_BASE_URL=http://localhost:3000
+      - CYPRESS_API_URL=http://localhost:3000
+      - CYPRESS_KEYCLOAK_URL=http://localhost:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    network_mode: host
     profiles:
       - testing
     depends_on:

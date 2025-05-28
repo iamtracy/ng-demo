@@ -12,4 +12,4 @@ export default defineConfig({
     chromeWebSecurity: false,
     experimentalOriginDependencies: true,
   },
-}) 
+})

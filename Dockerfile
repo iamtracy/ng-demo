@@ -1,11 +1,11 @@
-FROM node:24-slim AS client-builder
+FROM node:22-slim AS client-builder
 WORKDIR /app/client
 COPY client/package*.json ./
 RUN npm ci
 COPY client/ .
 RUN npm run build -- --configuration=production
 
-FROM node:24-slim AS server-builder
+FROM node:22-slim AS server-builder
 WORKDIR /app/server
 # Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl
@@ -15,7 +15,7 @@ COPY server/ .
 RUN npx prisma generate && \
     npm run build
 
-FROM node:24-slim AS production
+FROM node:22-slim AS production
 WORKDIR /app
 
 # Install OpenSSL for Prisma and curl for health checks
