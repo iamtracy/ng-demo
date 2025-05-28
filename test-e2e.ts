@@ -93,7 +93,7 @@ ${COLORS.NC}`)
       // we need to use the host.docker.internal or the service network
       const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
       // Frontend uses localhost, backend uses host.docker.internal for JWT validation
-      const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL.replace('localhost', 'host.docker.internal')
+      const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL //.replace('localhost', 'host.docker.internal')
       
       dockerRunCmd = `docker run -d --name ${containerName} --add-host=host.docker.internal:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
       

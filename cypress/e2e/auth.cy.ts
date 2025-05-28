@@ -22,13 +22,16 @@ describe('Authentication', () => {
     
     cy.get('[data-cy="logout-button"]').click()
     
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
-    const keycloakHost = new URL(keycloakUrl).host
-    cy.url().should('include', keycloakHost)
+    const keycloakUrl = 'http://localhost:8080'
+    
+    // After logout, we're redirected to Keycloak, so we need to handle the cross-origin
+    cy.origin(keycloakUrl, () => {
+      cy.url().should('include', 'localhost:8080')
+    })
   })
 
   it('should handle invalid credentials', () => {
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
+    const keycloakUrl = 'http://localhost:8080'
     const baseUrl = Cypress.config('baseUrl') || 'http://localhost:4200'
     const redirectUri = encodeURIComponent(`${baseUrl}/`)
     
