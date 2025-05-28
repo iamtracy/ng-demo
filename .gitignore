@@ -75,6 +75,8 @@ lerna-debug.log*
 testem.log
 /client/coverage
 /server/coverage
+/cypress/screenshots
+/cypress/videos
 
 # IDEs and editors
 .idea/
