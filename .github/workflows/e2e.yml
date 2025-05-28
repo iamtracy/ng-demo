@@ -11,15 +11,26 @@ on:
       - completed
     branches: [ main ]
 
+env:
+  KC_LOG_LEVEL: INFO
+  NODE_ENV: production
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
+  KEYCLOAK_CLIENT_SECRET: ng-demo-secret
+  KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
+  KEYCLOAK_REALM: ng-demo
+  KEYCLOAK_CLIENT_ID: ng-demo-client
+
 jobs:
   e2e-tests:
     name: End-to-End Tests
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+    timeout-minutes: 30
     
     strategy:
       matrix:
         node-version: ['22.x']
+      fail-fast: false
 
     steps:
       - name: 🛒 Checkout code
@@ -31,34 +42,55 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: 📦 Install root dependencies
         run: npm ci
 
       - name: 🚀 Run E2E Tests
+        id: e2e-tests
+        timeout-minutes: 25
         run: |
-          echo "Running E2E tests with production Docker container..."
-          # Set CI-optimized environment variables
-          export KC_LOG_LEVEL=INFO
-          export NODE_ENV=production
-          export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/ng_demo_db
-          export KEYCLOAK_CLIENT_SECRET=ng-demo-secret
-          export KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
-          export KEYCLOAK_REALM=ng-demo
-          export KEYCLOAK_CLIENT_ID=ng-demo-client
+          echo "🧪 Running E2E tests with production Docker container..."
+          echo "📊 Test started at: $(date)"
           
           # Run the full E2E test suite
           npm run test:e2e
+
+      - name: 📊 Test Results Summary
+        if: always()
+        run: |
+          echo "📊 Test completed at: $(date)"
+          if [ "${{ steps.e2e-tests.outcome }}" == "success" ]; then
+            echo "✅ E2E tests passed successfully!"
+          else
+            echo "❌ E2E tests failed"
+          fi
 
       - name: 📸 Upload Cypress screenshots
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ github.run_number }}
           path: cypress/screenshots
+          retention-days: 7
 
       - name: 📹 Upload Cypress videos
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cypress-videos
-          path: cypress/videos 
+          name: cypress-videos-${{ github.run_number }}
+          path: cypress/videos
+          retention-days: 3
+
+      - name: 📋 Upload test logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-logs-${{ github.run_number }}
+          path: |
+            *.log
+            cypress/logs
+          retention-days: 7
+          if-no-files-found: ignore 

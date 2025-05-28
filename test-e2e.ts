@@ -81,18 +81,35 @@ ${COLORS.NC}`)
     // Start the Docker container
     const isCI = process.env.GITHUB_ACTIONS === 'true'
     
+    console.log(`${COLORS.CUP_OF_TEA}[🔧] Environment: ${isCI ? 'CI (GitHub Actions)' : 'Local Development'}${COLORS.NC}`)
+    
     let dockerRunCmd: string
     if (isCI) {
-      // In CI, use host networking to access services on the runner
-      dockerRunCmd = `docker run -d --name ${containerName} --network=host -e DATABASE_URL="${ENV.DATABASE_URL}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_ISSUER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} ng-demo-e2e`
+      // In CI with GitHub Actions services, use standard Docker networking
+      console.log(`${COLORS.HYPERINTELLIGENT}[🌐] Using CI networking configuration...${COLORS.NC}`)
+      
+      // In CI, services are accessible via localhost from the runner, but from Docker containers
+      // we need to use the host.docker.internal or the service network
+      const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
+      const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL.replace('localhost', 'host.docker.internal')
+      
+      dockerRunCmd = `docker run -d --name ${containerName} --add-host=host.docker.internal:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
+      
+      console.log(`${COLORS.CUP_OF_TEA}[📋] CI Docker command: ${dockerRunCmd}${COLORS.NC}`)
     } else {
       // Local development: use port mapping and host.docker.internal
+      console.log(`${COLORS.HYPERINTELLIGENT}[🌐] Using local development networking configuration...${COLORS.NC}`)
+      
       const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
       // Keep Keycloak URL as localhost to match JWT token issuer
       const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL
       
-      dockerRunCmd = `docker run -d --name ${containerName} --add-host=localhost:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_ISSUER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} ng-demo-e2e`
+      dockerRunCmd = `docker run -d --name ${containerName} --add-host=localhost:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
+      
+      console.log(`${COLORS.CUP_OF_TEA}[📋] Local Docker command: ${dockerRunCmd}${COLORS.NC}`)
     }
+    
+    console.log(`${COLORS.IMPROBABILITY}[🐳] Starting Docker container with networking: ${isCI ? 'bridge+host.docker.internal' : 'bridge+host-gateway'}${COLORS.NC}`)
     
     execSync(dockerRunCmd, { 
       stdio: 'inherit'
