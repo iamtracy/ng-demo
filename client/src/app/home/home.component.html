@@ -2,9 +2,33 @@
   <div class="form-section">
     <h2>Add New Message</h2>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="message-form">
-      <nz-input-group nzSize="large">
-        <input nz-input formControlName="message" placeholder="Enter your message..." type="text" />
+      <nz-input-group nzSize="large" nzCompact>
+        <input 
+          nz-input 
+          formControlName="message" 
+          placeholder="Enter your message..." 
+          type="text"
+          maxlength="350"
+          style="width: calc(100% - 80px)"
+        />
+        <button 
+          nz-button 
+          nzType="primary" 
+          nzSize="large"
+          type="submit"
+          [disabled]="!form.valid"
+          style="width: 80px"
+        >
+          Send
+        </button>
       </nz-input-group>
+      <div 
+        class="character-count" 
+        *ngIf="form.get('message')?.value"
+        style="text-align: right; font-size: 12px; color: #666; margin-top: 4px;"
+      >
+        {{ form.get('message')?.value?.length || 0 }}/350
+      </div>
     </form>
   </div>
 

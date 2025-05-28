@@ -32,7 +32,17 @@ interface Message extends MessageDto {
     ReactiveFormsModule,
     FormsModule
   ],
-  templateUrl: './home.component.html'
+  templateUrl: './home.component.html',
+  styles: [
+    `
+      .form-section {
+        max-width: 350px;
+      }
+
+      .message-form {
+    
+    `
+  ]
 })
 export class HomeComponent implements OnInit {
   @ViewChild('messageInput') messageInput!: ElementRef
