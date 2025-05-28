@@ -104,6 +104,7 @@ services:
   cypress:
     image: cypress/included:latest
     container_name: ng-demo-cypress
+    working_dir: /e2e
     volumes:
       - .:/e2e
     environment:
