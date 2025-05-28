@@ -92,6 +92,7 @@ ${COLORS.NC}`)
       // In CI, services are accessible via localhost from the runner, but from Docker containers
       // we need to use the host.docker.internal or the service network
       const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
+      // Frontend uses localhost, backend uses host.docker.internal for JWT validation
       const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL.replace('localhost', 'host.docker.internal')
       
       dockerRunCmd = `docker run -d --name ${containerName} --add-host=host.docker.internal:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
@@ -275,9 +276,10 @@ ${COLORS.NC}`)
 ║  "The ships hung in the sky in much the same way that bricks don't."    ║
 ║                                                                          ║
 ╠══════════════════════════════════════════════════════════════════════════╣
-║  🚀 Base URL:     ${'http://host.docker.internal:3000'.padEnd(45)} ║
-║  🛸 API URL:      ${'http://host.docker.internal:3000'.padEnd(45)} ║
-║  🔐 Keycloak URL: ${'http://host.docker.internal:8080'.padEnd(45)} ║
+║  🚀 Base URL:     ${'http://localhost:3000'.padEnd(45)} ║
+║  🛸 API URL:      ${'http://localhost:3000'.padEnd(45)} ║
+║  🔐 Keycloak URL: ${'http://localhost:8080 (frontend)'.padEnd(45)} ║
+║  🔧 Backend Auth: ${'http://host.docker.internal:8080'.padEnd(45)} ║
 ║  🌍 Environment:  ${'production'.padEnd(45)} ║
 ║                                                                          ║
 ║  "Don't Panic" - The Hitchhiker's Guide to the Galaxy                   ║
