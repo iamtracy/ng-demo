@@ -38,9 +38,6 @@ interface Message extends MessageDto {
       .form-section {
         max-width: 350px;
       }
-
-      .message-form {
-    
     `
   ]
 })

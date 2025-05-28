@@ -13,18 +13,17 @@ import {
   RoleGuard,
   TokenValidation,
 } from 'nest-keycloak-connect'
+import { LoggerModule } from 'nestjs-pino'
 
 import { MessagesModule } from './messages/message.module'
 import { PrismaModule } from './prisma/prisma.module'
 import { UserSyncInterceptor } from './user/user-sync.interceptor'
 import { UserModule } from './user/user.module'
 
-// Load environment variables from root .env file
 dotenv.config()
 
 const isProduction = process.env.NODE_ENV === 'production'
 
-// Environment variables with defaults
 const KEYCLOAK_AUTH_SERVER_URL =
   process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080'
 
@@ -52,6 +51,7 @@ const KEYCLOAK_CONFIG = {
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    LoggerModule.forRoot(),
     KeycloakConnectModule.register({
       authServerUrl: KEYCLOAK_CONFIG.authServerUrl,
       realm: KEYCLOAK_CONFIG.realm,
