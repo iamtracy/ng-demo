@@ -79,11 +79,22 @@ ${COLORS.NC}`)
     containerName = `ng-demo-e2e-${Date.now()}`
     
     // Start the Docker container
-    const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
-    // Keep Keycloak URL as localhost to match JWT token issuer
-    const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL
+    const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true'
     
-    execSync(`docker run -d --name ${containerName} --add-host=localhost:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_ISSUER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} ng-demo-e2e`, { 
+    let dockerRunCmd: string
+    if (isCI) {
+      // In CI, use host networking to access services on the runner
+      dockerRunCmd = `docker run -d --name ${containerName} --network=host -e DATABASE_URL="${ENV.DATABASE_URL}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_ISSUER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} ng-demo-e2e`
+    } else {
+      // Local development: use port mapping and host.docker.internal
+      const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
+      // Keep Keycloak URL as localhost to match JWT token issuer
+      const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL
+      
+      dockerRunCmd = `docker run -d --name ${containerName} --add-host=localhost:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_ISSUER_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} ng-demo-e2e`
+    }
+    
+    execSync(dockerRunCmd, { 
       stdio: 'inherit'
     })
     
