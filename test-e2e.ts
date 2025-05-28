@@ -79,7 +79,7 @@ ${COLORS.NC}`)
     containerName = `ng-demo-e2e-${Date.now()}`
     
     // Start the Docker container
-    const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true'
+    const isCI = process.env.GITHUB_ACTIONS === 'true'
     
     let dockerRunCmd: string
     if (isCI) {
