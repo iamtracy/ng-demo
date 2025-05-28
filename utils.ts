@@ -342,4 +342,53 @@ export function getDevelopmentEnvironment(): NodeJS.ProcessEnv {
     KEYCLOAK_REALM: ENV.KEYCLOAK_REALM,
     KEYCLOAK_CLIENT_ID: ENV.KEYCLOAK_CLIENT_ID,
   }
+}
+
+// =============================================================================
+// 🐳 DOCKER LOG UTILITIES
+// =============================================================================
+
+export function showColorfulDockerLogs(
+  containerName: string, 
+  title: string, 
+  titleColor: keyof Colors = 'HYPERINTELLIGENT',
+  tailLines?: number
+): void {
+  try {
+    console.log(`${COLORS[titleColor]}╔════════════════════════════════════════════════════════════════════════════╗${COLORS.NC}`)
+    console.log(`${COLORS[titleColor]}║${title.padStart(Math.floor((76 + title.length) / 2)).padEnd(76)}║${COLORS.NC}`)
+    console.log(`${COLORS[titleColor]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
+    
+    const logCommand = tailLines ? `docker logs --tail ${tailLines} ${containerName}` : `docker logs ${containerName}`
+    const logs = execSync(logCommand, { encoding: 'utf8' })
+    
+    // Add color to different log levels
+    const coloredLogs = logs
+      .split('\n')
+      .map(line => {
+        if (line.includes('ERROR') || line.includes('error') || line.includes('Error')) {
+          return `${COLORS.PANIC}${line}${COLORS.NC}`
+        } else if (line.includes('WARN') || line.includes('warn') || line.includes('Warning')) {
+          return `${COLORS.SARCASM}${line}${COLORS.NC}`
+        } else if (line.includes('INFO') || line.includes('info') || line.includes('Info')) {
+          return `${COLORS.HYPERINTELLIGENT}${line}${COLORS.NC}`
+        } else if (line.includes('DEBUG') || line.includes('debug') || line.includes('Debug')) {
+          return `${COLORS.CUP_OF_TEA}${line}${COLORS.NC}`
+        } else if (line.includes('✅') || line.includes('SUCCESS') || line.includes('success')) {
+          return `${COLORS.TOWEL}${line}${COLORS.NC}`
+        } else if (line.includes('Starting') || line.includes('Listening') || line.includes('Ready')) {
+          return `${COLORS.IMPROBABILITY}${line}${COLORS.NC}`
+        } else if (line.trim() === '') {
+          return line // Keep empty lines as-is
+        } else {
+          return `${COLORS.CUP_OF_TEA}${line}${COLORS.NC}` // Default color for other lines
+        }
+      })
+      .join('\n')
+    
+    console.log(coloredLogs)
+    console.log(`${COLORS[titleColor]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
+  } catch {
+    console.log(`${COLORS.PANIC}[❌] Could not retrieve container logs for ${containerName}${COLORS.NC}`)
+  }
 } 

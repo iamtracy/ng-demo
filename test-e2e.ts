@@ -6,6 +6,7 @@ import {
   startDockerServices,
   createErrorHandler,
   showProductionBanner,
+  showColorfulDockerLogs,
 } from './utils.js'
 import { config } from 'dotenv'
 
@@ -148,9 +149,9 @@ ${COLORS.NC}`)
     
     if (retries >= 10) {
       console.log(`${COLORS.PANIC}[📋] Container failed to start. Logs:${COLORS.NC}`)
-      try {
-        execSync(`docker logs ${containerName}`, { stdio: 'inherit' })
-      } catch {}
+      if (containerName) {
+        showColorfulDockerLogs(containerName, '🐳 DOCKER CONTAINER LOGS 🐳', 'HYPERINTELLIGENT')
+      }
       exitWithError('CONTAINER START FAILED:', new Error('Container did not start within 10 seconds'))
     }
   }
@@ -165,9 +166,9 @@ ${COLORS.NC}`)
       const containerStatus = execSync(`docker ps --filter "name=${containerName}" --filter "status=running" --format "{{.Status}}"`, { encoding: 'utf8' })
       if (!containerStatus.trim()) {
         console.log(`${COLORS.PANIC}[💥] Container stopped running! Logs:${COLORS.NC}`)
-        try {
-          execSync(`docker logs ${containerName}`, { stdio: 'inherit' })
-        } catch {}
+        if (containerName) {
+          showColorfulDockerLogs(containerName, '💥 CONTAINER CRASH LOGS 💥', 'PANIC')
+        }
         exitWithError('CONTAINER STOPPED:', new Error('Container stopped unexpectedly'))
       }
       
@@ -198,7 +199,9 @@ ${COLORS.NC}`)
       // Show container logs for debugging
       try {
         console.log(`${COLORS.PANIC}[📋] Container logs:${COLORS.NC}`)
-        execSync(`docker logs ${containerName}`, { stdio: 'inherit' })
+        if (containerName) {
+          showColorfulDockerLogs(containerName, '🔍 HEALTH CHECK FAILURE LOGS 🔍', 'SARCASM')
+        }
       } catch {
         console.log(`${COLORS.PANIC}[❌] Could not retrieve container logs${COLORS.NC}`)
       }
@@ -252,7 +255,9 @@ ${COLORS.NC}`)
     // Show container logs for debugging
     try {
       console.log(`${COLORS.SARCASM}[📋] Recent container logs:${COLORS.NC}`)
-      execSync(`docker logs --tail 20 ${containerName}`, { stdio: 'inherit' })
+      if (containerName) {
+        showColorfulDockerLogs(containerName, '☕ PRODUCTION TEST LOGS ☕', 'CUP_OF_TEA', 20)
+      }
     } catch {
       console.log(`${COLORS.PANIC}[❌] Could not retrieve container logs${COLORS.NC}`)
     }
