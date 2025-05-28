@@ -107,19 +107,22 @@ export class MessageService {
     message: Message | null,
     user: OIDCTokenPayload,
     id: number,
+    operation: 'update' | 'deletion' = 'update',
   ): void {
     if (!message) {
       this.logger.warn(
-        `Message ${String(id)} not found for update by user ${user.preferred_username ?? 'unknown'}`,
+        `Message ${String(id)} not found for ${operation} by user ${user.preferred_username ?? 'unknown'}`,
       )
       throw new NotFoundException(`Message with ID ${id.toString()} not found`)
     }
 
     if (message.userId !== user.sub) {
       this.logger.warn(
-        `User ${user.preferred_username ?? 'unknown'} attempted to update message ${String(id)} owned by ${message.userId}`,
+        `User ${user.preferred_username ?? 'unknown'} attempted to ${operation === 'update' ? 'update' : 'delete'} message ${String(id)} owned by ${message.userId}`,
       )
-      throw new ForbiddenException('You can only update your own messages')
+      throw new ForbiddenException(
+        `You can only ${operation === 'update' ? 'update' : 'delete'} your own messages`,
+      )
     }
   }
 
@@ -147,7 +150,7 @@ export class MessageService {
 
     try {
       const message = await this.findMessageById(id)
-      this.validateMessageOwnership(message, user, id)
+      this.validateMessageOwnership(message, user, id, 'update')
 
       const updatedMessage = await this.performMessageUpdate(
         id,
@@ -173,26 +176,6 @@ export class MessageService {
     }
   }
 
-  private validateMessageOwnershipForDeletion(
-    message: Message | null,
-    user: OIDCTokenPayload,
-    id: number,
-  ): void {
-    if (!message) {
-      this.logger.warn(
-        `Message ${String(id)} not found for deletion by user ${user.preferred_username ?? 'unknown'}`,
-      )
-      throw new NotFoundException(`Message with ID ${id.toString()} not found`)
-    }
-
-    if (message.userId !== user.sub) {
-      this.logger.warn(
-        `User ${user.preferred_username ?? 'unknown'} attempted to delete message ${String(id)} owned by ${message.userId}`,
-      )
-      throw new ForbiddenException('You can only delete your own messages')
-    }
-  }
-
   private async performMessageDeletion(id: number): Promise<void> {
     await this.prisma.message.delete({
       where: { id },
@@ -206,7 +189,7 @@ export class MessageService {
 
     try {
       const message = await this.findMessageById(id)
-      this.validateMessageOwnershipForDeletion(message, user, id)
+      this.validateMessageOwnership(message, user, id, 'deletion')
 
       await this.performMessageDeletion(id)
 
