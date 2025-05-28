@@ -7,8 +7,8 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "dev": "tsx dev.ts",
-    "test:e2e": "tsx test-e2e.ts",
+    "dev": "npx tsx dev.ts",
+    "test:e2e": "npx tsx test-e2e.ts",
     "test:cypress": "cypress run",
     "cypress:open": "cypress open",
     "build": "tsc",
