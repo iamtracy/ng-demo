@@ -65,6 +65,12 @@ async function start(): Promise<void> {
       prefixColor: 'HYPERINTELLIGENT' 
     })
 
+    await runCommand('npm', ['run', 'seed'], { 
+      cwd: 'server', 
+      prefix: 'DEEP THOUGHT', 
+      prefixColor: 'TOWEL' 
+    })
+
     runCommand('npm', ['run', 'start'], {
       cwd: 'server',
       prefix: 'SERVER',

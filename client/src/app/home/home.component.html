@@ -38,6 +38,7 @@
       <thead>
         <tr>
           <th nzWidth="80px">ID</th>
+          <th *ngIf="shouldShowAuthorColumn" nzWidth="120px">Author</th>
           <th>Message</th>
           <th nzWidth="150px">Created</th>
           <th nzWidth="150px">Updated</th>
@@ -47,6 +48,11 @@
       <tbody>
         <tr *ngFor="let data of (messages$ | async) || []">
           <td>{{data.id}}</td>
+          <td *ngIf="shouldShowAuthorColumn">
+            <span class="author-name">
+              {{ (data.firstName || '') + (data.firstName && data.lastName ? ' ' : '') + (data.lastName || '') || data.username || 'Unknown' }}
+            </span>
+          </td>
           <td>
             <ng-container *ngIf="!data.editing; else editMode">
               <span 

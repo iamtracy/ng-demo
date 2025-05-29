@@ -95,4 +95,10 @@ export default tseslint.config(
       '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
+  {
+    files: ['prisma/seed.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  }
 )

@@ -16,6 +16,9 @@ import { HomeService } from './home.service'
 interface Message extends MessageDto {
   editing?: boolean
   editMessage?: string
+  username?: string
+  firstName?: string
+  lastName?: string
 }
 
 @Component({
@@ -38,6 +41,29 @@ interface Message extends MessageDto {
       .form-section {
         max-width: 350px;
       }
+      
+      .author-name {
+        font-weight: 500;
+        color: #1890ff;
+      }
+      
+      .editable-cell {
+        cursor: pointer;
+      }
+      
+      .editable-cell:hover .edit-icon {
+        opacity: 1;
+      }
+      
+      .edit-icon {
+        opacity: 0.5;
+        margin-left: 8px;
+        transition: opacity 0.2s;
+      }
+      
+      .not-owner {
+        cursor: default;
+      }
     `
   ]
 })
@@ -55,6 +81,13 @@ export class HomeComponent implements OnInit {
     message: new FormControl('')
   })
 
+  get isAdmin(): boolean {
+    return this.keycloak.tokenParsed?.realm_access?.roles?.includes('admin') ?? false
+  }
+
+  get shouldShowAuthorColumn(): boolean {
+    return this.isAdmin
+  }
 
   ngOnInit(): void {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''

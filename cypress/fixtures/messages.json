@@ -1,0 +1,44 @@
+{
+  "admin": [
+    {
+      "text": "Welcome to the Galaxy! I'm your President, Zaphod Beeblebrox!",
+      "category": "announcement"
+    },
+    {
+      "text": "Remember: Don't Panic, and always know where your towel is!",
+      "category": "advice"
+    },
+    {
+      "text": "The answer to life, the universe, and everything is... 42!",
+      "category": "wisdom"
+    }
+  ],
+  "user1": [
+    {
+      "text": "Hello, I'm Arthur Dent. My planet was recently demolished.",
+      "category": "introduction"
+    },
+    {
+      "text": "Has anyone seen my house? It was on Earth before the bypass.",
+      "category": "question"
+    },
+    {
+      "text": "I never did get the hang of Thursdays...",
+      "category": "observation"
+    }
+  ],
+  "user2": [
+    {
+      "text": "Greetings from Trillian! Exploring the galaxy one planet at a time.",
+      "category": "introduction"
+    },
+    {
+      "text": "The probability calculations for this message are quite fascinating.",
+      "category": "science"
+    },
+    {
+      "text": "Sometimes I miss Earth, but the universe is so much bigger!",
+      "category": "reflection"
+    }
+  ]
+} 

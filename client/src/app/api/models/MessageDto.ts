@@ -23,5 +23,17 @@ export type MessageDto = {
      * The ID of the user who created the message
      */
     userId: string;
+    /**
+     * The username of the message author (only for admin users)
+     */
+    username?: string;
+    /**
+     * The first name of the message author (only for admin users)
+     */
+    firstName?: string;
+    /**
+     * The last name of the message author (only for admin users)
+     */
+    lastName?: string;
 };
 

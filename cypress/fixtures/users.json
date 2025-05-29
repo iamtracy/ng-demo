@@ -1,58 +1,32 @@
 {
   "admin": {
+    "id": "zaphod-beeblebrox-id",
+    "email": "zaphod@galaxy.gov",
     "username": "zaphod",
-    "password": "hoopy123!",
-    "email": "president@galaxy.com",
     "firstName": "Zaphod",
     "lastName": "Beeblebrox",
-    "roles": ["admin", "user"],
-    "description": "President of the Galaxy - Admin user for testing admin functionality"
-  },
-  "user": {
-    "username": "arthur",
     "password": "hoopy123!",
-    "email": "arthur@earth.com",
+    "roles": ["admin", "user"],
+    "displayName": "Zaphod Beeblebrox"
+  },
+  "user1": {
+    "id": "arthur-dent-id",
+    "email": "arthur@earth.sol",
+    "username": "arthur",
     "firstName": "Arthur",
     "lastName": "Dent",
+    "password": "hoopy123!",
     "roles": ["user"],
-    "description": "Regular user from Earth - Standard user for testing user functionality"
+    "displayName": "Arthur Dent"
   },
   "user2": {
+    "id": "trillian-astra-id",
+    "email": "trillian@galaxy.gov",
     "username": "trillian",
+    "firstName": "Trillian",
+    "lastName": "Astra",
     "password": "hoopy123!",
-    "email": "trillian@heart-of-gold.com",
-    "firstName": "Tricia",
-    "lastName": "McMillan",
     "roles": ["user"],
-    "description": "Astrophysicist - Alternative user for testing user functionality"
-  },
-  "testUsers": [
-    {
-      "username": "zaphod",
-      "password": "hoopy123!",
-      "email": "president@galaxy.com",
-      "firstName": "Zaphod",
-      "lastName": "Beeblebrox",
-      "roles": ["admin", "user"],
-      "type": "admin"
-    },
-    {
-      "username": "arthur",
-      "password": "hoopy123!",
-      "email": "arthur@earth.com",
-      "firstName": "Arthur",
-      "lastName": "Dent",
-      "roles": ["user"],
-      "type": "user"
-    },
-    {
-      "username": "trillian",
-      "password": "hoopy123!",
-      "email": "trillian@heart-of-gold.com",
-      "firstName": "Tricia",
-      "lastName": "McMillan",
-      "roles": ["user"],
-      "type": "user"
-    }
-  ]
+    "displayName": "Trillian Astra"
+  }
 } 
