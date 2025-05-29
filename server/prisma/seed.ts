@@ -10,54 +10,35 @@ const prisma = new PrismaClient({
   datasourceUrl: process.env.DATABASE_URL,
 })
 
-interface JsonUser {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  password: string
-  roles: string[]
-  displayName: string
-}
-
-interface JsonMessage {
-  text: string
-  category: string
-}
-
-interface MessagesData {
-  admin: JsonMessage[]
-  user1: JsonMessage[]
-  user2: JsonMessage[]
-}
+type SeedUser = Partial<User>
+type SeedMessage = Partial<Message>
 
 async function main(): Promise<void> {
   console.log('🌌 Seeding users from JSON...')
 
-  const userPromises = Object.values(users).map(async (userData: JsonUser) => {
+  const userPromises = Object.values(users).map(async (userData: SeedUser) => {
     return await createUser(userData)
   })
   const createdUsers = await Promise.all(userPromises)
 
   console.log('🌌 Seeding messages from JSON...')
-  await createMessagesForUsers(messages as MessagesData, createdUsers)
+  await createMessagesForUsers(messages as SeedMessage, createdUsers)
 
-  console.log(
-    `✅ Created ${String(Object.keys(users).length)} users and messages`,
-  )
+  console.log('✨ Seeding complete!')
 }
 
-async function createUser(userData: JsonUser): Promise<User> {
-  return await prisma.user.upsert({
+async function createUser(userData: SeedUser): Promise<User> {
+  const user = await prisma.user.upsert({
     where: { id: userData.id },
-    update: {},
+    update: {
+      updatedAt: new Date(),
+    },
     create: {
-      id: userData.id,
-      email: userData.email,
-      username: userData.username,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
+      id: userData.id ?? '',
+      email: userData.email ?? '',
+      username: userData.username ?? '',
+      firstName: userData.firstName ?? '',
+      lastName: userData.lastName ?? '',
       roles: userData.roles,
       emailVerified: true,
       createdAt: new Date(),
@@ -65,19 +46,24 @@ async function createUser(userData: JsonUser): Promise<User> {
       lastLoginAt: new Date(),
     },
   })
+
+  console.log(`👤 User ${userData.username ?? 'unknown'} ready`)
+  return user
 }
 
 async function createMessagesForUsers(
-  messagesData: MessagesData,
+  messagesData: SeedMessage,
   createdUsers: User[],
 ): Promise<void> {
+  console.log('🌌 Seeding messages for users...')
+
   const userMapping = {
     admin: createdUsers.find((user) => user.id === 'zaphod-beeblebrox-id')?.id,
     user1: createdUsers.find((user) => user.id === 'arthur-dent-id')?.id,
     user2: createdUsers.find((user) => user.id === 'trillian-astra-id')?.id,
   }
 
-  const allMessagePromises: Promise<Message>[] = []
+  const allMessagePromises: Promise<Message | null>[] = []
 
   for (const [userKey, userMessages] of Object.entries(messagesData)) {
     const userId = userMapping[userKey as keyof typeof userMapping]
@@ -86,13 +72,24 @@ async function createMessagesForUsers(
       continue
     }
 
+    const existingMessageCount = await prisma.message.count({
+      where: { userId: userId },
+    })
+
+    if (existingMessageCount > 0) {
+      console.log(
+        `⏭️ User ${userKey} already has ${String(existingMessageCount)} messages, skipping...`,
+      )
+      continue
+    }
+
     const messagePromises: Promise<Message>[] = (
-      userMessages as JsonMessage[]
-    ).map(async (messageData: JsonMessage) => {
+      userMessages as unknown as SeedMessage[]
+    ).map(async (messageData: SeedMessage) => {
       return await prisma.message.create({
         data: {
-          message: messageData.text,
-          userId: userId,
+          message: messageData.message ?? '',
+          userId,
         },
       })
     })
@@ -100,8 +97,12 @@ async function createMessagesForUsers(
     allMessagePromises.push(...messagePromises)
   }
 
-  await Promise.all(allMessagePromises)
-  console.log(`✅ Created ${String(allMessagePromises.length)} messages`)
+  if (allMessagePromises.length > 0) {
+    await Promise.all(allMessagePromises)
+    console.log(`✅ Created ${String(allMessagePromises.length)} new messages`)
+  } else {
+    console.log('ℹ️ All users already have messages, no new messages created')
+  }
 }
 
 main()

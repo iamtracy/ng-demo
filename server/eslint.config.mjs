@@ -99,6 +99,7 @@ export default tseslint.config(
     files: ['prisma/seed.ts'],
     rules: {
       'no-console': 'off',
+      'max-lines-per-function': 'off',
     },
   }
 )

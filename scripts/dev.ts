@@ -19,7 +19,6 @@ async function start(): Promise<void> {
   let clientPid: number | undefined, serverPid: number | undefined, watcherPid: number | undefined
   const pids = [clientPid, serverPid, watcherPid]
 
-  // Create shared handlers
   const exitWithError = createErrorHandler(pids)
   const cleanupHandler = createCleanupHandler(pids)
 
@@ -99,7 +98,6 @@ async function start(): Promise<void> {
   console.log(`${COLORS.SARCASM}[📡] Monitoring transmissions from both ends of the improbability curve...${COLORS.NC}`)
   console.log(`${COLORS.CUP_OF_TEA}[🧭] Press Ctrl+C to dematerialize gracefully${COLORS.NC}`)
 
-  // Update pids array for cleanup
   pids[0] = clientPid
   pids[1] = serverPid
   pids[2] = watcherPid
