@@ -7,7 +7,7 @@ import {
   createCleanupHandler,
   createErrorHandler,
   showDevelopmentBanner,
-} from './utils.js'
+} from './utils'
 
 async function start(): Promise<void> {
   await ensureDockerIsRunning()
@@ -17,7 +17,7 @@ async function start(): Promise<void> {
   console.log(`${COLORS.CUP_OF_TEA}[☕] Brewing digital tea and warming up servers...${COLORS.NC}`)
 
   let clientPid: number | undefined, serverPid: number | undefined, watcherPid: number | undefined
-  const pids = [clientPid, serverPid, watcherPid]
+  const pids: (number | undefined)[] = [clientPid, serverPid, watcherPid]
 
   const exitWithError = createErrorHandler(pids)
   const cleanupHandler = createCleanupHandler(pids)
@@ -26,45 +26,49 @@ async function start(): Promise<void> {
   // CLIENT SETUP
   // =============================================================================
   try {
-    await runCommand('npm', ['install'], { 
+    await runCommand('npm', ['install'], {
       cwd: 'client', 
       prefix: 'CLIENT', 
       prefixColor: 'IMPROBABILITY' 
     })
-    
+  } catch (err) {
+    exitWithError('CLIENT INSTALLATION FAILED:', err as Error)
+  }
+
+  try {
     runCommand('npm', ['run', 'start'], {
       cwd: 'client',
       prefix: 'CLIENT',
       prefixColor: 'IMPROBABILITY',
       capturePid: pid => (clientPid = pid),
-    }).catch(err => exitWithError('CLIENT FAILED TO START:', err))
+    })
   } catch (err) {
-    exitWithError('CLIENT INSTALLATION FAILED:', err as Error)
+    exitWithError('CLIENT FAILED TO START:', err as Error)
   }
 
   // =============================================================================
   // SERVER SETUP
   // =============================================================================
   try {
-    await runCommand('npm', ['install', '--force'], { 
+    await runCommand('npm', ['install', '--force'], {
       cwd: 'server', 
       prefix: 'SERVER', 
       prefixColor: 'HYPERINTELLIGENT' 
     })
     
-    await runCommand('npm', ['run', 'prisma:generate'], { 
+    await runCommand('npm', ['run', 'prisma:generate'], {
       cwd: 'server', 
       prefix: 'SERVER', 
       prefixColor: 'HYPERINTELLIGENT' 
     })
     
-    await runCommand('npm', ['run', 'prisma:migrate'], { 
+    await runCommand('npm', ['run', 'prisma:migrate'], {
       cwd: 'server', 
       prefix: 'SERVER', 
       prefixColor: 'HYPERINTELLIGENT' 
     })
 
-    await runCommand('npm', ['run', 'seed'], { 
+    await runCommand('npm', ['run', 'seed'], {
       cwd: 'server', 
       prefix: 'DEEP THOUGHT', 
       prefixColor: 'TOWEL' 

@@ -8,10 +8,7 @@ import {
   showProductionBanner,
   showColorfulDockerLogs,
   startContinuousLogMonitoring,
-} from './utils.js'
-import { config } from 'dotenv'
-
-config()
+} from './utils'
 
 async function start(): Promise<void> {
   await ensureDockerIsRunning()
@@ -23,7 +20,6 @@ async function start(): Promise<void> {
   let containerName: string | undefined
   const pids: (number | undefined)[] = []
 
-  // Create shared handlers
   const exitWithError = createErrorHandler(pids)
   const cleanupHandler = () => {
     console.log(`\n${COLORS.HYPERINTELLIGENT}
@@ -34,7 +30,6 @@ async function start(): Promise<void> {
     ╚════════════════════════════════════════╝
 ${COLORS.NC}`)
     
-    // Stop and remove Docker container
     if (containerName) {
       try {
         console.log(`${COLORS.SARCASM}[🧹] Stopping Docker container: ${containerName}${COLORS.NC}`)
@@ -53,7 +48,6 @@ ${COLORS.NC}`)
   try {
     console.log(`${COLORS.IMPROBABILITY}[🐳] Building Docker image for production...${COLORS.NC}`)
     
-    // Build the Docker image with environment variables
     const buildArgs = [
       `--build-arg API_URL=""`,
       `--build-arg KEYCLOAK_URL="${ENV.KEYCLOAK_AUTH_SERVER_URL}"`,
@@ -61,7 +55,7 @@ ${COLORS.NC}`)
       `--build-arg KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}"`
     ].join(' ')
     
-    execSync(`docker build ${buildArgs} -t ng-demo-e2e .`, { 
+    execSync(`docker build ${buildArgs} -t ng-demo-e2e .`, {
       stdio: 'inherit',
       cwd: process.cwd()
     })
@@ -77,34 +71,26 @@ ${COLORS.NC}`)
   try {
     console.log(`${COLORS.HYPERINTELLIGENT}[🚀] Starting Docker container...${COLORS.NC}`)
     
-    // Generate unique container name
     containerName = `ng-demo-e2e-${Date.now()}`
     
-    // Start the Docker container
     const isCI = process.env.GITHUB_ACTIONS === 'true'
     
     console.log(`${COLORS.CUP_OF_TEA}[🔧] Environment: ${isCI ? 'CI (GitHub Actions)' : 'Local Development'}${COLORS.NC}`)
     
     let dockerRunCmd: string
     if (isCI) {
-      // In CI with GitHub Actions services, use standard Docker networking
       console.log(`${COLORS.HYPERINTELLIGENT}[🌐] Using CI networking configuration...${COLORS.NC}`)
       
-      // In CI, services are accessible via localhost from the runner, but from Docker containers
-      // we need to use the host.docker.internal or the service network
       const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
-      // Frontend uses localhost, backend uses host.docker.internal for JWT validation
       const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL.replace('localhost', 'host.docker.internal')
       
       dockerRunCmd = `docker run -d --name ${containerName} --add-host=host.docker.internal:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
       
       console.log(`${COLORS.CUP_OF_TEA}[📋] CI Docker command: ${dockerRunCmd}${COLORS.NC}`)
     } else {
-      // Local development: use port mapping and host.docker.internal
       console.log(`${COLORS.HYPERINTELLIGENT}[🌐] Using local development networking configuration...${COLORS.NC}`)
       
       const containerDatabaseUrl = ENV.DATABASE_URL.replace('localhost', 'host.docker.internal')
-      // Keep Keycloak URL as localhost to match JWT token issuer
       const containerKeycloakUrl = ENV.KEYCLOAK_AUTH_SERVER_URL
       
       dockerRunCmd = `docker run -d --name ${containerName} --add-host=localhost:host-gateway -p 3000:3000 -e DATABASE_URL="${containerDatabaseUrl}" -e KEYCLOAK_CLIENT_SECRET="${ENV.KEYCLOAK_CLIENT_SECRET}" -e KEYCLOAK_AUTH_SERVER_URL="${containerKeycloakUrl}" -e KEYCLOAK_REALM="${ENV.KEYCLOAK_REALM}" -e KEYCLOAK_CLIENT_ID="${ENV.KEYCLOAK_CLIENT_ID}" -e PORT=${ENV.PORT} -e NODE_ENV=production ng-demo-e2e`
@@ -114,13 +100,12 @@ ${COLORS.NC}`)
     
     console.log(`${COLORS.IMPROBABILITY}[🐳] Starting Docker container with networking: ${isCI ? 'bridge+host.docker.internal' : 'bridge+host-gateway'}${COLORS.NC}`)
     
-    execSync(dockerRunCmd, { 
+    execSync(dockerRunCmd, {
       stdio: 'inherit'
     })
     
     console.log(`${COLORS.HYPERINTELLIGENT}[✅] Docker container started: ${containerName}${COLORS.NC}`)
     
-    // Show initial container logs to verify startup
     console.log(`${COLORS.CUP_OF_TEA}[📋] Initial container logs:${COLORS.NC}`)
     if (containerName) {
       showColorfulDockerLogs(containerName, '🚀 CONTAINER STARTUP LOGS 🚀', 'HYPERINTELLIGENT', 30)
@@ -138,7 +123,6 @@ ${COLORS.NC}`)
   const maxRetries = ENV.HEALTH_CHECK_MAX_RETRIES
   let containerReady = false
   
-  // First, wait for container to be running
   console.log(`${COLORS.CUP_OF_TEA}[🔍] Checking container status...${COLORS.NC}`)
   while (retries < 10) {
     try {
@@ -164,13 +148,11 @@ ${COLORS.NC}`)
     }
   }
 
-  // Now wait for the application to be ready
   retries = 0
   console.log(`${COLORS.CUP_OF_TEA}[🔍] Waiting for application to be ready...${COLORS.NC}`)
   
   while (retries < maxRetries && !containerReady) {
     try {
-      // Check if container is still running
       const containerStatus = execSync(`docker ps --filter "name=${containerName}" --filter "status=running" --format "{{.Status}}"`, { encoding: 'utf8' })
       if (!containerStatus.trim()) {
         console.log(`${COLORS.PANIC}[💥] Container stopped running! Logs:${COLORS.NC}`)
@@ -180,13 +162,11 @@ ${COLORS.NC}`)
         exitWithError('CONTAINER STOPPED:', new Error('Container stopped unexpectedly'))
       }
       
-      // Test API endpoint with more detailed error handling
       try {
         execSync(`curl -f -s http://localhost:${ENV.PORT}/api/docs-json > /dev/null`, { stdio: 'ignore' })
         containerReady = true
         break
       } catch (curlError) {
-        // Try to get more info about what's wrong
         try {
           const response = execSync(`curl -s -w "%{http_code}" http://localhost:${ENV.PORT}/api/docs-json`, { encoding: 'utf8' })
           console.log(`${COLORS.SARCASM}[🔍] HTTP response: ${response}${COLORS.NC}`)
@@ -194,7 +174,6 @@ ${COLORS.NC}`)
           console.log(`${COLORS.SARCASM}[🔍] No HTTP response (connection refused)${COLORS.NC}`)
         }
         
-        // Show recent container logs every few attempts to track NestJS startup
         if (retries % 3 === 0 && containerName) {
           console.log(`${COLORS.CUP_OF_TEA}[📋] Recent container logs (attempt ${retries}):${COLORS.NC}`)
           showColorfulDockerLogs(containerName, '🔍 HEALTH CHECK LOGS 🔍', 'CUP_OF_TEA', 15)
@@ -210,7 +189,6 @@ ${COLORS.NC}`)
     if (retries >= maxRetries) {
       console.error(`${COLORS.PANIC}[💥] Application failed to start after ${maxRetries} attempts${COLORS.NC}`)
       
-      // Show container logs for debugging
       try {
         console.log(`${COLORS.PANIC}[📋] Container logs:${COLORS.NC}`)
         if (containerName) {
@@ -220,7 +198,6 @@ ${COLORS.NC}`)
         console.log(`${COLORS.PANIC}[❌] Could not retrieve container logs${COLORS.NC}`)
       }
       
-      // Try to check what's listening on the port
       try {
         console.log(`${COLORS.PANIC}[🔍] Checking what's listening on port ${ENV.PORT}:${COLORS.NC}`)
         execSync(`netstat -tlnp | grep :${ENV.PORT} || lsof -i :${ENV.PORT} || echo "Nothing listening on port ${ENV.PORT}"`, { stdio: 'inherit' })
@@ -231,7 +208,6 @@ ${COLORS.NC}`)
       exitWithError('CONTAINER HEALTH CHECK FAILED:', new Error(`Application not ready after ${maxRetries} attempts`))
     }
     
-    // Wait before next attempt
     await new Promise(resolve => setTimeout(resolve, ENV.HEALTH_CHECK_TIMEOUT))
   }
   
@@ -250,15 +226,12 @@ ${COLORS.NC}`)
   // =============================================================================
   console.log(`${COLORS.CUP_OF_TEA}[🧪] Running Docker production tests...${COLORS.NC}`)
   try {
-    // Test API health
     execSync(`curl -s http://localhost:${ENV.PORT}/api/docs-json > /dev/null`, { stdio: 'ignore' })
     console.log(`${COLORS.HYPERINTELLIGENT}[✅] API documentation endpoint: OK${COLORS.NC}`)
     
-    // Test static file serving
     execSync(`curl -s http://localhost:${ENV.PORT}/ | grep -q "ng-demo"`, { stdio: 'ignore' })
     console.log(`${COLORS.HYPERINTELLIGENT}[✅] Static file serving: OK${COLORS.NC}`)
     
-    // Test API endpoints
     execSync(`curl -s http://localhost:${ENV.PORT}/api/docs | grep -q "swagger"`, { stdio: 'ignore' })
     console.log(`${COLORS.HYPERINTELLIGENT}[✅] Swagger documentation: OK${COLORS.NC}`)
     
@@ -266,7 +239,6 @@ ${COLORS.NC}`)
   } catch (err) {
     console.log(`${COLORS.SARCASM}[⚠️] Some production tests failed, but the container is running: ${(err as Error).message}${COLORS.NC}`)
     
-    // Show container logs for debugging
     try {
       console.log(`${COLORS.SARCASM}[📋] Recent container logs:${COLORS.NC}`)
       if (containerName) {
@@ -282,7 +254,6 @@ ${COLORS.NC}`)
   // =============================================================================
   console.log(`${COLORS.IMPROBABILITY}[🧪] Running Cypress E2E tests via Docker Compose...${COLORS.NC}`)
   
-  // Show container logs before starting Cypress tests
   console.log(`${COLORS.CUP_OF_TEA}[📋] Container logs before Cypress tests:${COLORS.NC}`)
   if (containerName) {
     showColorfulDockerLogs(containerName, '🧪 PRE-CYPRESS LOGS 🧪', 'IMPROBABILITY', 20)
@@ -305,7 +276,6 @@ ${COLORS.NC}`)
 ╚══════════════════════════════════════════════════════════════════════════╝
 ${COLORS.NC}`)
   
-  // Test if the application is accessible before running Cypress
   try {
     console.log(`${COLORS.CUP_OF_TEA}[🔍] Pre-flight check: Testing application accessibility...${COLORS.NC}`)
     execSync(`curl -f -s http://localhost:${ENV.PORT}/ > /dev/null`, { stdio: 'ignore' })
@@ -316,33 +286,28 @@ ${COLORS.NC}`)
   }
   
   try {
-    // Run Cypress tests using Docker Compose service
     console.log(`${COLORS.IMPROBABILITY}[🐳] Starting Cypress container via Docker Compose...${COLORS.NC}`)
     
-    // Start continuous log monitoring during tests
     const stopLogMonitoring = containerName ? startContinuousLogMonitoring(containerName) : () => {}
     
     try {
       execSync('docker compose --profile testing run --rm cypress', { 
         stdio: 'inherit',
-        timeout: 180000 // 3 minute timeout
+        timeout: 180_000
       })
       
       console.log(`${COLORS.TOWEL}[🎉] Cypress E2E tests passed! All systems are go!${COLORS.NC}`)
     } finally {
-      // Stop log monitoring regardless of test outcome
       stopLogMonitoring()
     }
   } catch (err) {
     console.log(`${COLORS.PANIC}[💥] Cypress E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
     
-    // Show container logs when tests fail
     console.log(`${COLORS.PANIC}[📋] Container logs during test failure:${COLORS.NC}`)
     if (containerName) {
       showColorfulDockerLogs(containerName, '💥 CYPRESS FAILURE LOGS 💥', 'PANIC', 50)
     }
     
-    // Clean up container before exiting
     if (containerName) {
       try {
         console.log(`${COLORS.SARCASM}[🧹] Cleaning up Docker container: ${containerName}${COLORS.NC}`)
@@ -353,7 +318,6 @@ ${COLORS.NC}`)
       }
     }
     
-    // Exit with error code to fail CI
     exitWithError('CYPRESS E2E TESTS FAILED:', err as Error)
   }
 
