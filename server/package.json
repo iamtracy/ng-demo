@@ -17,6 +17,7 @@
     "prisma:migrate": "npx prisma migrate dev",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "seed": "tsx prisma/seed.ts",
     "test:watch": "jest --watch",
     "test:ci": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

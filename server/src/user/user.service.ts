@@ -12,10 +12,6 @@ export class UserService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Sync user data from Keycloak token to local database
-   * This should be called on every login/token refresh
-   */
   async syncUserFromKeycloak(keycloakUser: OIDCTokenPayload): Promise<User> {
     const syncData: SyncUserDto = {
       id: keycloakUser.sub ?? '',
@@ -30,9 +26,6 @@ export class UserService {
     return this.syncUser(syncData)
   }
 
-  /**
-   * Sync user data to local database (upsert operation)
-   */
   async syncUser(syncUserDto: SyncUserDto): Promise<User> {
     try {
       const user = await this.prisma.user.upsert({
@@ -93,9 +86,6 @@ export class UserService {
     })
   }
 
-  /**
-   * Get all users (admin only)
-   */
   async findAll(): Promise<User[]> {
     return this.prisma.user.findMany({
       orderBy: { createdAt: 'desc' },

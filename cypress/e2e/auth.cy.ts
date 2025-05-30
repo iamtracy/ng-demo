@@ -6,7 +6,6 @@ describe('Authentication', () => {
   it('should login as admin user via UI flow', () => {
     cy.login('admin')
     
-    // Wait for the user data to load and admin menu to appear
     cy.get('[data-cy="admin-menu-item"]').should('be.visible')
   })
 
@@ -24,7 +23,6 @@ describe('Authentication', () => {
     
     const keycloakUrl = 'http://localhost:8080'
     
-    // After logout, we're redirected to Keycloak, so we need to handle the cross-origin
     cy.origin(keycloakUrl, () => {
       cy.url().should('include', 'localhost:8080')
     })

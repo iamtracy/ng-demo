@@ -1,0 +1,22 @@
+{
+  "endpoints": {
+    "messages": {
+      "messagecontroller_findall": "/api/messages",
+      "messagecontroller_create": "/api/messages",
+      "messagecontroller_update": "/api/messages/{id}",
+      "messagecontroller_delete": "/api/messages/{id}"
+    },
+    "users": {
+      "usercontroller_getcurrentuser": "/api/users/me",
+      "usercontroller_synccurrentuser": "/api/users/sync",
+      "usercontroller_getuserbyid": "/api/users/{id}",
+      "usercontroller_getallusers": "/api/users"
+    }
+  },
+  "metadata": {
+    "generatedAt": "2025-05-29T05:48:52.998Z",
+    "swaggerVersion": "42.0",
+    "title": "The Hitchhiker's Guide to the Galaxy API",
+    "baseUrl": "http://localhost:3000"
+  }
+}

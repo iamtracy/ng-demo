@@ -85,8 +85,8 @@ describe('HomeComponent', () => {
     const firstRowButtons = spectator.queryAll('tbody tr:first-child nz-button-group button')
     const secondRowButtons = spectator.queryAll('tbody tr:last-child nz-button-group button')
     
-    expect(firstRowButtons.length).toBe(2) // Edit and Delete for own message
-    expect(secondRowButtons.length).toBe(0) // No buttons for other's message
+    expect(firstRowButtons.length).toBe(2)
+    expect(secondRowButtons.length).toBe(0)
   })
 
   it('should not allow editing others\' messages', () => {

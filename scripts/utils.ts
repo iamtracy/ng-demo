@@ -3,7 +3,6 @@ import { setTimeout as wait } from 'node:timers/promises'
 import readline from 'node:readline'
 import { config } from 'dotenv'
 
-// Load environment variables from root .env file
 config()
 
 // =============================================================================
@@ -68,21 +67,17 @@ function getEnvVar(name: string, defaultValue: string): string {
   return process.env[name] ?? defaultValue
 }
 
-// Environment variables
 export const ENV = {
-  // Server Configuration
   PORT: getEnvVar('PORT', '3000'),
   CLIENT_PORT: getEnvVar('CLIENT_PORT', '4200'),
   NODE_ENV: getEnvVar('NODE_ENV', 'development'),
   
-  // Database Configuration
   DATABASE_URL: getRequiredEnvVar('DATABASE_URL'),
   POSTGRES_USER: getEnvVar('POSTGRES_USER', 'postgres'),
   POSTGRES_PASSWORD: getEnvVar('POSTGRES_PASSWORD', 'postgres'),
   POSTGRES_DB: getEnvVar('POSTGRES_DB', 'ng_demo_db'),
   POSTGRES_PORT: getEnvVar('POSTGRES_PORT', '5432'),
   
-  // Keycloak Configuration
   KEYCLOAK_AUTH_SERVER_URL: getEnvVar('KEYCLOAK_AUTH_SERVER_URL', 'http://localhost:8080'),
   KEYCLOAK_REALM: getEnvVar('KEYCLOAK_REALM', 'ng-demo'),
   KEYCLOAK_CLIENT_ID: getEnvVar('KEYCLOAK_CLIENT_ID', 'ng-demo-client'),
@@ -91,16 +86,13 @@ export const ENV = {
   KEYCLOAK_ADMIN: getEnvVar('KEYCLOAK_ADMIN', 'admin'),
   KEYCLOAK_ADMIN_PASSWORD: getEnvVar('KEYCLOAK_ADMIN_PASSWORD', 'admin'),
   
-  // Keycloak Database Configuration
   KEYCLOAK_DB_NAME: getEnvVar('KEYCLOAK_DB_NAME', 'keycloak'),
   KEYCLOAK_DB_USER: getEnvVar('KEYCLOAK_DB_USER', 'keycloak'),
   KEYCLOAK_DB_PASSWORD: getEnvVar('KEYCLOAK_DB_PASSWORD', 'keycloak'),
   KEYCLOAK_DB_PORT: getEnvVar('KEYCLOAK_DB_PORT', '5433'),
   
-  // Logging Configuration
   KC_LOG_LEVEL: getEnvVar('KC_LOG_LEVEL', 'INFO'),
   
-  // Health Check Configuration
   HEALTH_CHECK_TIMEOUT: parseInt(getEnvVar('HEALTH_CHECK_TIMEOUT', '2000')),
   HEALTH_CHECK_MAX_RETRIES: parseInt(getEnvVar('HEALTH_CHECK_MAX_RETRIES', '30')),
 }
@@ -263,7 +255,6 @@ export function createErrorHandler(pids: (number | undefined)[]): (component: st
     ╚═══════════════════════════════════════════════════════════╝
 ${COLORS.NC}`)
     
-    // Cleanup any running processes
     for (const pid of pids) {
       if (pid) {
         try {
@@ -363,7 +354,6 @@ ${COLORS.NC}`)
     
     const logs = execSync(`docker logs --tail ${lines} ${containerName}`, { encoding: 'utf8' })
     
-    // Color-code different log levels
     const coloredLogs = logs
       .split('\n')
       .map(line => {
@@ -396,7 +386,6 @@ export function startContinuousLogMonitoring(containerName: string): () => void 
   
   const startMonitoring = () => {
     try {
-      // Use docker logs -f to follow logs in real-time
       logProcess = spawn('docker', ['logs', '-f', '--tail', '10', containerName], {
         stdio: ['ignore', 'pipe', 'pipe']
       })
@@ -447,7 +436,6 @@ export function startContinuousLogMonitoring(containerName: string): () => void 
   
   startMonitoring()
   
-  // Return cleanup function
   return () => {
     isMonitoring = false
     if (logProcess) {

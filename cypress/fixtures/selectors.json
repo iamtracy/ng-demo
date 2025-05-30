@@ -1,0 +1,40 @@
+{
+  "auth": {
+    "usernameInput": "[data-cy=username-input]",
+    "passwordInput": "[data-cy=password-input]",
+    "loginButton": "[data-cy=login-button]",
+    "logoutButton": "[data-cy=logout-button]",
+    "errorMessage": "[data-cy=error-message]"
+  },
+  "messages": {
+    "messageList": "[data-cy=message-list]",
+    "messageItem": "[data-cy=message-item]",
+    "createButton": "[data-cy=create-message-button]",
+    "messageInput": "[data-cy=message-input]",
+    "submitButton": "[data-cy=submit-message-button]",
+    "editButton": "[data-cy=edit-message-button]",
+    "deleteButton": "[data-cy=delete-message-button]",
+    "cancelButton": "[data-cy=cancel-button]"
+  },
+  "navigation": {
+    "homeLink": "[data-cy=nav-home]",
+    "messagesLink": "[data-cy=nav-messages]",
+    "adminLink": "[data-cy=nav-admin]",
+    "profileLink": "[data-cy=nav-profile]",
+    "userMenu": "[data-cy=user-menu]"
+  },
+  "admin": {
+    "userList": "[data-cy=admin-user-list]",
+    "userItem": "[data-cy=admin-user-item]",
+    "deleteUserButton": "[data-cy=delete-user-button]",
+    "allMessagesView": "[data-cy=all-messages-view]"
+  },
+  "common": {
+    "loadingSpinner": "[data-cy=loading-spinner]",
+    "confirmDialog": "[data-cy=confirm-dialog]",
+    "confirmButton": "[data-cy=confirm-button]",
+    "cancelButton": "[data-cy=cancel-button]",
+    "successMessage": "[data-cy=success-message]",
+    "errorMessage": "[data-cy=error-message]"
+  }
+}

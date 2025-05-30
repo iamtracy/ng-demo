@@ -56,6 +56,7 @@
   ],
   "users": [
     {
+      "id": "zaphod-beeblebrox-id",
       "username": "zaphod",
       "enabled": true,
       "emailVerified": true,
@@ -75,6 +76,7 @@
       ]
     },
     {
+      "id": "arthur-dent-id",
       "username": "arthur",
       "enabled": true,
       "emailVerified": true,
@@ -93,6 +95,7 @@
       ]
     },
     {
+      "id": "trillian-astra-id",
       "username": "trillian",
       "enabled": true,
       "emailVerified": true,

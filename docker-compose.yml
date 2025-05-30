@@ -88,7 +88,7 @@ services:
       - start-dev
       - --import-realm
     volumes:
-      - ./keycloak/realm-config:/opt/keycloak/data/import
+      - ./keycloak/realm-config/ng-demo-dev.json:/opt/keycloak/data/import/ng-demo-dev.json
     depends_on:
       keycloak-db:
         condition: service_healthy

@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms'
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms'
+import { NotificationService } from '@app/shared'
 import Keycloak from 'keycloak-js'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzInputModule } from 'ng-zorro-antd/input'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { map, Observable, of, tap } from 'rxjs'
+import { catchError, map, Observable, of, tap } from 'rxjs'
 
 import { MessageDto } from '../api'
 
@@ -30,13 +31,36 @@ interface Message extends MessageDto {
     NzButtonModule,
     NzIconModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
   ],
   templateUrl: './home.component.html',
   styles: [
     `
       .form-section {
         max-width: 350px;
+      }
+      
+      .author-name {
+        font-weight: 500;
+        color: #1890ff;
+      }
+      
+      .editable-cell {
+        cursor: pointer;
+      }
+      
+      .editable-cell:hover .edit-icon {
+        opacity: 1;
+      }
+      
+      .edit-icon {
+        opacity: 0.5;
+        margin-left: 8px;
+        transition: opacity 0.2s;
+      }
+      
+      .not-owner {
+        cursor: default;
       }
     `
   ]
@@ -52,9 +76,18 @@ export class HomeComponent implements OnInit {
   currentlyEditing: Message | null = null
 
   form = new FormGroup({
-    message: new FormControl('')
+    message: new FormControl('', [Validators.required]),
   })
 
+  notificationService = inject(NotificationService)
+
+  get isAdmin(): boolean {
+    return this.keycloak.tokenParsed?.realm_access?.roles?.includes('admin') ?? false
+  }
+
+  get shouldShowAuthorColumn(): boolean {
+    return this.isAdmin
+  }
 
   ngOnInit(): void {
     this.currentUserId = this.keycloak.tokenParsed?.sub ?? ''
@@ -73,7 +106,15 @@ export class HomeComponent implements OnInit {
   }
 
   deleteGreeting(id: number): void {
-    this.homeService.deleteGreeting(id).subscribe()
+    this.homeService.deleteGreeting(id).pipe(
+      tap(() => {
+        this.notificationService.deleteSuccess('Message')
+      }),
+      catchError((error) => {
+        this.notificationService.deleteError('Message')
+        return of(error)
+      })
+    ).subscribe()
   }
 
   onSubmit(): void {
@@ -81,7 +122,14 @@ export class HomeComponent implements OnInit {
     
     this.homeService.createGreeting(this.form.value.message)
     .pipe(
-      tap(() => this.form.reset())
+      tap(() => {
+        this.form.reset()
+        this.notificationService.saveSuccess('Message')
+      }),
+      catchError((error) => {
+        this.notificationService.saveError('Message')
+        return of(error)
+      })
     )
     .subscribe()
   }
@@ -108,12 +156,24 @@ export class HomeComponent implements OnInit {
     if (!this.canEdit(element)) return
 
     try {
-      this.homeService.updateGreeting(element.id, element.editMessage!).subscribe()
+      this.homeService.updateGreeting(element.id, element.editMessage!).pipe(
+        tap(() => {
+          element.message = element.editMessage!
+          element.editing = false
+          this.currentlyEditing = null
+          this.notificationService.updateSuccess('Message')
+        }),
+        catchError((error) => {
+          this.notificationService.updateError('Message')
+          return of(error)
+        })
+      ).subscribe()
       element.message = element.editMessage!
       element.editing = false
       this.currentlyEditing = null
     } catch (error) {
       console.error('Error saving message:', error)
+      this.notificationService.updateError('Message')
     }
   }
 

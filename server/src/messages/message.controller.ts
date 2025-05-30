@@ -31,14 +31,31 @@ export class MessageController {
 
   constructor(private readonly messageService: MessageService) {}
 
-  private toMessageDto(message: Message): MessageDto {
-    return {
+  private toMessageDto(
+    message: Message & {
+      user?: {
+        username: string
+        firstName: string | null
+        lastName: string | null
+      }
+    },
+    isAdmin = false,
+  ): MessageDto {
+    const dto: MessageDto = {
       id: message.id,
       message: message.message,
       userId: message.userId,
       createdAt: message.createdAt,
       updatedAt: message.updatedAt,
     }
+
+    if (isAdmin && message.user) {
+      dto.username = message.user.username
+      dto.firstName = message.user.firstName ?? undefined
+      dto.lastName = message.user.lastName ?? undefined
+    }
+
+    return dto
   }
 
   @Get()
@@ -58,7 +75,9 @@ export class MessageController {
 
     try {
       const messages = await this.messageService.messages(user, isAdmin)
-      const result = messages.map((message) => this.toMessageDto(message))
+      const result = messages.map((message) =>
+        this.toMessageDto(message, isAdmin),
+      )
 
       this.logger.log(
         `GET /messages - Successfully returned ${String(result.length)} messages for user ${user.preferred_username ?? 'unknown'}`,
