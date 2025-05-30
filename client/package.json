@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "generate": "openapi --input http://localhost:3000/api/docs-json --output ./src/app/api --client angular",
-    "watch-api": "nodemon --watch ../server/src -e ts,html,css --exec \"curl -s http://localhost:3000/api/docs-json > /dev/null && npm run generate\"",
+    "generate-api": "curl -s http://localhost:3000/api/docs-json > /dev/null && npm run generate",
+    "watch-api": "nodemon --config nodemon.json --exec \"curl -s http://localhost:3000/api/docs-json > /dev/null && npm run generate\"",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

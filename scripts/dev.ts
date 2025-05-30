@@ -55,24 +55,6 @@ async function start(): Promise<void> {
       prefix: 'SERVER', 
       prefixColor: 'HYPERINTELLIGENT' 
     })
-    
-    await runCommand('npm', ['run', 'prisma:generate'], {
-      cwd: 'server', 
-      prefix: 'SERVER', 
-      prefixColor: 'HYPERINTELLIGENT' 
-    })
-    
-    await runCommand('npm', ['run', 'prisma:migrate'], {
-      cwd: 'server', 
-      prefix: 'SERVER', 
-      prefixColor: 'HYPERINTELLIGENT' 
-    })
-
-    await runCommand('npm', ['run', 'seed'], {
-      cwd: 'server', 
-      prefix: 'DEEP THOUGHT', 
-      prefixColor: 'TOWEL' 
-    })
 
     runCommand('npm', ['run', 'start'], {
       cwd: 'server',
@@ -89,14 +71,14 @@ async function start(): Promise<void> {
   // =============================================================================
   // API WATCHER SETUP
   // =============================================================================
-  runCommand('npm', ['run', 'watch-api'], {
-    cwd: 'client',
-    prefix: 'BABEL FISH',
-    prefixColor: 'CUP_OF_TEA',
-    capturePid: pid => (watcherPid = pid),
-  }).catch(err => {
-    console.warn(`${COLORS.SARCASM}[⚠️] API watcher failed, but continuing anyway: ${err.message}${COLORS.NC}`)
-  })
+  // runCommand('npm', ['run', 'watch-api'], {
+  //   cwd: 'client',
+  //   prefix: 'BABEL FISH',
+  //   prefixColor: 'CUP_OF_TEA',
+  //   capturePid: pid => (watcherPid = pid),
+  // }).catch(err => {
+  //   console.warn(`${COLORS.SARCASM}[⚠️] API watcher failed, but continuing anyway: ${err.message}${COLORS.NC}`)
+  // })
 
   console.log(`${COLORS.TOWEL}[✨] Status: All Systems Go (unless the Vogons are involved)${COLORS.NC}`)
   console.log(`${COLORS.SARCASM}[📡] Monitoring transmissions from both ends of the improbability curve...${COLORS.NC}`)

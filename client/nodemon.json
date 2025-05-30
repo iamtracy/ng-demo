@@ -1,0 +1,11 @@
+{
+  "watch": [
+    "../server/src/**/*.controller.ts",
+    "../server/src/**/*.dto.ts"
+  ],
+  "ext": "ts",
+  "delay": 3000,
+  "env": {
+    "NODE_ENV": "development"
+  }
+} 

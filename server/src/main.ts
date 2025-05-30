@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv'
 import { Response } from 'express'
 
 import { AppModule } from './app.module'
-import { initializeDatabase } from './utils/database.utils'
+import { initializeDatabase } from './utils'
 
 dotenv.config()
 

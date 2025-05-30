@@ -1,35 +1,62 @@
 import { execSync } from 'child_process'
-import * as path from 'path'
 
 import { Logger } from '@nestjs/common'
+
+import { getWorkingDirectory, isProduction, isTest } from './common.utils'
+
 const logger = new Logger('DatabaseUtils')
 
-export function initializeDatabase(): Promise<void> {
-  const isProduction = process.env.NODE_ENV === 'production'
-  const isTest = process.env.NODE_ENV === 'test'
+function generatePrismaClient(workingDir: string): void {
+  logger.log('🔧 Generating Prisma client...')
+  execSync('npx prisma generate', {
+    stdio: 'inherit',
+    cwd: workingDir,
+    env: process.env,
+  })
+  logger.log('✅ Prisma client generated')
+}
 
-  const workingDir =
-    isProduction || isTest ? '/app' : path.resolve(__dirname, '../../../')
+function runDatabaseMigrations(workingDir: string): void {
+  logger.log('📦 Running database migrations...')
+  if (isProduction() || isTest()) {
+    execSync('npx prisma migrate deploy', {
+      stdio: 'inherit',
+      cwd: workingDir,
+      env: process.env,
+    })
+  } else {
+    execSync('npx prisma migrate dev', {
+      stdio: 'inherit',
+      cwd: workingDir,
+      env: process.env,
+    })
+  }
+  logger.log('✅ Database migrations completed')
+}
+
+function seedDatabase(workingDir: string): void {
+  if (!isProduction()) {
+    logger.log('🌱 Seeding database...')
+    execSync('npm run seed', {
+      stdio: 'inherit',
+      cwd: workingDir,
+      env: process.env,
+    })
+    logger.log('✅ Database seeded')
+  }
+}
+
+export function initializeDatabase(): Promise<void> {
+  const workingDir = getWorkingDirectory()
 
   try {
     logger.log('🗄️ Initializing database...')
     logger.log(`📁 Working directory: ${workingDir}`)
-    logger.log('📦 Running database migrations...')
 
-    if (isProduction || isTest) {
-      execSync('npx prisma migrate deploy', {
-        stdio: 'inherit',
-        cwd: workingDir,
-        env: process.env,
-      })
-    } else {
-      execSync('npx prisma migrate dev', {
-        stdio: 'inherit',
-        cwd: workingDir,
-        env: process.env,
-      })
-    }
-    logger.log('✅ Database migrations completed')
+    generatePrismaClient(workingDir)
+    runDatabaseMigrations(workingDir)
+    seedDatabase(workingDir)
+
     logger.log('🎉 Database initialization successful!')
     return Promise.resolve()
   } catch (error) {
