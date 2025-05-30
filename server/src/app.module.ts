@@ -61,7 +61,8 @@ const KEYCLOAK_CONFIG = {
               transport: {
                 target: 'pino-pretty',
                 options: {
-                  singleLine: true,
+                  colorize: true,
+                  singleLine: false,
                 },
               },
             }),
