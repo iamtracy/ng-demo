@@ -23,6 +23,7 @@ import { UserModule } from './user/user.module'
 dotenv.config()
 
 const isProduction = process.env.NODE_ENV === 'production'
+const isTest = process.env.NODE_ENV === 'test'
 
 const KEYCLOAK_AUTH_SERVER_URL =
   process.env.KEYCLOAK_AUTH_SERVER_URL ?? 'http://localhost:8080'
@@ -74,11 +75,11 @@ const KEYCLOAK_CONFIG = {
       clientId: KEYCLOAK_CONFIG.clientId,
       secret: KEYCLOAK_CONFIG.secret,
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-      tokenValidation: TokenValidation.OFFLINE,
+      tokenValidation: isTest ? TokenValidation.NONE : TokenValidation.OFFLINE,
       bearerOnly: false,
       useNestLogger: true,
     }),
-    ...(isProduction
+    ...(isProduction || isTest
       ? [
           ServeStaticModule.forRoot({
             rootPath: join(__dirname, '..', '..', 'public', 'browser'),

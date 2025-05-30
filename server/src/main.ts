@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv'
 import { Response } from 'express'
 
 import { AppModule } from './app.module'
+import { initializeDatabase } from './utils/database.utils'
 
 dotenv.config()
 
@@ -118,6 +119,8 @@ function createServerBanner(port: string): string {
 }
 
 async function bootstrap(): Promise<void> {
+  await initializeDatabase()
+
   const app = await NestFactory.create(AppModule, { bufferLogs: true })
   const port = process.env.PORT ?? '3000'
 

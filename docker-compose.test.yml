@@ -1,0 +1,199 @@
+# =============================================================================
+# 🧪 Testing Docker Compose Configuration
+# =============================================================================
+# This file contains all services needed for running E2E tests in isolation
+
+services:
+  # ===========================================================================
+  # 🗄️ Test Database (PostgreSQL)
+  # ===========================================================================
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: ng-demo-postgres-test
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ng_demo_db}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - test-network
+
+  # ===========================================================================
+  # 🔐 Keycloak Test Database (PostgreSQL)
+  # ===========================================================================
+  keycloak-db-test:
+    image: postgres:16-alpine
+    container_name: keycloak-postgres-test
+    ports:
+      - "${KEYCLOAK_DB_PORT:-5433}:5432"
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME:-keycloak}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER:-keycloak}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+    volumes:
+      - keycloak_postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER:-keycloak}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - test-network
+
+  # ===========================================================================
+  # 🔐 Keycloak Test Server
+  # ===========================================================================
+  keycloak-test:
+    image: quay.io/keycloak/keycloak:26.2.4
+    container_name: keycloak-test
+    environment:
+      # Database Configuration
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db-test:5432/${KEYCLOAK_DB_NAME:-keycloak}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER:-keycloak}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+      
+      # Admin Configuration
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      
+      # Test Configuration - optimized for speed
+      KC_HEALTH_ENABLED: true
+      
+      # Test-optimized settings
+      KC_DEV: "true"
+      KC_FEATURES: "preview"
+      KC_LOG_LEVEL: "WARN"
+      KEYCLOAK_LOGLEVEL: "WARN"
+      
+      # Hostname Configuration (v2 - modern) - Fixed URLs
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_ADMIN: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8080}:8080"
+      - "9000:9000"  # Management port for health checks
+    command:
+      - start-dev
+      - --import-realm
+    volumes:
+      - ./keycloak/realm-config/ng-demo-test.json:/opt/keycloak/data/import/ng-demo-test.json
+    depends_on:
+      keycloak-db-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - test-network
+
+  # ===========================================================================
+  # 🚀 Application Test Container
+  # ===========================================================================
+  app-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ng-demo-app-test
+    ports:
+      - "3000:3000"
+    environment:
+      # Application Configuration
+      - NODE_ENV=test
+      - PORT=3000
+      
+      # Database Configuration - hardcoded for test environment
+      - DATABASE_URL=postgresql://postgres:postgres@postgres-test:5432/ng_demo_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ng_demo_db
+      
+      # Keycloak Configuration - hardcoded for test environment
+      - KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
+      - KEYCLOAK_REALM=ng-demo
+      - KEYCLOAK_CLIENT_ID=ng-demo-client
+      - KEYCLOAK_CLIENT_SECRET=ng-demo-secret
+      
+      # Ensure Prisma uses the correct database URL
+      - PRISMA_DATABASE_URL=postgresql://postgres:postgres@postgres-test:5432/ng_demo_db
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      keycloak-test:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/docs-json"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    networks:
+      - test-network
+
+  # ===========================================================================
+  # 🧪 Cypress Test Runner
+  # ===========================================================================
+  cypress-test:
+    image: cypress/included:latest
+    container_name: ng-demo-cypress-test
+    working_dir: /e2e
+    volumes:
+      - .:/e2e
+      - /dev/shm:/dev/shm
+    environment:
+      - CYPRESS_BASE_URL=http://localhost:3000
+      - CYPRESS_API_URL=http://localhost:3000
+      - CYPRESS_KEYCLOAK_URL=http://localhost:8080
+      - CYPRESS_KEYCLOAK_INTERNAL_URL=http://localhost:8080
+      
+      - CYPRESS_VIDEO=true
+      - CYPRESS_SCREENSHOTS=true
+      - CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY:-}
+      - CI=true
+      
+      - DEBUG=cypress:cli,cypress:run
+    depends_on:
+      app-test:
+        condition: service_healthy
+      keycloak-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    command: 
+      - cypress
+      - run
+      - --spec
+      - cypress/e2e/**/*.cy.ts
+      - --browser
+      - electron
+      - --headless
+      - --config
+      - baseUrl=http://host.docker.internal:3000
+      - --reporter
+      - spec
+      - --reporter-options
+      - verbose=true
+
+# =============================================================================
+# 📦 Test Storage Volumes
+# =============================================================================
+volumes:
+  postgres_test_data:
+  keycloak_postgres_test_data:
+
+# =============================================================================
+# 🌐 Test Network Configuration
+# =============================================================================
+networks:
+  test-network:
+    driver: bridge 

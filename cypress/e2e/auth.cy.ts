@@ -10,26 +10,26 @@ describe('Authentication', () => {
   })
 
   it('should login as regular user via UI flow', () => {
-    cy.login('user')
+    cy.login('user1')
     
     cy.get('[data-cy="admin-menu-item"]').should('not.exist')
     cy.get('[data-cy="home-menu-item"]').should('be.visible')
   })
 
   it('should logout successfully', () => {
-    cy.login('user')
+    cy.login('user1')
     
     cy.get('[data-cy="logout-button"]').click()
     
-    const keycloakUrl = 'http://localhost:8080'
+    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
     
     cy.origin(keycloakUrl, () => {
-      cy.url().should('include', 'localhost:8080')
+      cy.url().should('include', 'keycloak')
     })
   })
 
   it('should handle invalid credentials', () => {
-    const keycloakUrl = 'http://localhost:8080'
+    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
     const baseUrl = Cypress.config('baseUrl') || 'http://localhost:4200'
     const redirectUri = encodeURIComponent(`${baseUrl}/`)
     

@@ -39,6 +39,7 @@ export class HomeService {
       message
     }).pipe(
       map((response: MessageDto) => [response, ...this._messages$.value].sort((a: MessageDto, b: MessageDto) => b.id - a.id)),
+      tap((response: MessageDto[]) => console.log(response)),
       tap((response: MessageDto[]) => this._messages$.next(response))
     )
   }

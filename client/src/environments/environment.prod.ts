@@ -5,5 +5,5 @@ export const environment = {
     url: 'http://localhost:8080',
     realm: 'ng-demo',
     clientId: 'ng-demo-client'
-  }
+  },
 }

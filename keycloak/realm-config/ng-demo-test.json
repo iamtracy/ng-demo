@@ -1,0 +1,113 @@
+{
+  "realm": "ng-demo",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "ng-demo-client",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://host.docker.internal:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://host.docker.internal:3000"
+      ],
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Regular user role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "user"
+  ],
+  "users": [
+    {
+      "id": "zaphod-beeblebrox-id",
+      "username": "zaphod",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zaphod",
+      "lastName": "Beeblebrox",
+      "email": "president@galaxy.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "hoopy123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "admin",
+        "user"
+      ]
+    },
+    {
+      "id": "arthur-dent-id",
+      "username": "arthur",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Arthur",
+      "lastName": "Dent",
+      "email": "arthur@earth.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "hoopy123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    },
+    {
+      "id": "trillian-astra-id",
+      "username": "trillian",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Tricia",
+      "lastName": "McMillan",
+      "email": "trillian@heart-of-gold.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "hoopy123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ]
+}

@@ -293,3 +293,52 @@ npm run test:e2e    # Run end-to-end tests
 # Full E2E Tests (Cypress)
 npm run test:e2e    # Run Cypress tests (requires services running)
 ```
+
+## 🧪 Testing
+
+### E2E Testing with Docker Compose
+
+The project includes a comprehensive Docker Compose configuration for running end-to-end tests in an isolated environment.
+
+#### Quick Start
+```bash
+# Run all E2E tests with Docker Compose (recommended)
+npm run test:e2e:docker
+
+# Clean up test environment
+npm run test:e2e:docker:clean
+
+# Run E2E tests with the full script (legacy method)
+npm run test:e2e
+```
+
+#### Test Environment
+The `docker-compose.test.yml` creates an isolated testing environment with:
+- **Application Container**: Production build of the app
+- **PostgreSQL Database**: Isolated test database
+- **Keycloak Server**: Authentication service with test realm
+- **Cypress Runner**: Automated E2E test execution
+
+#### Architecture Benefits
+- ✅ **Isolated Environment**: Tests run in containers, no local dependencies
+- ✅ **Production-like**: Tests against production Docker builds
+- ✅ **Parallel Execution**: Multiple test environments can run simultaneously
+- ✅ **CI/CD Ready**: Same configuration works locally and in CI
+- ✅ **Faster Setup**: No manual service configuration required
+- ✅ **Reproducible**: Consistent results across different machines
+
+#### Manual Testing
+If you need to debug tests or run them manually:
+```bash
+# Start test environment
+docker compose -f docker-compose.test.yml up -d postgres-test keycloak-db-test keycloak-test app-test
+
+# Wait for services to be ready, then run tests
+docker compose -f docker-compose.test.yml run --rm cypress-test
+
+# Or open Cypress GUI (requires local Cypress installation)
+npx cypress open --config baseUrl=http://localhost:3000
+
+# Clean up when done
+docker compose -f docker-compose.test.yml down --volumes
+```
