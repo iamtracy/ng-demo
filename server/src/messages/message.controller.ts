@@ -49,9 +49,6 @@ export class MessageController {
       updatedAt: message.updatedAt,
     }
 
-    console.log('!!!message', message)
-    console.log('!!!isAdmin', isAdmin)
-
     if (isAdmin && message.user) {
       dto.username = message.user.username
       dto.firstName = message.user.firstName ?? undefined
