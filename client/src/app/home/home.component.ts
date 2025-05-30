@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
-import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms'
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms'
 import Keycloak from 'keycloak-js'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzInputModule } from 'ng-zorro-antd/input'
+import { NzNotificationService } from 'ng-zorro-antd/notification'
 import { NzTableModule } from 'ng-zorro-antd/table'
-import { map, Observable, of, tap } from 'rxjs'
+import { catchError, map, Observable, of, tap } from 'rxjs'
 
 import { MessageDto } from '../api'
 
@@ -33,7 +34,7 @@ interface Message extends MessageDto {
     NzButtonModule,
     NzIconModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
   ],
   templateUrl: './home.component.html',
   styles: [
@@ -78,8 +79,10 @@ export class HomeComponent implements OnInit {
   currentlyEditing: Message | null = null
 
   form = new FormGroup({
-    message: new FormControl('')
+    message: new FormControl('', [Validators.required]),
   })
+
+  notificationService = inject(NzNotificationService)
 
   get isAdmin(): boolean {
     return this.keycloak.tokenParsed?.realm_access?.roles?.includes('admin') ?? false
@@ -106,7 +109,15 @@ export class HomeComponent implements OnInit {
   }
 
   deleteGreeting(id: number): void {
-    this.homeService.deleteGreeting(id).subscribe()
+    this.homeService.deleteGreeting(id).pipe(
+      tap(() => {
+        this.notificationService.success('Success', 'Message deleted successfully')
+      }),
+      catchError((error) => {
+        this.notificationService.error('Error', 'Failed to delete message')
+        return of(error)
+      })
+    ).subscribe()
   }
 
   onSubmit(): void {
@@ -114,7 +125,14 @@ export class HomeComponent implements OnInit {
     
     this.homeService.createGreeting(this.form.value.message)
     .pipe(
-      tap(() => this.form.reset())
+      tap(() => {
+        this.form.reset()
+        this.notificationService.success('Success', 'Message created successfully')
+      }),
+      catchError((error) => {
+        this.notificationService.error('Error', 'Failed to create message')
+        return of(error)
+      })
     )
     .subscribe()
   }
@@ -141,12 +159,24 @@ export class HomeComponent implements OnInit {
     if (!this.canEdit(element)) return
 
     try {
-      this.homeService.updateGreeting(element.id, element.editMessage!).subscribe()
+      this.homeService.updateGreeting(element.id, element.editMessage!).pipe(
+        tap(() => {
+          element.message = element.editMessage!
+          element.editing = false
+          this.currentlyEditing = null
+          this.notificationService.success('Success', 'Message updated successfully')
+        }),
+        catchError((error) => {
+          this.notificationService.error('Error', 'Failed to update message')
+          return of(error)
+        })
+      ).subscribe()
       element.message = element.editMessage!
       element.editing = false
       this.currentlyEditing = null
     } catch (error) {
       console.error('Error saving message:', error)
+      this.notificationService.error('Error', 'Failed to update message')
     }
   }
 

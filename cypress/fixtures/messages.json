@@ -1,44 +1,35 @@
 {
   "admin": [
     {
-      "text": "Welcome to the Galaxy! I'm your President, Zaphod Beeblebrox!",
-      "category": "announcement"
+      "message": "Welcome to the Galaxy! I'm your President, Zaphod Beeblebrox!"
     },
     {
-      "text": "Remember: Don't Panic, and always know where your towel is!",
-      "category": "advice"
+      "message": "Remember: Don't Panic, and always know where your towel is!"
     },
     {
-      "text": "The answer to life, the universe, and everything is... 42!",
-      "category": "wisdom"
+      "message": "The answer to life, the universe, and everything is... 42!"
     }
   ],
   "user1": [
     {
-      "text": "Hello, I'm Arthur Dent. My planet was recently demolished.",
-      "category": "introduction"
+      "message": "Hello, I'm Arthur Dent. My planet was recently demolished."
     },
     {
-      "text": "Has anyone seen my house? It was on Earth before the bypass.",
-      "category": "question"
+      "message": "Has anyone seen my house? It was on Earth before the bypass."
     },
     {
-      "text": "I never did get the hang of Thursdays...",
-      "category": "observation"
+      "message": "I never did get the hang of Thursdays..."
     }
   ],
   "user2": [
     {
-      "text": "Greetings from Trillian! Exploring the galaxy one planet at a time.",
-      "category": "introduction"
+      "message": "Greetings from Trillian! Exploring the galaxy one planet at a time."
     },
     {
-      "text": "The probability calculations for this message are quite fascinating.",
-      "category": "science"
+      "message": "The probability calculations for this message are quite fascinating."
     },
     {
-      "text": "Sometimes I miss Earth, but the universe is so much bigger!",
-      "category": "reflection"
+      "message": "Sometimes I miss Earth, but the universe is so much bigger!"
     }
   ]
 } 

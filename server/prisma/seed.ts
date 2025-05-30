@@ -11,7 +11,7 @@ const prisma = new PrismaClient({
 })
 
 type SeedUser = Partial<User>
-type SeedMessage = Partial<Message>
+type SeedMessagesData = Record<string, Pick<Message, 'message'>[]>
 
 async function main(): Promise<void> {
   console.log('🌌 Seeding users from JSON...')
@@ -22,7 +22,7 @@ async function main(): Promise<void> {
   const createdUsers = await Promise.all(userPromises)
 
   console.log('🌌 Seeding messages from JSON...')
-  await createMessagesForUsers(messages as SeedMessage, createdUsers)
+  await createMessagesForUsers(messages as SeedMessagesData, createdUsers)
 
   console.log('✨ Seeding complete!')
 }
@@ -52,7 +52,7 @@ async function createUser(userData: SeedUser): Promise<User> {
 }
 
 async function createMessagesForUsers(
-  messagesData: SeedMessage,
+  messagesData: SeedMessagesData,
   createdUsers: User[],
 ): Promise<void> {
   console.log('🌌 Seeding messages for users...')
@@ -83,16 +83,16 @@ async function createMessagesForUsers(
       continue
     }
 
-    const messagePromises: Promise<Message>[] = (
-      userMessages as unknown as SeedMessage[]
-    ).map(async (messageData: SeedMessage) => {
-      return await prisma.message.create({
-        data: {
-          message: messageData.message ?? '',
-          userId,
-        },
-      })
-    })
+    const messagePromises: Promise<Message>[] = userMessages.map(
+      async ({ message }) => {
+        return await prisma.message.create({
+          data: {
+            message,
+            userId,
+          },
+        })
+      },
+    )
 
     allMessagePromises.push(...messagePromises)
   }
