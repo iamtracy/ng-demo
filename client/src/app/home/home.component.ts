@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common'
 import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ElementRef, inject } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms'
+import { NotificationService } from '@app/shared'
 import Keycloak from 'keycloak-js'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzDividerModule } from 'ng-zorro-antd/divider'
 import { NzIconModule } from 'ng-zorro-antd/icon'
 import { NzInputModule } from 'ng-zorro-antd/input'
-import { NzNotificationService } from 'ng-zorro-antd/notification'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { catchError, map, Observable, of, tap } from 'rxjs'
 
@@ -17,9 +17,6 @@ import { HomeService } from './home.service'
 interface Message extends MessageDto {
   editing?: boolean
   editMessage?: string
-  username?: string
-  firstName?: string
-  lastName?: string
 }
 
 @Component({
@@ -82,7 +79,7 @@ export class HomeComponent implements OnInit {
     message: new FormControl('', [Validators.required]),
   })
 
-  notificationService = inject(NzNotificationService)
+  notificationService = inject(NotificationService)
 
   get isAdmin(): boolean {
     return this.keycloak.tokenParsed?.realm_access?.roles?.includes('admin') ?? false
@@ -111,10 +108,10 @@ export class HomeComponent implements OnInit {
   deleteGreeting(id: number): void {
     this.homeService.deleteGreeting(id).pipe(
       tap(() => {
-        this.notificationService.success('Success', 'Message deleted successfully')
+        this.notificationService.deleteSuccess('Message')
       }),
       catchError((error) => {
-        this.notificationService.error('Error', 'Failed to delete message')
+        this.notificationService.deleteError('Message')
         return of(error)
       })
     ).subscribe()
@@ -127,10 +124,10 @@ export class HomeComponent implements OnInit {
     .pipe(
       tap(() => {
         this.form.reset()
-        this.notificationService.success('Success', 'Message created successfully')
+        this.notificationService.saveSuccess('Message')
       }),
       catchError((error) => {
-        this.notificationService.error('Error', 'Failed to create message')
+        this.notificationService.saveError('Message')
         return of(error)
       })
     )
@@ -164,10 +161,10 @@ export class HomeComponent implements OnInit {
           element.message = element.editMessage!
           element.editing = false
           this.currentlyEditing = null
-          this.notificationService.success('Success', 'Message updated successfully')
+          this.notificationService.updateSuccess('Message')
         }),
         catchError((error) => {
-          this.notificationService.error('Error', 'Failed to update message')
+          this.notificationService.updateError('Message')
           return of(error)
         })
       ).subscribe()
@@ -176,7 +173,7 @@ export class HomeComponent implements OnInit {
       this.currentlyEditing = null
     } catch (error) {
       console.error('Error saving message:', error)
-      this.notificationService.error('Error', 'Failed to update message')
+      this.notificationService.updateError('Message')
     }
   }
 
