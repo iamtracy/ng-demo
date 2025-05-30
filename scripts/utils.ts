@@ -192,7 +192,7 @@ export async function startDockerServices(): Promise<void> {
 
 export async function waitForServer(): Promise<void> {
   const serverUrl = `http://localhost:${ENV.PORT}/api/docs-json`
-  console.log(`${COLORS.SARCASM}[⏳] Waiting for server to finish calculating Pi at ${serverUrl}...${COLORS.NC}`)
+  console.log(`${COLORS.SARCASM}[⏳] Waiting for server to finish initializing at ${serverUrl}...${COLORS.NC}`)
   
   let retries = 0
   const maxRetries = ENV.HEALTH_CHECK_MAX_RETRIES
@@ -203,7 +203,9 @@ export async function waitForServer(): Promise<void> {
       break
     } catch {
       retries++
-      console.log(`${COLORS.SARCASM}[⌛] Still calculating... (${COLORS.TOWEL}${Math.round((retries / maxRetries) * 100)}%${COLORS.SARCASM} complete) - Attempt ${retries}/${maxRetries}${COLORS.NC}`)
+      const progress = Math.round((retries / maxRetries) * 100)
+      const dots = '.'.repeat((retries % 4) + 1)
+      console.log(`${COLORS.CUP_OF_TEA}[⌛] Server starting${dots} ${COLORS.TOWEL}${progress}%${COLORS.CUP_OF_TEA} ready${COLORS.NC}`)
       
       if (retries >= maxRetries) {
         console.error(`${COLORS.PANIC}[💥] Server failed to start after ${maxRetries} attempts${COLORS.NC}`)
