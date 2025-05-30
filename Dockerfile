@@ -7,7 +7,6 @@ RUN npm run build -- --configuration=production
 
 FROM node:22-slim AS server-builder
 WORKDIR /app/server
-# Install OpenSSL for Prisma
 RUN apt-get update -y && apt-get install -y openssl
 COPY server/package*.json ./
 RUN npm ci --legacy-peer-deps
@@ -18,7 +17,6 @@ RUN npx prisma generate && \
 FROM node:22-slim AS production
 WORKDIR /app
 
-# Install OpenSSL for Prisma and curl for health checks
 RUN apt-get update -y && apt-get install -y openssl curl
 
 COPY server/package*.json ./
@@ -30,12 +28,15 @@ COPY --from=server-builder /app/server/node_modules/.prisma ./node_modules/.pris
 COPY --from=client-builder /app/client/dist/ng-demo/browser ./public/browser
 
 RUN addgroup --system appgroup && \
-    adduser --system appuser --ingroup appgroup && \
-    chown -R appuser:appgroup /app
+    adduser --system appuser --ingroup appgroup --home /home/appuser && \
+    mkdir -p /home/appuser/.npm && \
+    chown -R appuser:appgroup /app /home/appuser
+
 USER appuser
 
 ENV NODE_ENV=production \
-    PORT=3000
+    PORT=3000 \
+    HOME=/home/appuser
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
     CMD curl --fail http://localhost:${PORT}/api/docs-json || exit 1

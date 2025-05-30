@@ -7,10 +7,7 @@ import { MenuComponent } from './menu/menu.component'
   selector: 'app-root',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    RouterOutlet,
-    MenuComponent,
-  ],
+  imports: [RouterOutlet, MenuComponent],
   template: `
     <app-menu></app-menu>
     <main class="content">

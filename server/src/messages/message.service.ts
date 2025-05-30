@@ -82,6 +82,15 @@ export class MessageService {
 
       const message = await this.prisma.message.create({
         data,
+        include: {
+          user: {
+            select: {
+              username: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
       })
 
       this.logger.log(

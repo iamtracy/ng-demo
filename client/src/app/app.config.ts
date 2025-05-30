@@ -46,7 +46,8 @@ export const appConfig: ApplicationConfig = {
         onLoad: 'login-required',
         checkLoginIframe: false,
         silentCheckSsoRedirectUri: `${window.location.origin}/assets/silent-check-sso.html`,
-        scope: 'openid profile email roles'
+        scope: 'openid profile email roles',
+        pkceMethod: 'S256'
       },
       features: [
         withAutoRefreshToken({
@@ -85,4 +86,3 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync()
   ]
 }
-

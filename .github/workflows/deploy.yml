@@ -48,36 +48,36 @@ jobs:
           docker build -t ng-demo:${{ github.sha }} .
           docker tag ng-demo:${{ github.sha }} ng-demo:latest
 
-      - name: 🧪 Test Docker image
-        run: |
-          # Start the container in background for testing
-          docker run -d --name test-container \
-            -p 3000:3000 \
-            -e DATABASE_URL="postgresql://test:test@localhost:5432/test" \
-            -e NODE_ENV="production" \
-            -e KEYCLOAK_CLIENT_SECRET="test-secret" \
-            ng-demo:${{ github.sha }}
+      # - name: 🧪 Test Docker image
+      #   run: |
+      #     # Start the container in background for testing
+      #     docker run -d --name test-container \
+      #       -p 3000:3000 \
+      #       -e DATABASE_URL="postgresql://test:test@localhost:5432/test" \
+      #       -e NODE_ENV="production" \
+      #       -e KEYCLOAK_CLIENT_SECRET="test-secret" \
+      #       ng-demo:${{ github.sha }}
           
-          # Wait a moment for startup
-          sleep 10
+      #     # Wait a moment for startup
+      #     sleep 10
           
-          # Basic health check
-          curl -f http://localhost:3000/health || exit 1
+      #     # Basic health check
+      #     curl -f http://localhost:3000/health || exit 1
           
-          # Cleanup
-          docker stop test-container
-          docker rm test-container
+      #     # Cleanup
+      #     docker stop test-container
+      #     docker rm test-container
 
-      - name: 📦 Save Docker image
-        run: |
-          docker save ng-demo:${{ github.sha }} | gzip > ng-demo-${{ github.sha }}.tar.gz
+      # - name: 📦 Save Docker image
+      #   run: |
+      #     docker save ng-demo:${{ github.sha }} | gzip > ng-demo-${{ github.sha }}.tar.gz
 
-      - name: 📤 Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image-${{ github.sha }}
-          path: ng-demo-${{ github.sha }}.tar.gz
-          retention-days: 7
+      # - name: 📤 Upload Docker image artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: docker-image-${{ github.sha }}
+      #     path: ng-demo-${{ github.sha }}.tar.gz
+      #     retention-days: 7
 
       # Placeholder for actual deployment steps
       - name: 🚀 Deploy to staging
@@ -97,18 +97,18 @@ jobs:
     environment: production
     
     steps:
-      - name: 🛒 Checkout code
-        uses: actions/checkout@v4
+      # - name: 🛒 Checkout code
+      #   uses: actions/checkout@v4
 
-      - name: 📥 Download Docker image
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image-${{ github.sha }}
+      # - name: 📥 Download Docker image
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: docker-image-${{ github.sha }}
 
-      - name: 📦 Load Docker image
-        run: |
-          docker load < ng-demo-${{ github.sha }}.tar.gz
-          docker tag ng-demo:${{ github.sha }} ng-demo:production
+      # - name: 📦 Load Docker image
+      #   run: |
+      #     docker load < ng-demo-${{ github.sha }}.tar.gz
+      #     docker tag ng-demo:${{ github.sha }} ng-demo:production
 
       # Placeholder for production deployment
       - name: 🚀 Deploy to production

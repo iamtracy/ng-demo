@@ -61,27 +61,22 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
       
       # Admin Configuration
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       
       # Application Configuration
       KC_HEALTH_ENABLED: true
-      KC_REALM: ${KEYCLOAK_REALM:-ng-demo}
-      KC_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-ng-demo-client}
-      KC_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-ng-demo-secret}
-      KC_CLIENT_ROLES: "user,admin"
-      KC_REDIRECT_URIS: "http://localhost:${CLIENT_PORT:-4200}/*,http://host.docker.internal:3000/*,http://localhost:3000/*"
       
       # Development Configuration
       KC_DEV: "true"
       KC_FEATURES: "preview"
       KC_LOG_LEVEL: ${KC_LOG_LEVEL:-INFO}
       KEYCLOAK_LOGLEVEL: ${KC_LOG_LEVEL:-INFO}
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_HOSTNAME: ${KC_HOSTNAME:-localhost}
-      KC_HOSTNAME_PORT: "8080"
-      KC_HOSTNAME_URL: ${KC_HOSTNAME_URL:-http://localhost:8080}
+      
+      # Hostname Configuration (v2 - modern)
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_ADMIN: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
     command:

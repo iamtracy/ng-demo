@@ -49,6 +49,9 @@ export class MessageController {
       updatedAt: message.updatedAt,
     }
 
+    console.log('!!!message', message)
+    console.log('!!!isAdmin', isAdmin)
+
     if (isAdmin && message.user) {
       dto.username = message.user.username
       dto.firstName = message.user.firstName ?? undefined
@@ -68,7 +71,7 @@ export class MessageController {
     type: [MessageDto],
   })
   async findAll(@CurrentUser() user: OIDCTokenPayload): Promise<MessageDto[]> {
-    const isAdmin = user.realm_access?.roles.includes('admin') ?? false
+    const isAdmin: boolean = user.realm_access?.roles.includes('admin') ?? false
     this.logger.log(
       `GET /messages - User ${user.preferred_username ?? 'unknown'} (admin: ${String(isAdmin)})`,
     )
@@ -101,24 +104,27 @@ export class MessageController {
   })
   async create(
     @Body() createMessageDto: CreateMessageDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: OIDCTokenPayload,
   ): Promise<MessageDto> {
-    this.logger.log(`POST /messages - User ${user.username} creating message`)
+    this.logger.log(
+      `POST /messages - User ${user.preferred_username ?? 'unknown'} creating message`,
+    )
+    const isAdmin: boolean = user.realm_access?.roles.includes('admin') ?? false
 
     try {
       const message = await this.messageService.createMessage(
         createMessageDto,
         user,
       )
-      const result = this.toMessageDto(message)
+      const result = this.toMessageDto(message, isAdmin)
 
       this.logger.log(
-        `POST /messages - Successfully created message ${String(message.id)} for user ${user.username}`,
+        `POST /messages - Successfully created message ${String(message.id)} for user ${user.preferred_username ?? 'unknown'}`,
       )
       return result
     } catch (error) {
       this.logger.error(
-        `POST /messages - Failed to create message for user ${user.username}:`,
+        `POST /messages - Failed to create message for user ${user.preferred_username ?? 'unknown'}:`,
         error,
       )
       throw error
