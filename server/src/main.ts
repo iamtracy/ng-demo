@@ -64,14 +64,14 @@ function logServerConfiguration(port: string): void {
   const envLine = padLine(`  Environment:     ${nodeEnv}`)
   const clientLine =
     nodeEnv !== 'production'
-      ? `║${padLine(`  Client URL:      http://localhost:${clientPort}`)}║`
+      ? `║${padLine(`  Client URL:      http://app.localhost:${clientPort}`)}║`
       : ''
-  const serverLine = padLine(`  Server URL:      http://localhost:${port}`)
+  const serverLine = padLine(`  Server URL:      http://app.localhost:${port}`)
   const docsLine = padLine(
-    `  API Docs:        http://localhost:${port}/api/docs`,
+    `  API Docs:        http://app.localhost:${port}/api/docs`,
   )
   const schemaLine = padLine(
-    `  API Schema:      http://localhost:${port}/api/docs-json`,
+    `  API Schema:      http://app.localhost:${port}/api/docs-json`,
   )
   const statusLine = padLine(
     `                   🚀 Server is ready and accepting connections`,

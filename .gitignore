@@ -2,7 +2,7 @@
 
 # Environment variables
 .env*
-
+!.env.example
 # TypeScript compilation
 dist/
 *.tsbuildinfo
