@@ -1,6 +1,9 @@
 import { defineConfig } from 'cypress'
 
-import { DOMAINS } from './scripts/constants'
+const DOMAINS = {
+  APP_SERVER: 'app.localhost',
+  KEYCLOAK: 'auth.localhost'
+} as const
 
 export default defineConfig({
   e2e: {

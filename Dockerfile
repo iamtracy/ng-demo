@@ -27,8 +27,6 @@ COPY --from=server-builder /app/server/prisma ./prisma
 COPY --from=server-builder /app/server/node_modules/.prisma ./node_modules/.prisma
 COPY --from=client-builder /app/client/dist/ng-demo/browser ./public/browser
 
-COPY scripts ./scripts
-
 RUN addgroup --system appgroup && \
     adduser --system appuser --ingroup appgroup --home /home/appuser && \
     mkdir -p /home/appuser/.npm && \
