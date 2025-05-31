@@ -34,8 +34,6 @@ import { routes } from './app.routes'
 
 registerLocaleData(en)
 
-console.log('environment', environment)
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideKeycloak({

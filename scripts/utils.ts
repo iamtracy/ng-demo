@@ -2,22 +2,13 @@ import { spawn, execSync } from 'node:child_process'
 import { setTimeout as wait } from 'node:timers/promises'
 import readline from 'node:readline'
 import { config } from 'dotenv'
+import { DOMAINS, type Colors } from './constants'
 
 config()
 
 // =============================================================================
 // 🎨 TYPES & INTERFACES
 // =============================================================================
-
-export interface Colors {
-  PRIMARY: string
-  SUCCESS: string
-  ERROR: string
-  WARNING: string
-  INFO: string
-  MUTED: string
-  NC: string
-}
 
 export interface RunCommandOptions {
   cwd?: string
@@ -70,7 +61,7 @@ export const ENV = {
   POSTGRES_DB: getEnvVar('POSTGRES_DB', 'ng_demo_db'),
   POSTGRES_PORT: getEnvVar('POSTGRES_PORT', '5432'),
   
-  KEYCLOAK_AUTH_SERVER_URL: getEnvVar('KEYCLOAK_AUTH_SERVER_URL', 'http://localhost:8080'),
+  KEYCLOAK_AUTH_SERVER_URL: getEnvVar('KEYCLOAK_AUTH_SERVER_URL', `http://${DOMAINS.KEYCLOAK}:8080`),
   KEYCLOAK_REALM: getEnvVar('KEYCLOAK_REALM', 'ng-demo'),
   KEYCLOAK_CLIENT_ID: getEnvVar('KEYCLOAK_CLIENT_ID', 'ng-demo-client'),
   KEYCLOAK_CLIENT_SECRET: getRequiredEnvVar('KEYCLOAK_CLIENT_SECRET'),
@@ -88,9 +79,8 @@ export const ENV = {
   HEALTH_CHECK_TIMEOUT: parseInt(getEnvVar('HEALTH_CHECK_TIMEOUT', '5000')),
   HEALTH_CHECK_MAX_RETRIES: parseInt(getEnvVar('HEALTH_CHECK_MAX_RETRIES', '60')),
 
-  CYPRESS_BASE_URL: getEnvVar('CYPRESS_BASE_URL', 'http://localhost:3000'),
-  CYPRESS_API_URL: getEnvVar('CYPRESS_API_URL', 'http://localhost:3000'),
-  CYPRESS_KEYCLOAK_URL: getEnvVar('CYPRESS_KEYCLOAK_URL', 'http://localhost:8080'),
+  CYPRESS_BASE_URL: getEnvVar('CYPRESS_BASE_URL', `http://${DOMAINS.APP_SERVER}:3000`),
+  CYPRESS_KEYCLOAK_URL: getEnvVar('CYPRESS_KEYCLOAK_URL', `http://${DOMAINS.KEYCLOAK}:8080`),
 }
 
 // =============================================================================

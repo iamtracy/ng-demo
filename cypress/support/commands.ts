@@ -11,7 +11,8 @@ Cypress.Commands.add('login', (userType: UserType) => {
     
     cy.visit('/', { timeout: 15000 })
     
-    cy.origin(keycloakUrl, { args: { username: user.username, password: user.password } }, ({ username, password }) => {
+    // Handle authentication redirect to auth.localhost:8080
+    cy.origin('http://auth.localhost:8080', { args: { username: user.username, password: user.password } }, ({ username, password }) => {
       cy.get('#kc-form-login', { timeout: 10000 }).should('be.visible')
       cy.get('#username').clear().type(username)
       cy.get('#password').clear().type(password)

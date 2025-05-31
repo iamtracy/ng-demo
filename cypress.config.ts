@@ -1,17 +1,12 @@
 import { defineConfig } from 'cypress'
 
-const baseUrl = process.env.CYPRESS_BASE_URL ?? 'http://localhost:4200'
-const keycloakUrl = process.env.CYPRESS_KEYCLOAK_URL ?? 'http://localhost:8080'
-
-console.log('baseUrl', baseUrl)
-console.log('keycloakUrl', keycloakUrl)
-
+import { DOMAINS } from './scripts/constants'
 
 export default defineConfig({
   e2e: {
-    baseUrl,
+    baseUrl: `http://${DOMAINS.APP_SERVER}:3000`,
     env: {
-      keycloakUrl,
+      keycloakUrl: `http://${DOMAINS.KEYCLOAK}:8080`,
     },
     video: true,
     screenshotOnRunFailure: true,

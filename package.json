@@ -19,7 +19,11 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "build": "tsc",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "setup:hosts": "tsx scripts/setup-hosts.ts",
+    "setup:hosts:add": "tsx scripts/setup-hosts.ts add",
+    "setup:hosts:remove": "tsx scripts/setup-hosts.ts remove",
+    "setup:hosts:check": "tsx scripts/setup-hosts.ts check"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

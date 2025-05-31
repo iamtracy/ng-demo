@@ -79,6 +79,9 @@
           },
           "defaultConfiguration": "development",
           "options": {
+            "host": "0.0.0.0",
+            "allowedHosts": ["app.localhost", "localhost"],
+            "disableHostCheck": true,
             "proxyConfig": "proxy.conf.json"
           }
         },
