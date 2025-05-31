@@ -3,15 +3,58 @@ import { config } from 'dotenv'
 
 config()
 
-import messages from '../../cypress/fixtures/messages.json'
-import users from '../../cypress/fixtures/users.json'
-
 const prisma = new PrismaClient({
   datasourceUrl: process.env.DATABASE_URL,
 })
 
 type SeedUser = Partial<User>
 type SeedMessagesData = Record<string, Pick<Message, 'message'>[]>
+
+// Inline seed data
+const users = {
+  admin: {
+    id: 'zaphod-beeblebrox-id',
+    email: 'zaphod@galaxy.gov',
+    username: 'zaphod',
+    firstName: 'Zaphod',
+    lastName: 'Beeblebrox',
+    roles: ['admin', 'user'],
+  },
+  user1: {
+    id: 'arthur-dent-id',
+    email: 'arthur@earth.sol',
+    username: 'arthur',
+    firstName: 'Arthur',
+    lastName: 'Dent',
+    roles: ['user'],
+  },
+  user2: {
+    id: 'trillian-astra-id',
+    email: 'trillian@galaxy.gov',
+    username: 'trillian',
+    firstName: 'Trillian',
+    lastName: 'Astra',
+    roles: ['user'],
+  },
+}
+
+const messages: SeedMessagesData = {
+  admin: [
+    { message: 'Welcome to the NG Demo! Administrative functions are ready.' },
+    { message: 'System status: All services operational.' },
+    { message: 'Database seeding completed successfully.' },
+  ],
+  user1: [
+    { message: 'Hello! This is my first message in the system.' },
+    { message: 'Testing the message functionality - looks good!' },
+    { message: 'Great to be part of this demo application.' },
+  ],
+  user2: [
+    { message: 'Another user checking in! The interface is very clean.' },
+    { message: 'Excited to explore all the features available.' },
+    { message: 'This messaging system works really well!' },
+  ],
+}
 
 async function main(): Promise<void> {
   console.log('🌌 Seeding users from JSON...')
@@ -22,32 +65,48 @@ async function main(): Promise<void> {
   const createdUsers = await Promise.all(userPromises)
 
   console.log('🌌 Seeding messages from JSON...')
-  await createMessagesForUsers(messages as SeedMessagesData, createdUsers)
+  await createMessagesForUsers(messages, createdUsers)
 
   console.log('✨ Seeding complete!')
 }
 
+function prepareUserData(userData: SeedUser): Omit<User, 'createdAt'> {
+  return {
+    id: userData.id ?? '',
+    email: userData.email ?? '',
+    username: userData.username ?? '',
+    firstName: userData.firstName ?? '',
+    lastName: userData.lastName ?? '',
+    roles: userData.roles ?? [],
+    emailVerified: true,
+    updatedAt: new Date(),
+    lastLoginAt: new Date(),
+  }
+}
+
 async function createUser(userData: SeedUser): Promise<User> {
-  const user = await prisma.user.upsert({
-    where: { id: userData.id },
-    update: {
-      updatedAt: new Date(),
-    },
-    create: {
-      id: userData.id ?? '',
-      email: userData.email ?? '',
-      username: userData.username ?? '',
-      firstName: userData.firstName ?? '',
-      lastName: userData.lastName ?? '',
-      roles: userData.roles,
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  const existingUser = await prisma.user.findUnique({
+    where: { username: userData.username },
   })
 
-  console.log(`👤 User ${userData.username ?? 'unknown'} ready`)
+  const preparedData = prepareUserData(userData)
+
+  if (existingUser) {
+    const user = await prisma.user.update({
+      where: { username: userData.username },
+      data: preparedData,
+    })
+    console.log(`👤 User ${userData.username ?? 'unknown'} updated`)
+    return user
+  }
+
+  const user = await prisma.user.create({
+    data: {
+      ...preparedData,
+      createdAt: new Date(),
+    },
+  })
+  console.log(`👤 User ${userData.username ?? 'unknown'} created`)
   return user
 }
 

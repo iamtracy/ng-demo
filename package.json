@@ -12,32 +12,27 @@
     "dev:server": "tsx scripts/dev-server.ts",
     "dev:docs": "tsx scripts/dev-docs.ts",
     "start": "node dist/main",
-    "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "tsx scripts/test-e2e.ts",
-    "test:e2e:docker": "docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from cypress-test --remove-orphans",
-    "test:e2e:docker:clean": "docker compose -f docker-compose.test.yml down --volumes --remove-orphans",
-    "test:e2e:docker:logs": "docker compose -f docker-compose.test.yml logs --tail=50",
-    "test:e2e:docker:debug": "docker compose -f docker-compose.test.yml up --build postgres-test keycloak-db-test keycloak-test app-test && echo 'Services started. Run: docker compose -f docker-compose.test.yml run --rm cypress-test' && docker compose -f docker-compose.test.yml logs -f",
+    "test:e2e:clean": "docker compose -f docker-compose.test.yml down --volumes --remove-orphans",
+    "test:e2e:logs": "docker compose -f docker-compose.test.yml logs --tail=50",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run --spec 'cypress/e2e/**/*.cy.ts'",
-    "cypress:run:headless": "cypress run --spec 'cypress/e2e/**/*.cy.ts' --browser chrome --headless",
+    "cypress:run": "cypress run",
     "build": "tsc",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "setup:hosts": "tsx scripts/setup-hosts.ts",
+    "setup:hosts:add": "tsx scripts/setup-hosts.ts add",
+    "setup:hosts:remove": "tsx scripts/setup-hosts.ts remove",
+    "setup:hosts:check": "tsx scripts/setup-hosts.ts check"
   },
   "dependencies": {
     "dotenv": "^16.5.0",
     "cypress": "^13.17.0",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
-    "@types/node": "^22.10.7",
-    "typescript": "^5.7.3"
+    "@types/node": "^22.10.7"
   },
   "engines": {
     "node": ">=22.0.0"

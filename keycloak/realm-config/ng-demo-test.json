@@ -16,12 +16,10 @@
       "enabled": true,
       "publicClient": true,
       "redirectUris": [
-        "http://localhost:3000/*",
-        "http://host.docker.internal:3000/*"
+        "http://app.localhost:3000/*"
       ],
       "webOrigins": [
-        "http://localhost:3000",
-        "http://host.docker.internal:3000"
+        "http://app.localhost:3000"
       ],
       "protocol": "openid-connect",
       "directAccessGrantsEnabled": true,
@@ -52,7 +50,7 @@
   ],
   "users": [
     {
-      "id": "zaphod-beeblebrox-id",
+      "id": "46888525-6c02-431c-84b4-1b69db0953f3",
       "username": "zaphod",
       "enabled": true,
       "emailVerified": true,
@@ -72,7 +70,7 @@
       ]
     },
     {
-      "id": "arthur-dent-id",
+      "id": "46888525-6c02-431c-84b4-1b69db0953f4",
       "username": "arthur",
       "enabled": true,
       "emailVerified": true,
@@ -91,7 +89,7 @@
       ]
     },
     {
-      "id": "trillian-astra-id",
+      "id": "46888525-6c02-431c-84b4-1b69db0953f5",
       "username": "trillian",
       "enabled": true,
       "emailVerified": true,

@@ -90,9 +90,10 @@ export default tseslint.config(
   {
     files: ['**/*.spec.ts', '**/*.test.ts'],
     rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
       'max-lines-per-function': 'off',
       'max-params': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
   {

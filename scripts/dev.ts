@@ -14,7 +14,6 @@ async function start(): Promise<void> {
   await startDockerServices()
 
   showDevelopmentBanner()
-  console.log(`${COLORS.CUP_OF_TEA}[☕] Brewing digital tea and warming up servers...${COLORS.NC}`)
 
   let clientPid: number | undefined, serverPid: number | undefined, watcherPid: number | undefined
   const pids: (number | undefined)[] = [clientPid, serverPid, watcherPid]
@@ -29,7 +28,7 @@ async function start(): Promise<void> {
     await runCommand('npm', ['install'], {
       cwd: 'client', 
       prefix: 'CLIENT', 
-      prefixColor: 'IMPROBABILITY' 
+      prefixColor: 'PRIMARY' 
     })
   } catch (err) {
     exitWithError('CLIENT INSTALLATION FAILED:', err as Error)
@@ -39,7 +38,7 @@ async function start(): Promise<void> {
     runCommand('npm', ['run', 'start'], {
       cwd: 'client',
       prefix: 'CLIENT',
-      prefixColor: 'IMPROBABILITY',
+      prefixColor: 'PRIMARY',
       capturePid: pid => (clientPid = pid),
     })
   } catch (err) {
@@ -53,31 +52,13 @@ async function start(): Promise<void> {
     await runCommand('npm', ['install', '--force'], {
       cwd: 'server', 
       prefix: 'SERVER', 
-      prefixColor: 'HYPERINTELLIGENT' 
-    })
-    
-    await runCommand('npm', ['run', 'prisma:generate'], {
-      cwd: 'server', 
-      prefix: 'SERVER', 
-      prefixColor: 'HYPERINTELLIGENT' 
-    })
-    
-    await runCommand('npm', ['run', 'prisma:migrate'], {
-      cwd: 'server', 
-      prefix: 'SERVER', 
-      prefixColor: 'HYPERINTELLIGENT' 
-    })
-
-    await runCommand('npm', ['run', 'seed'], {
-      cwd: 'server', 
-      prefix: 'DEEP THOUGHT', 
-      prefixColor: 'TOWEL' 
+      prefixColor: 'SUCCESS' 
     })
 
     runCommand('npm', ['run', 'start'], {
       cwd: 'server',
       prefix: 'SERVER',
-      prefixColor: 'HYPERINTELLIGENT',
+      prefixColor: 'SUCCESS',
       capturePid: pid => (serverPid = pid),
     }).catch(err => exitWithError('SERVER FAILED TO START:', err))
   } catch (err) {
@@ -91,16 +72,12 @@ async function start(): Promise<void> {
   // =============================================================================
   runCommand('npm', ['run', 'watch-api'], {
     cwd: 'client',
-    prefix: 'BABEL FISH',
-    prefixColor: 'CUP_OF_TEA',
+    prefix: 'API WATCHER',
+    prefixColor: 'INFO',
     capturePid: pid => (watcherPid = pid),
   }).catch(err => {
-    console.warn(`${COLORS.SARCASM}[⚠️] API watcher failed, but continuing anyway: ${err.message}${COLORS.NC}`)
+    console.warn(`${COLORS.WARNING}[WARN] API watcher failed, but continuing anyway: ${err.message}${COLORS.NC}`)
   })
-
-  console.log(`${COLORS.TOWEL}[✨] Status: All Systems Go (unless the Vogons are involved)${COLORS.NC}`)
-  console.log(`${COLORS.SARCASM}[📡] Monitoring transmissions from both ends of the improbability curve...${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🧭] Press Ctrl+C to dematerialize gracefully${COLORS.NC}`)
 
   pids[0] = clientPid
   pids[1] = serverPid
@@ -110,6 +87,6 @@ async function start(): Promise<void> {
 }
 
 start().catch(err => {
-  console.error(`${COLORS.PANIC}[FATAL ERROR] │ ${err.message}${COLORS.NC}`)
+  console.error(`${COLORS.ERROR}[ERROR] Fatal error: ${err.message}${COLORS.NC}`)
   process.exit(1)
 }) 

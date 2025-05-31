@@ -1,11 +1,15 @@
 import { defineConfig } from 'cypress'
 
+const DOMAINS = {
+  APP_SERVER: 'app.localhost',
+  KEYCLOAK: 'auth.localhost'
+}
+
 export default defineConfig({
   e2e: {
-    baseUrl: process.env.CYPRESS_BASE_URL || 'http://localhost:4200',
+    baseUrl: `http://${DOMAINS.APP_SERVER}:3000`,
     env: {
-      apiUrl: process.env.CYPRESS_API_URL || 'http://localhost:3000',
-      keycloakUrl: process.env.CYPRESS_KEYCLOAK_URL || 'http://localhost:8080',
+      keycloakUrl: `http://${DOMAINS.KEYCLOAK}:8080`,
     },
     video: true,
     screenshotOnRunFailure: true,

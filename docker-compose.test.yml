@@ -1,7 +1,8 @@
 # =============================================================================
 # 🧪 Testing Docker Compose Configuration
 # =============================================================================
-# This file contains all services needed for running E2E tests in isolation
+# This file contains all services needed for running E2E tests
+# Cypress will run locally, not in Docker
 
 services:
   # ===========================================================================
@@ -74,13 +75,17 @@ services:
       KC_LOG_LEVEL: "WARN"
       KEYCLOAK_LOGLEVEL: "WARN"
       
-      # Hostname Configuration (v2 - modern) - Fixed URLs
-      KC_HOSTNAME: http://localhost:8080
-      KC_HOSTNAME_ADMIN: http://localhost:8080
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      # Hostname Configuration - use auth.localhost for consistent JWT issuer
+      KC_HOSTNAME: auth.localhost
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_URL: http://auth.localhost:8080
+      KC_HOSTNAME_ADMIN_URL: http://auth.localhost:8080
+      KC_HTTP_ENABLED: "true"      
+      # Force frontend URL
+      KEYCLOAK_FRONTEND_URL: http://auth.localhost:8080
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
-      - "9000:9000"  # Management port for health checks
+      - "9000:9000"
     command:
       - start-dev
       - --import-realm
@@ -96,7 +101,9 @@ services:
       retries: 12
       start_period: 30s
     networks:
-      - test-network
+      test-network:
+        aliases:
+          - auth.localhost
 
   # ===========================================================================
   # 🚀 Application Test Container
@@ -108,19 +115,22 @@ services:
     container_name: ng-demo-app-test
     ports:
       - "3000:3000"
+    extra_hosts:
+      - "app.localhost:host-gateway"
+      - "host.docker.internal:host-gateway"
     environment:
       # Application Configuration
-      - NODE_ENV=test
+      - NODE_ENV=production
       - PORT=3000
       
-      # Database Configuration - hardcoded for test environment
+      # Database Configuration
       - DATABASE_URL=postgresql://postgres:postgres@postgres-test:5432/ng_demo_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=ng_demo_db
       
-      # Keycloak Configuration - hardcoded for test environment
-      - KEYCLOAK_AUTH_SERVER_URL=http://localhost:8080
+      # Keycloak Configuration - Use auth.localhost via Docker network alias
+      - KEYCLOAK_AUTH_SERVER_URL=http://auth.localhost:8080
       - KEYCLOAK_REALM=ng-demo
       - KEYCLOAK_CLIENT_ID=ng-demo-client
       - KEYCLOAK_CLIENT_SECRET=ng-demo-secret
@@ -139,50 +149,6 @@ services:
       retries: 15
     networks:
       - test-network
-
-  # ===========================================================================
-  # 🧪 Cypress Test Runner
-  # ===========================================================================
-  cypress-test:
-    image: cypress/included:latest
-    container_name: ng-demo-cypress-test
-    working_dir: /e2e
-    volumes:
-      - .:/e2e
-      - /dev/shm:/dev/shm
-    environment:
-      - CYPRESS_BASE_URL=http://localhost:3000
-      - CYPRESS_API_URL=http://localhost:3000
-      - CYPRESS_KEYCLOAK_URL=http://localhost:8080
-      - CYPRESS_KEYCLOAK_INTERNAL_URL=http://localhost:8080
-      
-      - CYPRESS_VIDEO=true
-      - CYPRESS_SCREENSHOTS=true
-      - CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY:-}
-      - CI=true
-      
-      - DEBUG=cypress:cli,cypress:run
-    depends_on:
-      app-test:
-        condition: service_healthy
-      keycloak-test:
-        condition: service_healthy
-    networks:
-      - test-network
-    command: 
-      - cypress
-      - run
-      - --spec
-      - cypress/e2e/**/*.cy.ts
-      - --browser
-      - electron
-      - --headless
-      - --config
-      - baseUrl=http://host.docker.internal:3000
-      - --reporter
-      - spec
-      - --reporter-options
-      - verbose=true
 
 # =============================================================================
 # 📦 Test Storage Volumes

@@ -16,12 +16,12 @@ env:
   NODE_ENV: production
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_db
   KEYCLOAK_CLIENT_SECRET: ng-demo-secret
-  KEYCLOAK_AUTH_SERVER_URL: http://localhost:8080
+  KEYCLOAK_AUTH_SERVER_URL: http://auth.localhost:8080
   KEYCLOAK_REALM: ng-demo
   KEYCLOAK_CLIENT_ID: ng-demo-client
-  # CI-specific Keycloak configuration for proper JWT validation
-  KC_HOSTNAME: host.docker.internal
-  KC_HOSTNAME_URL: http://host.docker.internal:8080
+  # Updated Keycloak configuration for .localhost domains
+  KC_HOSTNAME: auth.localhost
+  KC_HOSTNAME_URL: http://auth.localhost:8080
 
 jobs:
   e2e-tests:
@@ -48,6 +48,20 @@ jobs:
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: 🏠 Configure hosts for .localhost domains
+        run: |
+          echo "🏠 Adding hosts entries for .localhost domains..."
+          sudo tee -a /etc/hosts > /dev/null <<EOF
+          
+          # ng-demo-hosts-start
+          127.0.0.1 auth.localhost
+          127.0.0.1 app.localhost
+          # ng-demo-hosts-end
+          EOF
+          
+          echo "✅ Hosts entries added:"
+          grep -A3 "ng-demo-hosts-start" /etc/hosts
+
       - name: 📦 Install root dependencies
         run: |
           npm ci
@@ -56,49 +70,56 @@ jobs:
           # Verify cypress is available
           npx cypress --version
 
-      # - name: 🚀 Run E2E Tests
-      #   id: e2e-tests
-      #   timeout-minutes: 25
-      #   run: |
-      #     echo "🧪 Running E2E tests with production Docker container..."
-      #     echo "📊 Test started at: $(date)"
+      - name: 🚀 Run E2E Tests
+        id: e2e-tests
+        timeout-minutes: 25
+        run: |
+          echo "🧪 Running E2E tests with .localhost domain setup..."
+          echo "📊 Test started at: $(date)"
           
-      #     # Run the full E2E test suite
-      #     npm run test:e2e
+          # Run the full E2E test suite
+          npm run test:e2e
 
-      # - name: 📊 Test Results Summary
-      #   if: always()
-      #   run: |
-      #     echo "📊 Test completed at: $(date)"
-      #     if [ "${{ steps.e2e-tests.outcome }}" == "success" ]; then
-      #       echo "✅ E2E tests passed successfully!"
-      #     else
-      #       echo "❌ E2E tests failed"
-      #     fi
+      - name: 📊 Test Results Summary
+        if: always()
+        run: |
+          echo "📊 Test completed at: $(date)"
+          if [ "${{ steps.e2e-tests.outcome }}" == "success" ]; then
+            echo "✅ E2E tests passed successfully!"
+          else
+            echo "❌ E2E tests failed"
+          fi
 
-      # - name: 📸 Upload Cypress screenshots
-      #   uses: actions/upload-artifact@v4
-      #   if: failure()
-      #   with:
-      #     name: cypress-screenshots-${{ github.run_number }}
-      #     path: cypress/screenshots
-      #     retention-days: 7
+      - name: 📸 Upload Cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ github.run_number }}
+          path: cypress/screenshots
+          retention-days: 7
 
-      # - name: 📹 Upload Cypress videos
-      #   uses: actions/upload-artifact@v4
-      #   if: always()
-      #   with:
-      #     name: cypress-videos-${{ github.run_number }}
-      #     path: cypress/videos
-      #     retention-days: 3
+      - name: 📹 Upload Cypress videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-${{ github.run_number }}
+          path: cypress/videos
+          retention-days: 3
 
-      # - name: 📋 Upload test logs
-      #   uses: actions/upload-artifact@v4
-      #   if: failure()
-      #   with:
-      #     name: test-logs-${{ github.run_number }}
-      #     path: |
-      #       *.log
-      #       cypress/logs
-      #     retention-days: 7
-      #     if-no-files-found: ignore 
+      - name: 📋 Upload test logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-logs-${{ github.run_number }}
+          path: |
+            *.log
+            cypress/logs
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 🧹 Cleanup hosts file
+        if: always()
+        run: |
+          echo "🧹 Cleaning up hosts entries..."
+          sudo sed -i '/# ng-demo-hosts-start/,/# ng-demo-hosts-end/d' /etc/hosts
+          echo "✅ Hosts cleanup completed" 
