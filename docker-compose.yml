@@ -96,29 +96,6 @@ services:
       - app-network
 
 # =============================================================================
-# 🧪 TESTING SERVICES
-# =============================================================================
-
-  cypress:
-    image: cypress/included:latest
-    container_name: ng-demo-cypress
-    working_dir: /e2e
-    volumes:
-      - .:/e2e
-    environment:
-      - CYPRESS_BASE_URL=http://localhost:3000
-      - CYPRESS_API_URL=http://localhost:3000
-      - CYPRESS_KEYCLOAK_URL=http://localhost:8080
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    network_mode: host
-    profiles:
-      - testing
-    depends_on:
-      - keycloak
-    command: ["cypress", "run", "--spec", "cypress/e2e/**/*.cy.ts"]
-
-# =============================================================================
 # 📦 Persistent Storage Volumes
 # =============================================================================
 volumes:

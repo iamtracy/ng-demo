@@ -75,7 +75,7 @@ const KEYCLOAK_CONFIG = {
       clientId: KEYCLOAK_CONFIG.clientId,
       secret: KEYCLOAK_CONFIG.secret,
       policyEnforcement: PolicyEnforcementMode.PERMISSIVE,
-      tokenValidation: isTest ? TokenValidation.NONE : TokenValidation.OFFLINE,
+      tokenValidation: TokenValidation.OFFLINE,
       bearerOnly: false,
       useNestLogger: true,
     }),

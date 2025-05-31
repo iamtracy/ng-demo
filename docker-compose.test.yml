@@ -1,7 +1,8 @@
 # =============================================================================
 # 🧪 Testing Docker Compose Configuration
 # =============================================================================
-# This file contains all services needed for running E2E tests in isolation
+# This file contains all services needed for running E2E tests
+# Cypress will run locally, not in Docker
 
 services:
   # ===========================================================================
@@ -139,50 +140,6 @@ services:
       retries: 15
     networks:
       - test-network
-
-  # ===========================================================================
-  # 🧪 Cypress Test Runner
-  # ===========================================================================
-  cypress-test:
-    image: cypress/included:latest
-    container_name: ng-demo-cypress-test
-    working_dir: /e2e
-    volumes:
-      - .:/e2e
-      - /dev/shm:/dev/shm
-    environment:
-      - CYPRESS_BASE_URL=http://localhost:3000
-      - CYPRESS_API_URL=http://localhost:3000
-      - CYPRESS_KEYCLOAK_URL=http://localhost:8080
-      - CYPRESS_KEYCLOAK_INTERNAL_URL=http://localhost:8080
-      
-      - CYPRESS_VIDEO=true
-      - CYPRESS_SCREENSHOTS=true
-      - CYPRESS_RECORD_KEY=${CYPRESS_RECORD_KEY:-}
-      - CI=true
-      
-      - DEBUG=cypress:cli,cypress:run
-    depends_on:
-      app-test:
-        condition: service_healthy
-      keycloak-test:
-        condition: service_healthy
-    networks:
-      - test-network
-    command: 
-      - cypress
-      - run
-      - --spec
-      - cypress/e2e/**/*.cy.ts
-      - --browser
-      - electron
-      - --headless
-      - --config
-      - baseUrl=http://host.docker.internal:3000
-      - --reporter
-      - spec
-      - --reporter-options
-      - verbose=true
 
 # =============================================================================
 # 📦 Test Storage Volumes

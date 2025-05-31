@@ -4,30 +4,21 @@ import {
   ENV,
   ensureDockerIsRunning,
   createErrorHandler,
-  showProductionBanner,
 } from './utils'
 
 async function start(): Promise<void> {
   await ensureDockerIsRunning()
   
-  showProductionBanner()
-  console.log(`${COLORS.CUP_OF_TEA}[☕] Starting E2E testing with Docker Compose...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Starting E2E test suite with local Cypress${COLORS.NC}`)
 
   const pids: (number | undefined)[] = []
   const exitWithError = createErrorHandler(pids)
 
   const cleanupHandler = () => {
-    console.log(`\n${COLORS.HYPERINTELLIGENT}
-    ╔════════════════════════════════════════╗
-    ║    ✴️  Emergency Protocols Activated    ║
-    ╠════════════════════════════════════════╣
-    ║    🛬 Returning to Earth (or Magrathea)║
-    ╚════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.log(`\n${COLORS.INFO}[INFO] Cleaning up test environment...${COLORS.NC}`)
     
     try {
-      console.log(`${COLORS.SARCASM}[🧹] Cleaning up Docker Compose test environment...${COLORS.NC}`)
-      execSync('npm run test:e2e:docker:clean', { stdio: 'inherit' })
+      execSync('npm run test:e2e:clean', { stdio: 'inherit' })
     } catch {
       // Ignore cleanup errors
     }
@@ -41,74 +32,107 @@ ${COLORS.NC}`)
     // =============================================================================
     // CLEANUP EXISTING TEST ENVIRONMENT
     // =============================================================================
-    console.log(`${COLORS.HYPERINTELLIGENT}[🧹] Cleaning up any existing test environment...${COLORS.NC}`)
+    console.log(`${COLORS.INFO}[INFO] Cleaning up existing test environment...${COLORS.NC}`)
     try {
-      execSync('npm run test:e2e:docker:clean', { stdio: 'inherit' })
+      execSync('npm run test:e2e:clean', { stdio: 'inherit' })
     } catch {
       // Ignore if no existing services
     }
 
     // =============================================================================
-    // DISPLAY TEST INFORMATION
+    // START DOCKER SERVICES (WITHOUT CYPRESS)
     // =============================================================================
-    console.log(`${COLORS.HYPERINTELLIGENT}
-╔══════════════════════════════════════════════════════════════════════════╗
-║                    🌌 CYPRESS DOCKER COMPOSE EXECUTION 🌌               ║
-║                                                                          ║
-║  "The ships hung in the sky in much the same way that bricks don't."    ║
-║                                                                          ║
-╠══════════════════════════════════════════════════════════════════════════╣
-║  🚀 Test Network:    ${'Docker Compose Isolated Network'.padEnd(45)} ║
-║  🛸 App URL:         ${'http://app-test:3000 (internal)'.padEnd(45)} ║
-║  🔐 Keycloak URL:    ${'http://keycloak-test:8080 (internal)'.padEnd(45)} ║
-║  🌍 Environment:     ${`${process.env.NODE_ENV} (containerized)`.padEnd(45)} ║
-║                                                                          ║
-║  "Don't Panic" - The Hitchhiker's Guide to the Galaxy                   ║
-╚══════════════════════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.log(`${COLORS.PRIMARY}[INFO] Starting Docker services (infrastructure + app)...${COLORS.NC}`)
+    execSync('docker compose -f docker-compose.test.yml up -d app-test', { stdio: 'inherit' })
+
+    // Wait for services to be healthy
+    console.log(`${COLORS.INFO}[INFO] Waiting for services to be ready...${COLORS.NC}`)
+    let retries = 0
+    const maxRetries = 60
+    
+    while (retries < maxRetries) {
+      try {
+        try {
+          const result = execSync('docker compose -f docker-compose.test.yml ps app-test --format json', { 
+            stdio: 'pipe',
+            encoding: 'utf8'
+          })
+          const container = JSON.parse(result.trim())
+          if (container.Health === 'healthy') {
+            break
+          }
+        } catch {
+          execSync('docker compose -f docker-compose.test.yml ps app-test | grep "healthy"', { stdio: 'ignore' })
+          break
+        }
+        throw new Error('Container not healthy yet')
+      } catch {
+        retries++
+        if (retries % 6 === 0) { // Log every 30 seconds
+          console.log(`${COLORS.INFO}[INFO] Services starting... ${Math.round((retries / maxRetries) * 100)}% (${retries * 5}s)${COLORS.NC}`)
+        }
+        
+        if (retries >= maxRetries) {
+          console.error(`${COLORS.ERROR}[ERROR] Services failed to start after ${maxRetries * 5} seconds${COLORS.NC}`)
+          cleanupHandler()
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 5000))
+      }
+    }
+
+    console.log(`${COLORS.SUCCESS}[INFO] All services ready${COLORS.NC}`)
 
     // =============================================================================
-    // RUN DOCKER COMPOSE E2E TESTS
+    // DISPLAY TEST CONFIGURATION
     // =============================================================================
-    console.log(`${COLORS.IMPROBABILITY}[🐳] Running Docker Compose E2E test suite...${COLORS.NC}`)
+    console.log(`${COLORS.PRIMARY}[INFO] Test Configuration:${COLORS.NC}`)
+    console.log(`${COLORS.INFO}       Environment: test${COLORS.NC}`)
+    console.log(`${COLORS.INFO}       Database: PostgreSQL in Docker (localhost:5432)${COLORS.NC}`)
+    console.log(`${COLORS.INFO}       Keycloak: In Docker (localhost:8080)${COLORS.NC}`)
+    console.log(`${COLORS.INFO}       Server: In Docker (localhost:3000)${COLORS.NC}`)
+    console.log(`${COLORS.INFO}       Cypress: Local execution${COLORS.NC}`)
+
+    // =============================================================================
+    // RUN CYPRESS TESTS LOCALLY
+    // =============================================================================
+    console.log(`${COLORS.PRIMARY}[INFO] Running Cypress E2E tests locally...${COLORS.NC}`)
     
     try {
-      execSync('npm run test:e2e:docker', { 
+      execSync('npm run cypress:run:headless', { 
         stdio: 'inherit',
-        timeout: 600_000  // 10 minutes timeout
+        timeout: 300_000,
+        env: {
+          ...process.env,
+          CYPRESS_baseUrl: ENV.CYPRESS_BASE_URL,
+          CYPRESS_keycloakUrl: ENV.CYPRESS_KEYCLOAK_URL,
+        }
       })
       
-      console.log(`${COLORS.TOWEL}[🎉] All E2E tests passed! All systems are go!${COLORS.NC}`)
+      console.log(`${COLORS.SUCCESS}[SUCCESS] All E2E tests passed successfully${COLORS.NC}`)
       
-      // Automatic cleanup on success
-      console.log(`${COLORS.CUP_OF_TEA}[🧹] Cleaning up test environment...${COLORS.NC}`)
-      execSync('npm run test:e2e:docker:clean', { stdio: 'inherit' })
-      console.log(`${COLORS.HYPERINTELLIGENT}[✅] Test environment cleaned up successfully${COLORS.NC}`)
-
     } catch (err) {
-      console.log(`${COLORS.PANIC}[💥] E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
+      console.log(`${COLORS.ERROR}[ERROR] E2E tests failed: ${(err as Error).message}${COLORS.NC}`)
       
       try {
-        console.log(`${COLORS.PANIC}[📋] Service logs during test failure:${COLORS.NC}`)
-        execSync('npm run test:e2e:docker:logs', { stdio: 'inherit' })
+        console.log(`${COLORS.INFO}[INFO] Retrieving service logs...${COLORS.NC}`)
+        execSync('npm run test:e2e:logs', { stdio: 'inherit' })
       } catch {
-        console.log(`${COLORS.PANIC}[❌] Could not retrieve service logs${COLORS.NC}`)
+        console.log(`${COLORS.ERROR}[ERROR] Could not retrieve service logs${COLORS.NC}`)
       }
       
       cleanupHandler()
       exitWithError('E2E TESTS FAILED:', err as Error)
     }
 
-    console.log(`${COLORS.HYPERINTELLIGENT}
-╔══════════════════════════════════════════════════════════════════════════╗
-║                           🎉 MISSION ACCOMPLISHED 🎉                    ║
-║                                                                          ║
-║  All E2E tests have passed successfully!                                ║
-║  The Heart of Gold is ready for production.                             ║
-║                                                                          ║
-║  "So long, and thanks for all the fish!"                                ║
-╚══════════════════════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    // =============================================================================
+    // CLEANUP
+    // =============================================================================
+    console.log(`${COLORS.INFO}[INFO] Cleaning up test environment...${COLORS.NC}`)
+    execSync('npm run test:e2e:clean', { stdio: 'inherit' })
+    console.log(`${COLORS.SUCCESS}[SUCCESS] Test environment cleaned up${COLORS.NC}`)
+
+    console.log(`${COLORS.SUCCESS}[SUCCESS] E2E test suite completed successfully${COLORS.NC}`)
 
   } catch (err) {
     cleanupHandler()
@@ -117,7 +141,7 @@ ${COLORS.NC}`)
 }
 
 start().catch(err => {
-  console.error(`${COLORS.PANIC}[FATAL ERROR] │ ${err.message}${COLORS.NC}`)
+  console.error(`${COLORS.ERROR}[ERROR] Fatal error: ${err.message}${COLORS.NC}`)
   process.exit(1)
 })
  

@@ -2,7 +2,6 @@ import { getThemeSync } from '@intelika/swagger-theme'
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
-import chalk from 'chalk'
 import * as dotenv from 'dotenv'
 import { Response } from 'express'
 
@@ -15,9 +14,9 @@ void bootstrap()
 
 function createSwaggerConfig(): ReturnType<DocumentBuilder['build']> {
   return new DocumentBuilder()
-    .setTitle("The Hitchhiker's Guide to the Galaxy API")
-    .setDescription('A mostly harmless API for intergalactic message sharing')
-    .setVersion('42.0')
+    .setTitle('NG Demo API')
+    .setDescription('REST API for the NG Demo application')
+    .setVersion('1.0')
     .addBearerAuth(
       {
         type: 'http',
@@ -39,7 +38,7 @@ function setupSwagger(
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('/api/docs', app, document, {
     customCss: getThemeSync().toString(),
-    customSiteTitle: "The Guide API - Don't Panic!",
+    customSiteTitle: 'NG Demo API Documentation',
     customfavIcon: '/favicon.ico',
     swaggerOptions: {
       persistAuthorization: true,
@@ -51,71 +50,47 @@ function setupSwagger(
     .get('/api/docs-json', (_req, res: Response) => res.json(document))
 }
 
-function getRandomHitchhikerLog(): string {
-  const logs = [
-    'Computing ultimate answer... 42 milliseconds response time',
-    'Babel fish translation services online... mostly harmless',
-    'Heart of Gold improbability drive: 1 in 2^276,709 against',
-    'Vogon poetry detector: No threatening verse detected',
-    'Towel location services: Always know where your towel is',
-    'Pan Galactic Gargle Blaster mixer: Preparing cosmic cocktails',
-    'Infinite Improbability Drive: Making the impossible probable',
-    'Restaurant at the End of the Universe: Reservations available',
-    'Magrathea planet factory: Custom worlds built to order',
-    'Slartibartfast fjord design studio: Award-winning coastlines',
-    'Zaphod Beeblebrox ego monitor: Confidence levels at maximum',
-    "Marvin the Paranoid Android: Life? Don't talk to me about life",
-    'Guide entry compiler: 42 new entries added to database',
-    'Hyperspace bypass construction: Demolition permits filed',
-    'Milliways temporal stabilizer: Time is an illusion, lunchtime doubly so',
-    'Arthur Dent confusion matrix: Probability of understanding = 0.001%',
-    'Ford Prefect research mode: Investigating local drinking establishments',
-    'Trillian logic processor: The only sane person in the galaxy online',
-    'Golgafrinchan B-Ark passenger manifest: Telephone sanitizers aboard',
-    'Bistromath navigation: Calculating restaurant bill complexity',
-    "Somebody Else's Problem field generator: SEP field at 99.7% efficiency",
-    'Total Perspective Vortex: Showing you your place in the universe',
-    'Electronic Thumb: Hitchhiking probability calculator active',
-    'Nutrimatic drink dispenser: Almost, but not quite, entirely unlike tea',
-    'Sirius Cybernetics Corporation: Share and Enjoy! (Complaints Dept.)',
-  ]
-  return logs[Math.floor(Math.random() * logs.length)]
-}
-
-function createServerBanner(port: string): string {
+function logServerConfiguration(port: string): void {
+  const logger = new Logger('Bootstrap')
   const clientPort = process.env.CLIENT_PORT ?? '4200'
-  const nodeEnv = process.env.NODE_ENV ?? 'mostly harmless'
+  const nodeEnv = process.env.NODE_ENV ?? 'development'
 
-  return `
-      ${chalk.hex('#FF0000')(`
-    ╔════════════════════════════════════════════════════════════════════════════════════╗
-    ║                                                                                    ║
-    ║  ██████╗  ██████╗ ███╗   ██╗██╗████████╗    ██████╗  █████╗ ███╗   ██║██╗ ██████╗  ║
-    ║  ██╔══██╗██╔═══██╗████╗  ██║╚═╝╚══██╔══╝    ██╔══██╗██╔══██╗████╗  ██║██║██╔════╝  ║
-    ║  ██║  ██║██║   ██║██╔██╗ ██║       ██║       ██████╔╝███████║██╔██╗ ██║██║██║      ║
-    ║  ██║  ██║██║   ██║██║╚██╗██║       ██║       ██╔═══╝ ██╔══██║██║╚██╗██║██║██║      ║
-    ║  ██████╔╝╚██████╔╝██║ ╚████║       ██║       ██║     ██║  ██║██║ ╚████║██║╚██████╗ ║
-    ║  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝       ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝ ╚═════╝ ║
-    ║                                                                                    ║
-    ╚════════════════════════════════════════════════════════════════════════════════════╝
-      `)}
+  // Calculate proper spacing for 76-character width
+  const boxWidth = 76
+  const padLine = (content: string): string => {
+    return content + ' '.repeat(boxWidth - content.length)
+  }
 
-    ${chalk.hex('#26A7DE')('════════════════════════ SYSTEM STATUS ═══════════════════════════════════════════════')}
+  const envLine = padLine(`  Environment:     ${nodeEnv}`)
+  const clientLine =
+    nodeEnv !== 'production'
+      ? `║${padLine(`  Client URL:      http://localhost:${clientPort}`)}║`
+      : ''
+  const serverLine = padLine(`  Server URL:      http://localhost:${port}`)
+  const docsLine = padLine(
+    `  API Docs:        http://localhost:${port}/api/docs`,
+  )
+  const schemaLine = padLine(
+    `  API Schema:      http://localhost:${port}/api/docs-json`,
+  )
+  const statusLine = padLine(
+    `                   🚀 Server is ready and accepting connections`,
+  )
 
-    ${chalk.hex('#FFFFFF')('🐋 Universe Mode:       ')} ${chalk.hex('#FFD700')(nodeEnv)}
-    ${nodeEnv !== 'production' ? chalk.hex('#FFD700')('🫖  Main Application:    ') + ' ' + chalk.hex('#FFFFFF')(`http://localhost:${clientPort}`) : ''}
-    ${chalk.hex('#FFD700')('🌌 Space-Time Port:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}`)}
-    ${chalk.hex('#FFD700')('📖 Guide Entry:         ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}/api/docs`)}
-    ${chalk.hex('#FFD700')('🐬 Babel Fish JSON:     ')} ${chalk.hex('#FFFFFF')(`http://localhost:${port}/api/docs-json`)}
+  const banner = `
+╔════════════════════════════════════════════════════════════════════════════╗
+║                              NG DEMO API                                   ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║${envLine}║
+${clientLine}
+║${serverLine}║
+║${docsLine}║
+║${schemaLine}║
+╠════════════════════════════════════════════════════════════════════════════╣
+║${statusLine}║
+╚════════════════════════════════════════════════════════════════════════════╝`
 
-    ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
-
-    ${chalk.hex('#FFD700')('🤖 Deep Thought:        ')} ${chalk.hex('#FFFFFF')(getRandomHitchhikerLog())}
-
-    ${chalk.hex('#26A7DE')('══════════════════════════════════════════════════════════════════════════════════════')}
-
-    ${chalk.hex('#FFD700')('💡 Tip:')} ${chalk.hex('#FFFFFF')('The answer to life, the universe, and everything is 42!')}
-    `
+  logger.log(banner)
 }
 
 async function bootstrap(): Promise<void> {
@@ -137,8 +112,6 @@ async function bootstrap(): Promise<void> {
   const config = createSwaggerConfig()
   setupSwagger(app, config)
 
-  const serverBanner = createServerBanner(port)
-
   await app.listen(Number(port))
-  Logger.log(serverBanner)
+  logServerConfiguration(port)
 }

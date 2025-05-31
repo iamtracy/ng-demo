@@ -10,12 +10,12 @@ config()
 // =============================================================================
 
 export interface Colors {
-  IMPROBABILITY: string
-  HYPERINTELLIGENT: string
-  PANIC: string
-  TOWEL: string
-  CUP_OF_TEA: string
-  SARCASM: string
+  PRIMARY: string
+  SUCCESS: string
+  ERROR: string
+  WARNING: string
+  INFO: string
+  MUTED: string
   NC: string
 }
 
@@ -32,12 +32,12 @@ export interface RunCommandOptions {
 // =============================================================================
 
 export const COLORS: Colors = {
-  IMPROBABILITY: '\x1b[38;5;57m',
-  HYPERINTELLIGENT: '\x1b[38;5;135m',
-  PANIC: '\x1b[1;91m',
-  TOWEL: '\x1b[1;97m',
-  CUP_OF_TEA: '\x1b[1;96m',
-  SARCASM: '\x1b[1;90m',
+  PRIMARY: '\x1b[38;5;57m',
+  SUCCESS: '\x1b[38;5;135m',
+  ERROR: '\x1b[1;91m',
+  WARNING: '\x1b[1;93m',
+  INFO: '\x1b[1;96m',
+  MUTED: '\x1b[1;90m',
   NC: '\x1b[0m',
 }
 
@@ -48,16 +48,8 @@ export const COLORS: Colors = {
 function getRequiredEnvVar(name: string): string {
   const value = process.env[name]
   if (!value) {
-    console.error(`${COLORS.PANIC}
-    ╔═══════════════════════════════════════════════════════════╗
-    ║                🚨 CONFIGURATION ERROR 🚨                  ║
-    ╠═══════════════════════════════════════════════════════════╣
-    ║  Missing required environment variable: ${name.padEnd(20)} ║
-    ║                                                           ║
-    ║  Please check your .env file and ensure all required      ║
-    ║  variables are set.                                       ║
-    ╚═══════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.error(`${COLORS.ERROR}[ERROR] Missing required environment variable: ${name}${COLORS.NC}`)
+    console.error(`${COLORS.ERROR}        Please check your .env file and ensure all required variables are set.${COLORS.NC}`)
     process.exit(1)
   }
   return value
@@ -93,8 +85,12 @@ export const ENV = {
   
   KC_LOG_LEVEL: getEnvVar('KC_LOG_LEVEL', 'INFO'),
   
-  HEALTH_CHECK_TIMEOUT: parseInt(getEnvVar('HEALTH_CHECK_TIMEOUT', '2000')),
-  HEALTH_CHECK_MAX_RETRIES: parseInt(getEnvVar('HEALTH_CHECK_MAX_RETRIES', '30')),
+  HEALTH_CHECK_TIMEOUT: parseInt(getEnvVar('HEALTH_CHECK_TIMEOUT', '5000')),
+  HEALTH_CHECK_MAX_RETRIES: parseInt(getEnvVar('HEALTH_CHECK_MAX_RETRIES', '60')),
+
+  CYPRESS_BASE_URL: getEnvVar('CYPRESS_BASE_URL', 'http://localhost:3000'),
+  CYPRESS_API_URL: getEnvVar('CYPRESS_API_URL', 'http://localhost:3000'),
+  CYPRESS_KEYCLOAK_URL: getEnvVar('CYPRESS_KEYCLOAK_URL', 'http://localhost:8080'),
 }
 
 // =============================================================================
@@ -102,7 +98,7 @@ export const ENV = {
 // =============================================================================
 
 export const log = (color: keyof Colors, prefix: string, msg: string): void => {
-  console.log(`${COLORS[color]}[${prefix}] │${COLORS.NC} ${msg}`)
+  console.log(`${COLORS[color]}[${prefix}] ${msg}${COLORS.NC}`)
 }
 
 export function runCommand(
@@ -118,11 +114,11 @@ export function runCommand(
     }
 
     readline.createInterface({ input: proc.stdout }).on('line', line => {
-      log(opts.prefixColor || 'HYPERINTELLIGENT', opts.prefix || cmd, line)
+      log(opts.prefixColor || 'SUCCESS', opts.prefix || cmd, line)
     })
 
     readline.createInterface({ input: proc.stderr }).on('line', line => {
-      log('PANIC', `${opts.prefix || cmd} ERR`, line)
+      log('ERROR', `${opts.prefix || cmd} ERR`, line)
     })
 
     proc.on('close', code => {
@@ -141,22 +137,13 @@ export async function ensureDockerIsRunning(): Promise<void> {
     execSync('docker info', { stdio: 'ignore' })
     execSync('docker compose version', { stdio: 'ignore' })
   } catch {
-    console.error(`${COLORS.PANIC}
-    ╔═══════════════════════════════════════════════════════════╗
-    ║     🚫 INFINITE IMPROBABILITY DRIVE MALFUNCTION           ║
-    ╠═══════════════════════════════════════════════════════════╣
-    ║  Please ensure Docker and Docker Compose v2 are running   ║
-    ║  before attempting to traverse the galaxy.                ║
-    ║                                                           ║
-    ║  Error Code: 42                                           ║
-    ╚═══════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.error(`${COLORS.ERROR}[ERROR] Docker is not running. Please ensure Docker and Docker Compose v2 are installed and running.${COLORS.NC}`)
     process.exit(1)
   }
 }
 
 export async function cleanupConflicts(): Promise<void> {
-  console.log(`${COLORS.HYPERINTELLIGENT}[🗑️] Checking for conflicting containers...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Checking for conflicting containers...${COLORS.NC}`)
   try {
     const containers = execSync('docker ps -a --format "{{.Names}}"', { encoding: 'utf8' })
     const targets = containers
@@ -165,7 +152,7 @@ export async function cleanupConflicts(): Promise<void> {
       .filter(Boolean)
 
     if (targets.length > 0) {
-      console.log(`${COLORS.SARCASM}[⚠️] Removing: ${targets.join(', ')}${COLORS.NC}`)
+      console.log(`${COLORS.WARNING}[WARN] Removing conflicting containers: ${targets.join(', ')}${COLORS.NC}`)
       execSync(`docker rm -f ${targets.join(' ')}`, { stdio: 'inherit' })
     }
   } catch {
@@ -174,15 +161,15 @@ export async function cleanupConflicts(): Promise<void> {
 }
 
 export async function startDockerServices(): Promise<void> {
-  console.log(`${COLORS.HYPERINTELLIGENT}[🔄] Resetting the infinite improbability drive...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Stopping existing Docker services...${COLORS.NC}`)
   execSync('docker compose down --remove-orphans', { stdio: 'inherit' })
 
-  console.log(`${COLORS.HYPERINTELLIGENT}[🧹] Cleaning up containers...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Cleaning up containers...${COLORS.NC}`)
   execSync('docker container prune -f', { stdio: 'inherit' })
 
   await cleanupConflicts()
 
-  console.log(`${COLORS.HYPERINTELLIGENT}[🚀] Engaging hyperspace bypass...${COLORS.NC}`)
+  console.log(`${COLORS.SUCCESS}[INFO] Starting Docker services...${COLORS.NC}`)
   execSync('docker compose up -d', { stdio: 'inherit' })
 }
 
@@ -192,7 +179,7 @@ export async function startDockerServices(): Promise<void> {
 
 export async function waitForServer(): Promise<void> {
   const serverUrl = `http://localhost:${ENV.PORT}/api/docs-json`
-  console.log(`${COLORS.SARCASM}[⏳] Waiting for server to finish initializing at ${serverUrl}...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Waiting for server to initialize at ${serverUrl}...${COLORS.NC}`)
   
   let retries = 0
   const maxRetries = ENV.HEALTH_CHECK_MAX_RETRIES
@@ -205,17 +192,17 @@ export async function waitForServer(): Promise<void> {
       retries++
       const progress = Math.round((retries / maxRetries) * 100)
       const dots = '.'.repeat((retries % 4) + 1)
-      console.log(`${COLORS.CUP_OF_TEA}[⌛] Server starting${dots} ${COLORS.TOWEL}${progress}%${COLORS.CUP_OF_TEA} ready${COLORS.NC}`)
+      console.log(`${COLORS.INFO}[INFO] Server starting${dots} ${progress}% ready${COLORS.NC}`)
       
       if (retries >= maxRetries) {
-        console.error(`${COLORS.PANIC}[💥] Server failed to start after ${maxRetries} attempts${COLORS.NC}`)
+        console.error(`${COLORS.ERROR}[ERROR] Server failed to start after ${maxRetries} attempts${COLORS.NC}`)
         process.exit(1)
       }
       
       await wait(ENV.HEALTH_CHECK_TIMEOUT)
     }
   }
-  console.log(`${COLORS.HYPERINTELLIGENT}[🎯] Server ready! Deep Thought has finished its calculations.${COLORS.NC}`)
+  console.log(`${COLORS.SUCCESS}[SUCCESS] Server is ready and responding${COLORS.NC}`)
 }
 
 // =============================================================================
@@ -224,13 +211,7 @@ export async function waitForServer(): Promise<void> {
 
 export function createCleanupHandler(pids: (number | undefined)[]): () => void {
   return () => {
-    console.log(`\n${COLORS.HYPERINTELLIGENT}
-    ╔════════════════════════════════════════╗
-    ║    ✴️  Emergency Protocols Activated    ║
-    ╠════════════════════════════════════════╣
-    ║    🛬 Returning to Earth (or Magrathea)║
-    ╚════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.log(`\n${COLORS.INFO}[INFO] Cleaning up processes...${COLORS.NC}`)
     
     for (const pid of pids) {
       if (pid) {
@@ -245,17 +226,8 @@ ${COLORS.NC}`)
 
 export function createErrorHandler(pids: (number | undefined)[]): (component: string, error: Error) => void {
   return (component: string, error: Error): void => {
-    console.error(`${COLORS.PANIC}
-    ╔═══════════════════════════════════════════════════════════╗
-    ║                    🚨 LAUNCH FAILURE 🚨                   ║
-    ╠═══════════════════════════════════════════════════════════╣
-    ║  ${component.padEnd(55)}                                  ║
-    ║  ${error.message.slice(0, 55).padEnd(55)}                 ║
-    ║                                                           ║
-    ║  The Heart of Gold has suffered a critical malfunction.   ║
-    ║  Please check the logs above for more details.            ║
-    ╚═══════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.error(`${COLORS.ERROR}[ERROR] ${component}: ${error.message}${COLORS.NC}`)
+    console.error(`${COLORS.ERROR}        Please check the logs above for more details.${COLORS.NC}`)
     
     for (const pid of pids) {
       if (pid) {
@@ -273,37 +245,19 @@ ${COLORS.NC}`)
 // =============================================================================
 
 export function showDevelopmentBanner(): void {
-  console.log(`${COLORS.IMPROBABILITY}
-    ╔════════════════════════════════════════════════════════╗
-    ║              GALACTIC DEV LAUNCH SYSTEM                ║
-    ╠════════════════════════════════════════════════════════╣
-    ║    🚀 Powered by Infinite Improbability Drive          ║
-    ║    🪐 Consult your towel before launch                 ║
-    ╚════════════════════════════════════════════════════════╝
-${COLORS.TOWEL}                        🚨 DON'T PANIC 🚨${COLORS.NC}
-`)
-
-  console.log(`${COLORS.CUP_OF_TEA}[🌍] Environment: ${ENV.NODE_ENV}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🚀] Client Port: ${ENV.CLIENT_PORT}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🌌] Server Port: ${ENV.PORT}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🔐] Keycloak: ${ENV.KEYCLOAK_AUTH_SERVER_URL}${COLORS.NC}`)
+  console.log(`${COLORS.PRIMARY}[INFO] Development Environment${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Environment: ${ENV.NODE_ENV}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Client Port: ${ENV.CLIENT_PORT}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Server Port: ${ENV.PORT}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Keycloak URL: ${ENV.KEYCLOAK_AUTH_SERVER_URL}${COLORS.NC}`)
 }
 
 export function showProductionBanner(): void {
-  console.log(`${COLORS.IMPROBABILITY}
-    ╔════════════════════════════════════════════════════════╗
-    ║           GALACTIC PRODUCTION TEST SYSTEM              ║
-    ╠════════════════════════════════════════════════════════╣
-    ║    🏭 Powered by Production-Grade Improbability        ║
-    ║    🪐 Testing the Restaurant at the End of the Universe║
-    ╚════════════════════════════════════════════════════════╝
-${COLORS.TOWEL}                        🚨 DON'T PANIC 🚨${COLORS.NC}
-`)
-
-  console.log(`${COLORS.CUP_OF_TEA}[🌍] Environment: ${ENV.NODE_ENV}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🌌] Server Port: ${ENV.PORT}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🔐] Keycloak: ${ENV.KEYCLOAK_AUTH_SERVER_URL}${COLORS.NC}`)
-  console.log(`${COLORS.CUP_OF_TEA}[🗄️] Database: ${ENV.DATABASE_URL.replace(/\/\/.*@/, '//***:***@')}${COLORS.NC}`)
+  console.log(`${COLORS.PRIMARY}[INFO] Production Test Environment${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Environment: ${ENV.NODE_ENV}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Server Port: ${ENV.PORT}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Keycloak URL: ${ENV.KEYCLOAK_AUTH_SERVER_URL}${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Database: ${ENV.DATABASE_URL.replace(/\/\/.*@/, '//***:***@')}${COLORS.NC}`)
 }
 
 // =============================================================================
@@ -348,11 +302,7 @@ export function showColorfulDockerLogs(
   lines: number = 50
 ): void {
   try {
-    console.log(`${COLORS[color]}
-╔════════════════════════════════════════════════════════════════════════════╗
-║                           ${title.padEnd(42)} ║
-╚════════════════════════════════════════════════════════════════════════════╝
-${COLORS.NC}`)
+    console.log(`${COLORS[color]}[LOGS] ${title}${COLORS.NC}`)
     
     const logs = execSync(`docker logs --tail ${lines} ${containerName}`, { encoding: 'utf8' })
     
@@ -360,13 +310,13 @@ ${COLORS.NC}`)
       .split('\n')
       .map(line => {
         if (line.includes('ERROR') || line.includes('error')) {
-          return `${COLORS.PANIC}${line}${COLORS.NC}`
+          return `${COLORS.ERROR}${line}${COLORS.NC}`
         } else if (line.includes('WARN') || line.includes('warn')) {
-          return `${COLORS.SARCASM}${line}${COLORS.NC}`
+          return `${COLORS.WARNING}${line}${COLORS.NC}`
         } else if (line.includes('INFO') || line.includes('info')) {
-          return `${COLORS.HYPERINTELLIGENT}${line}${COLORS.NC}`
+          return `${COLORS.SUCCESS}${line}${COLORS.NC}`
         } else if (line.includes('DEBUG') || line.includes('debug')) {
-          return `${COLORS.CUP_OF_TEA}${line}${COLORS.NC}`
+          return `${COLORS.MUTED}${line}${COLORS.NC}`
         } else {
           return line
         }
@@ -374,14 +324,13 @@ ${COLORS.NC}`)
       .join('\n')
     
     console.log(coloredLogs)
-    console.log(`${COLORS[color]}╚════════════════════════════════════════════════════════════════════════════╝${COLORS.NC}`)
   } catch (error) {
-    console.log(`${COLORS.PANIC}[❌] Could not retrieve logs for container ${containerName}: ${(error as Error).message}${COLORS.NC}`)
+    console.log(`${COLORS.ERROR}[ERROR] Could not retrieve logs for container ${containerName}: ${(error as Error).message}${COLORS.NC}`)
   }
 }
 
 export function startContinuousLogMonitoring(containerName: string): () => void {
-  console.log(`${COLORS.IMPROBABILITY}[📡] Starting continuous log monitoring for ${containerName}...${COLORS.NC}`)
+  console.log(`${COLORS.INFO}[INFO] Starting log monitoring for ${containerName}...${COLORS.NC}`)
   
   let isMonitoring = true
   let logProcess: any
@@ -397,13 +346,13 @@ export function startContinuousLogMonitoring(containerName: string): () => void 
         lines.forEach(line => {
           const timestamp = new Date().toISOString().substring(11, 19)
           if (line.includes('ERROR') || line.includes('error')) {
-            console.log(`${COLORS.PANIC}[${timestamp}] 🔴 ${line}${COLORS.NC}`)
+            console.log(`${COLORS.ERROR}[${timestamp}] ERROR: ${line}${COLORS.NC}`)
           } else if (line.includes('WARN') || line.includes('warn')) {
-            console.log(`${COLORS.SARCASM}[${timestamp}] 🟡 ${line}${COLORS.NC}`)
+            console.log(`${COLORS.WARNING}[${timestamp}] WARN: ${line}${COLORS.NC}`)
           } else if (line.includes('INFO') || line.includes('info')) {
-            console.log(`${COLORS.HYPERINTELLIGENT}[${timestamp}] 🔵 ${line}${COLORS.NC}`)
+            console.log(`${COLORS.SUCCESS}[${timestamp}] INFO: ${line}${COLORS.NC}`)
           } else if (line.trim()) {
-            console.log(`${COLORS.CUP_OF_TEA}[${timestamp}] 📝 ${line}${COLORS.NC}`)
+            console.log(`${COLORS.INFO}[${timestamp}] ${line}${COLORS.NC}`)
           }
         })
       })
@@ -412,26 +361,26 @@ export function startContinuousLogMonitoring(containerName: string): () => void 
         const lines = data.toString().split('\n').filter(line => line.trim())
         lines.forEach(line => {
           const timestamp = new Date().toISOString().substring(11, 19)
-          console.log(`${COLORS.PANIC}[${timestamp}] 🚨 ${line}${COLORS.NC}`)
+          console.log(`${COLORS.ERROR}[${timestamp}] ERROR: ${line}${COLORS.NC}`)
         })
       })
       
       logProcess.on('close', (code: number) => {
         if (isMonitoring && code !== 0) {
-          console.log(`${COLORS.SARCASM}[📡] Log monitoring process exited with code ${code}, restarting...${COLORS.NC}`)
+          console.log(`${COLORS.INFO}[INFO] Log monitoring process exited, restarting...${COLORS.NC}`)
           setTimeout(startMonitoring, 1000)
         }
       })
       
       logProcess.on('error', (error: Error) => {
         if (isMonitoring) {
-          console.log(`${COLORS.SARCASM}[📡] Log monitoring error: ${error.message}, restarting...${COLORS.NC}`)
+          console.log(`${COLORS.ERROR}[ERROR] Log monitoring error: ${error.message}, restarting...${COLORS.NC}`)
           setTimeout(startMonitoring, 1000)
         }
       })
     } catch (error) {
       if (isMonitoring) {
-        console.log(`${COLORS.PANIC}[❌] Failed to start log monitoring: ${(error as Error).message}${COLORS.NC}`)
+        console.log(`${COLORS.ERROR}[ERROR] Failed to start log monitoring: ${(error as Error).message}${COLORS.NC}`)
       }
     }
   }
@@ -443,7 +392,7 @@ export function startContinuousLogMonitoring(containerName: string): () => void 
     if (logProcess) {
       try {
         logProcess.kill('SIGTERM')
-        console.log(`${COLORS.IMPROBABILITY}[📡] Stopped continuous log monitoring${COLORS.NC}`)
+        console.log(`${COLORS.INFO}[INFO] Stopped log monitoring${COLORS.NC}`)
       } catch {
         // Ignore cleanup errors
       }

@@ -77,6 +77,7 @@ testem.log
 /server/coverage
 /cypress/screenshots
 /cypress/videos
+/cypress/downloads
 
 # IDEs and editors
 .idea/

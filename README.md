@@ -296,49 +296,51 @@ npm run test:e2e    # Run Cypress tests (requires services running)
 
 ## 🧪 Testing
 
-### E2E Testing with Docker Compose
+### E2E Testing with Hybrid Docker + Local Cypress
 
-The project includes a comprehensive Docker Compose configuration for running end-to-end tests in an isolated environment.
+The project uses a hybrid approach for E2E testing that combines Docker infrastructure with local Cypress execution for the best development experience.
 
 #### Quick Start
 ```bash
-# Run all E2E tests with Docker Compose (recommended)
-npm run test:e2e:docker
-
-# Clean up test environment
-npm run test:e2e:docker:clean
-
-# Run E2E tests with the full script (legacy method)
+# Run all E2E tests (recommended)
 npm run test:e2e
+
+# Clean up test environment  
+npm run test:e2e:clean
+
+# Open Cypress GUI for development
+npm run cypress:open
 ```
 
-#### Test Environment
-The `docker-compose.test.yml` creates an isolated testing environment with:
-- **Application Container**: Production build of the app
-- **PostgreSQL Database**: Isolated test database
-- **Keycloak Server**: Authentication service with test realm
-- **Cypress Runner**: Automated E2E test execution
+#### Test Architecture
+The current setup provides:
+- **Docker Infrastructure**: PostgreSQL, Keycloak, and App Server run in containers
+- **Local Cypress**: Test runner executes locally for better performance and debugging
+- **Environment Variables**: Automatically configured for seamless integration
 
 #### Architecture Benefits
-- ✅ **Isolated Environment**: Tests run in containers, no local dependencies
-- ✅ **Production-like**: Tests against production Docker builds
-- ✅ **Parallel Execution**: Multiple test environments can run simultaneously
-- ✅ **CI/CD Ready**: Same configuration works locally and in CI
-- ✅ **Faster Setup**: No manual service configuration required
-- ✅ **Reproducible**: Consistent results across different machines
+- ✅ **Fast Execution**: No Docker overhead for Cypress tests
+- ✅ **Easy Debugging**: Direct browser access and dev tools
+- ✅ **Reliable Infrastructure**: Containerized services ensure consistency
+- ✅ **Hot Reload Friendly**: Quick iteration on test development
+- ✅ **CI/CD Ready**: Same infrastructure works in continuous integration
+- ✅ **No Network Issues**: Local execution avoids Docker networking complexity
 
 #### Manual Testing
-If you need to debug tests or run them manually:
+If you need to debug the infrastructure or run tests manually:
 ```bash
-# Start test environment
-docker compose -f docker-compose.test.yml up -d postgres-test keycloak-db-test keycloak-test app-test
+# Start infrastructure only (PostgreSQL + Keycloak + App)
+docker compose -f docker-compose.test.yml up -d app-test
 
-# Wait for services to be ready, then run tests
-docker compose -f docker-compose.test.yml run --rm cypress-test
+# Wait for services to be ready, then run tests locally
+npm run cypress:run
 
-# Or open Cypress GUI (requires local Cypress installation)
-npx cypress open --config baseUrl=http://localhost:3000
+# Or open Cypress GUI for interactive testing
+npm run cypress:open
+
+# View service logs for debugging
+npm run test:e2e:logs
 
 # Clean up when done
-docker compose -f docker-compose.test.yml down --volumes
+npm run test:e2e:clean
 ```

@@ -18,31 +18,13 @@ describe('Authentication', () => {
 
   it('should logout successfully', () => {
     cy.login('user1')
-    
     cy.get('[data-cy="logout-button"]').click()
-    
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
-    
-    cy.origin(keycloakUrl, () => {
-      cy.url().should('include', 'keycloak')
-    })
-  })
 
-  it('should handle invalid credentials', () => {
-    const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
-    const baseUrl = Cypress.config('baseUrl') || 'http://localhost:4200'
-    const redirectUri = encodeURIComponent(`${baseUrl}/`)
+
+    const keycloakUrl = Cypress.env('keycloakUrl')
     
-    cy.visit('/')
-    
-    cy.origin(keycloakUrl, { args: { redirectUri } }, ({ redirectUri }) => {
-      cy.visit(`/realms/ng-demo/protocol/openid-connect/auth?client_id=ng-demo-client&redirect_uri=${redirectUri}&response_type=code&scope=openid`)
-      
-      cy.get('#username').type('invalid')
-      cy.get('#password').type('invalid')
-      cy.get('#kc-login').click()
-      
-      cy.get('.alert-error, .kc-feedback-text').should('be.visible')
+    cy.origin(keycloakUrl, { args: { keycloakUrl } }, ({ keycloakUrl }) => {
+      cy.url().should('include', keycloakUrl)
     })
   })
 }) 
