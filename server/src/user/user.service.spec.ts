@@ -14,6 +14,7 @@ interface MockPrismaService {
     findMany: jest.Mock<Promise<User[]>, [unknown]>
     update: jest.Mock<Promise<User>, [unknown]>
     delete: jest.Mock<Promise<User>, [unknown]>
+    create: jest.Mock<Promise<User>, [unknown]>
   }
 }
 
@@ -103,6 +104,7 @@ describe('UserService', () => {
               findMany: jest.fn(),
               update: jest.fn(),
               delete: jest.fn(),
+              create: jest.fn(),
             },
           },
         },

@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress'
 const DOMAINS = {
   APP_SERVER: 'app.localhost',
   KEYCLOAK: 'auth.localhost'
-} as const
+}
 
 export default defineConfig({
   e2e: {
