@@ -99,7 +99,7 @@ async function start(): Promise<void> {
     console.log(`${COLORS.PRIMARY}[INFO] Running Cypress E2E tests locally...${COLORS.NC}`)
     
     try {
-      execSync('npm run cypress:run:headless', { 
+      execSync('npm run cypress:run', { 
         stdio: 'inherit',
         timeout: 300_000,
         env: {
