@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import { User } from '@prisma/client'
+import { OIDCTokenPayload } from '@types'
 
 import { PrismaService } from '../prisma/prisma.service'
 
@@ -9,57 +10,12 @@ import { UserService } from './user.service'
 
 interface MockPrismaService {
   user: {
-    upsert: jest.Mock<Promise<User>, [unknown]>
     findUnique: jest.Mock<Promise<User | null>, [unknown]>
     findMany: jest.Mock<Promise<User[]>, [unknown]>
     update: jest.Mock<Promise<User>, [unknown]>
     delete: jest.Mock<Promise<User>, [unknown]>
     create: jest.Mock<Promise<User>, [unknown]>
   }
-}
-
-interface KeycloakUser {
-  sub: string
-  email: string
-  preferred_username: string
-  given_name?: string
-  family_name?: string
-  email_verified: boolean
-  realm_access?: {
-    roles: string[]
-  }
-}
-
-interface UserCreateInput {
-  id: string
-  email: string
-  username: string
-  firstName?: string | null
-  lastName?: string | null
-  emailVerified: boolean
-  roles: string[]
-  lastLoginAt: Date
-}
-
-interface UserUpdateInput {
-  email: string
-  username: string
-  firstName?: string | null
-  lastName?: string | null
-  emailVerified: boolean
-  roles: string[]
-  lastLoginAt: Date
-  updatedAt: Date
-}
-
-interface UserWhereUniqueInput {
-  id: string
-}
-
-interface UserUpsertArgs {
-  where: UserWhereUniqueInput
-  create: UserCreateInput
-  update: UserUpdateInput
 }
 
 describe('UserService', () => {
@@ -79,7 +35,7 @@ describe('UserService', () => {
     lastLoginAt: new Date(),
   }
 
-  const mockKeycloakUser: KeycloakUser = {
+  const mockKeycloakUser: OIDCTokenPayload = {
     sub: 'test-id',
     email: 'test@example.com',
     preferred_username: 'testuser',
@@ -121,43 +77,32 @@ describe('UserService', () => {
 
   describe('syncUserFromKeycloak', () => {
     it('should sync user data from Keycloak', async () => {
-      prismaServiceMock.user.upsert.mockResolvedValue(mockUser)
+      // Mock user doesn't exist, so create new user
+      prismaServiceMock.user.findUnique.mockResolvedValue(null)
+      prismaServiceMock.user.create.mockResolvedValue(mockUser)
 
       const result = await service.syncUserFromKeycloak(mockKeycloakUser)
 
       expect(result).toEqual(mockUser)
-      const expectedUpdate: UserUpdateInput = {
-        email: mockKeycloakUser.email,
-        username: mockKeycloakUser.preferred_username,
-        firstName: mockKeycloakUser.given_name ?? null,
-        lastName: mockKeycloakUser.family_name ?? null,
-        emailVerified: mockKeycloakUser.email_verified,
-        roles: mockKeycloakUser.realm_access?.roles ?? [],
-        lastLoginAt: expect.any(Date) as unknown as Date,
-        updatedAt: expect.any(Date) as unknown as Date,
-      }
-      const expectedCreate: UserCreateInput = {
-        id: mockKeycloakUser.sub,
-        email: mockKeycloakUser.email,
-        username: mockKeycloakUser.preferred_username,
-        firstName: mockKeycloakUser.given_name ?? null,
-        lastName: mockKeycloakUser.family_name ?? null,
-        emailVerified: mockKeycloakUser.email_verified,
-        roles: mockKeycloakUser.realm_access?.roles ?? [],
-        lastLoginAt: expect.any(Date) as unknown as Date,
-      }
-
-      const expectedArgs: UserUpsertArgs = {
-        where: { id: mockKeycloakUser.sub },
-        update: expectedUpdate,
-        create: expectedCreate,
-      }
-
-      expect(prismaServiceMock.user.upsert).toHaveBeenCalledWith(expectedArgs)
+      expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+        where: { username: mockKeycloakUser.preferred_username },
+      })
+      expect(prismaServiceMock.user.create).toHaveBeenCalledWith({
+        data: {
+          id: mockKeycloakUser.sub,
+          email: mockKeycloakUser.email,
+          username: mockKeycloakUser.preferred_username,
+          firstName: mockKeycloakUser.given_name ?? '',
+          lastName: mockKeycloakUser.family_name ?? '',
+          emailVerified: mockKeycloakUser.email_verified,
+          roles: mockKeycloakUser.realm_access?.roles ?? [],
+          lastLoginAt: expect.any(Date),
+        },
+      })
     })
 
     it('should handle Keycloak user with missing optional fields', async () => {
-      const partialKeycloakUser: KeycloakUser = {
+      const partialKeycloakUser: OIDCTokenPayload = {
         sub: 'test-id',
         email: 'test@example.com',
         preferred_username: 'testuser',
@@ -165,51 +110,56 @@ describe('UserService', () => {
         realm_access: { roles: ['user'] },
       }
 
-      prismaServiceMock.user.upsert.mockResolvedValue({
+      prismaServiceMock.user.findUnique.mockResolvedValue(null)
+      prismaServiceMock.user.create.mockResolvedValue({
         ...mockUser,
-        firstName: null,
-        lastName: null,
+        firstName: '',
+        lastName: '',
       })
 
       await service.syncUserFromKeycloak(partialKeycloakUser)
 
-      const expectedUpdate: Partial<UserUpdateInput> = {
-        email: partialKeycloakUser.email,
-        username: partialKeycloakUser.preferred_username,
-        firstName: '',
-        lastName: '',
-        emailVerified: partialKeycloakUser.email_verified,
-        roles: partialKeycloakUser.realm_access?.roles ?? [],
-        lastLoginAt: expect.any(Date) as unknown as Date,
-        updatedAt: expect.any(Date) as unknown as Date,
-      }
+      expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+        where: { username: partialKeycloakUser.preferred_username },
+      })
+      expect(prismaServiceMock.user.create).toHaveBeenCalledWith({
+        data: {
+          id: partialKeycloakUser.sub,
+          email: partialKeycloakUser.email,
+          username: partialKeycloakUser.preferred_username,
+          firstName: '',
+          lastName: '',
+          emailVerified: partialKeycloakUser.email_verified,
+          roles: partialKeycloakUser.realm_access?.roles ?? [],
+          lastLoginAt: expect.any(Date),
+        },
+      })
+    })
 
-      const expectedCreate: Partial<UserCreateInput> = {
-        id: partialKeycloakUser.sub,
-        email: partialKeycloakUser.email,
-        username: partialKeycloakUser.preferred_username,
-        firstName: '',
-        lastName: '',
-        emailVerified: partialKeycloakUser.email_verified,
-        roles: partialKeycloakUser.realm_access?.roles ?? [],
-        lastLoginAt: expect.any(Date) as unknown as Date,
-      }
+    it('should update existing user from Keycloak', async () => {
+      // Mock user exists, so update existing user
+      prismaServiceMock.user.findUnique.mockResolvedValue(mockUser)
+      prismaServiceMock.user.update.mockResolvedValue(mockUser)
 
-      interface ExpectedArgs {
-        where: UserWhereUniqueInput
-        update: Partial<UserUpdateInput>
-        create: Partial<UserCreateInput>
-      }
+      const result = await service.syncUserFromKeycloak(mockKeycloakUser)
 
-      const expectedArgs: Partial<ExpectedArgs> = {
-        where: { id: partialKeycloakUser.sub },
-        update: expectedUpdate,
-        create: expectedCreate,
-      }
-
-      expect(prismaServiceMock.user.upsert).toHaveBeenCalledWith(
-        expect.objectContaining<Partial<ExpectedArgs>>(expectedArgs),
-      )
+      expect(result).toEqual(mockUser)
+      expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+        where: { username: mockKeycloakUser.preferred_username },
+      })
+      expect(prismaServiceMock.user.update).toHaveBeenCalledWith({
+        where: { username: mockKeycloakUser.preferred_username },
+        data: {
+          id: mockKeycloakUser.sub,
+          email: mockKeycloakUser.email,
+          firstName: mockKeycloakUser.given_name ?? '',
+          lastName: mockKeycloakUser.family_name ?? '',
+          emailVerified: mockKeycloakUser.email_verified,
+          roles: mockKeycloakUser.realm_access?.roles ?? [],
+          lastLoginAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        },
+      })
     })
   })
 
@@ -225,41 +175,63 @@ describe('UserService', () => {
         roles: ['user'],
       }
 
-      prismaServiceMock.user.upsert.mockResolvedValue(mockUser)
+      prismaServiceMock.user.findUnique.mockResolvedValue(null)
+      prismaServiceMock.user.create.mockResolvedValue(mockUser)
 
       const result = await service.syncUser(syncUserDto)
 
       expect(result).toEqual(mockUser)
+      expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+        where: { username: syncUserDto.username },
+      })
+      expect(prismaServiceMock.user.create).toHaveBeenCalledWith({
+        data: {
+          id: syncUserDto.id,
+          email: syncUserDto.email,
+          username: syncUserDto.username,
+          firstName: syncUserDto.firstName,
+          lastName: syncUserDto.lastName,
+          emailVerified: syncUserDto.emailVerified,
+          roles: syncUserDto.roles,
+          lastLoginAt: expect.any(Date),
+        },
+      })
+    })
 
-      const expectedUpdate: UserUpdateInput = {
-        email: syncUserDto.email,
-        username: syncUserDto.username,
-        firstName: syncUserDto.firstName,
-        lastName: syncUserDto.lastName,
-        emailVerified: syncUserDto.emailVerified,
-        roles: syncUserDto.roles,
-        lastLoginAt: expect.any(Date) as unknown as Date,
-        updatedAt: expect.any(Date) as unknown as Date,
+    it('should update existing user with provided DTO', async () => {
+      const syncUserDto: SyncUserDto = {
+        id: 'test-id',
+        email: 'test@example.com',
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
+        emailVerified: true,
+        roles: ['user'],
       }
 
-      const expectedCreate: UserCreateInput = {
-        id: syncUserDto.id,
-        email: syncUserDto.email,
-        username: syncUserDto.username,
-        firstName: syncUserDto.firstName,
-        lastName: syncUserDto.lastName,
-        emailVerified: syncUserDto.emailVerified,
-        roles: syncUserDto.roles,
-        lastLoginAt: expect.any(Date) as unknown as Date,
-      }
+      // Mock user exists, so update existing user
+      prismaServiceMock.user.findUnique.mockResolvedValue(mockUser)
+      prismaServiceMock.user.update.mockResolvedValue(mockUser)
 
-      const expectedArgs: UserUpsertArgs = {
-        where: { id: syncUserDto.id },
-        update: expectedUpdate,
-        create: expectedCreate,
-      }
+      const result = await service.syncUser(syncUserDto)
 
-      expect(prismaServiceMock.user.upsert).toHaveBeenCalledWith(expectedArgs)
+      expect(result).toEqual(mockUser)
+      expect(prismaServiceMock.user.findUnique).toHaveBeenCalledWith({
+        where: { username: syncUserDto.username },
+      })
+      expect(prismaServiceMock.user.update).toHaveBeenCalledWith({
+        where: { username: syncUserDto.username },
+        data: {
+          id: syncUserDto.id,
+          email: syncUserDto.email,
+          firstName: syncUserDto.firstName,
+          lastName: syncUserDto.lastName,
+          emailVerified: syncUserDto.emailVerified,
+          roles: syncUserDto.roles,
+          lastLoginAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        },
+      })
     })
 
     it('should handle database errors', async () => {
@@ -274,7 +246,7 @@ describe('UserService', () => {
       }
 
       const error = new Error('Database error')
-      prismaServiceMock.user.upsert.mockRejectedValue(error)
+      prismaServiceMock.user.findUnique.mockRejectedValue(error)
 
       await expect(service.syncUser(syncUserDto)).rejects.toThrow(error)
     })
