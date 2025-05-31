@@ -64,19 +64,23 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       
-      # Application Configuration
+      # Test Configuration - optimized for speed
       KC_HEALTH_ENABLED: true
       
-      # Development Configuration
+      # Test-optimized settings
       KC_DEV: "true"
       KC_FEATURES: "preview"
-      KC_LOG_LEVEL: ${KC_LOG_LEVEL:-INFO}
-      KEYCLOAK_LOGLEVEL: ${KC_LOG_LEVEL:-INFO}
+      KC_LOG_LEVEL: "WARN"
+      KEYCLOAK_LOGLEVEL: "WARN"
       
-      # Hostname Configuration (v2 - modern)
-      KC_HOSTNAME: http://localhost:8080
-      KC_HOSTNAME_ADMIN: http://localhost:8080
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      # Hostname Configuration - use auth.localhost for consistent JWT issuer
+      KC_HOSTNAME: auth.localhost
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_URL: http://auth.localhost:8080
+      KC_HOSTNAME_ADMIN_URL: http://auth.localhost:8080
+      KC_HTTP_ENABLED: "true"      
+      # Force frontend URL
+      KEYCLOAK_FRONTEND_URL: http://auth.localhost:8080
     ports:
       - "${KEYCLOAK_PORT:-8080}:8080"
     command:
@@ -93,7 +97,9 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - app-network
+      app-network:
+        aliases:
+          - auth.localhost
 
 # =============================================================================
 # 📦 Persistent Storage Volumes

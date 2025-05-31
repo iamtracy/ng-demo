@@ -27,12 +27,18 @@ export class UserService {
   }
 
   async syncUser(syncUserDto: SyncUserDto): Promise<User> {
-    try {
-      const user = await this.prisma.user.upsert({
-        where: { id: syncUserDto.id },
-        update: {
+    const isExistingUser = await this.prisma.user.findUnique({
+      where: { username: syncUserDto.username },
+    })
+
+    let user: User
+
+    if (isExistingUser) {
+      user = await this.prisma.user.update({
+        where: { username: syncUserDto.username },
+        data: {
+          id: syncUserDto.id,
           email: syncUserDto.email,
-          username: syncUserDto.username,
           firstName: syncUserDto.firstName,
           lastName: syncUserDto.lastName,
           emailVerified: syncUserDto.emailVerified,
@@ -40,7 +46,14 @@ export class UserService {
           lastLoginAt: new Date(),
           updatedAt: new Date(),
         },
-        create: {
+      })
+
+      this.logger.log(
+        `User updated: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`,
+      )
+    } else {
+      user = await this.prisma.user.create({
+        data: {
           id: syncUserDto.id,
           email: syncUserDto.email,
           username: syncUserDto.username,
@@ -53,13 +66,11 @@ export class UserService {
       })
 
       this.logger.log(
-        `User synced: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`,
+        `User created: ${user.username} (${user.id}) with roles: ${user.roles.join(', ')}`,
       )
-      return user
-    } catch (error) {
-      this.logger.error(`Failed to sync user ${syncUserDto.username}:`, error)
-      throw error
     }
+
+    return user
   }
 
   async findById(id: string): Promise<User | null> {

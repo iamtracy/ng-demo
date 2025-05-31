@@ -70,27 +70,43 @@ async function main(): Promise<void> {
   console.log('✨ Seeding complete!')
 }
 
+function prepareUserData(userData: SeedUser): Omit<User, 'createdAt'> {
+  return {
+    id: userData.id ?? '',
+    email: userData.email ?? '',
+    username: userData.username ?? '',
+    firstName: userData.firstName ?? '',
+    lastName: userData.lastName ?? '',
+    roles: userData.roles ?? [],
+    emailVerified: true,
+    updatedAt: new Date(),
+    lastLoginAt: new Date(),
+  }
+}
+
 async function createUser(userData: SeedUser): Promise<User> {
-  const user = await prisma.user.upsert({
-    where: { id: userData.id },
-    update: {
-      updatedAt: new Date(),
-    },
-    create: {
-      id: userData.id ?? '',
-      email: userData.email ?? '',
-      username: userData.username ?? '',
-      firstName: userData.firstName ?? '',
-      lastName: userData.lastName ?? '',
-      roles: userData.roles,
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      lastLoginAt: new Date(),
-    },
+  const existingUser = await prisma.user.findUnique({
+    where: { username: userData.username },
   })
 
-  console.log(`👤 User ${userData.username ?? 'unknown'} ready`)
+  const preparedData = prepareUserData(userData)
+
+  if (existingUser) {
+    const user = await prisma.user.update({
+      where: { username: userData.username },
+      data: preparedData,
+    })
+    console.log(`👤 User ${userData.username ?? 'unknown'} updated`)
+    return user
+  }
+
+  const user = await prisma.user.create({
+    data: {
+      ...preparedData,
+      createdAt: new Date(),
+    },
+  })
+  console.log(`👤 User ${userData.username ?? 'unknown'} created`)
   return user
 }
 

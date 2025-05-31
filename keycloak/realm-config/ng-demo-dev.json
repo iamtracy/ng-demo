@@ -16,12 +16,10 @@
       "enabled": true,
       "publicClient": true,
       "redirectUris": [
-        "http://app.localhost:3000/*",
-        "http://localhost:3000/*"
+        "http://app.localhost:4200/*"
       ],
       "webOrigins": [
-        "http://app.localhost:3000",
-        "http://localhost:3000"
+        "http://app.localhost:4200"
       ],
       "protocol": "openid-connect",
       "directAccessGrantsEnabled": true,

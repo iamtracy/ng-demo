@@ -46,8 +46,6 @@ const KEYCLOAK_CONFIG = {
   secret: KEYCLOAK_CLIENT_SECRET,
 }
 
-console.log('KEYCLOAK_CONFIG', KEYCLOAK_CONFIG)
-
 @Module({
   imports: [
     ConfigModule.forRoot({
