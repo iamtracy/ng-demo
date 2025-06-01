@@ -9,14 +9,15 @@ new NgDemoStack(app, 'NgDemo-Staging', {
   environment: 'staging',
   includeKeycloak: true,
   infrastructure: {
+    certificateArn: 'arn:aws:acm:us-east-1:273354628963:certificate/bdf06578-3ac9-44ec-a0f4-3ae9dc95af98',
     database: {
       instanceClass: cdk.aws_ec2.InstanceType.of(cdk.aws_ec2.InstanceClass.T3, cdk.aws_ec2.InstanceSize.SMALL),
-      allocatedStorage: 50,
     },
+    domainName: 'is-mood.com',
     ecs: {
       cpu: 512,
       memoryLimitMiB: 1024,
-      desiredCount: 2,
+      desiredCount: 1,
     },
   },
   env: {
@@ -33,14 +34,15 @@ new NgDemoStack(app, 'NgDemo-Prod', {
   environment: 'prod',
   includeKeycloak: true,
   infrastructure: {
+    certificateArn: 'arn:aws:acm:us-east-1:273354628963:certificate/bdf06578-3ac9-44ec-a0f4-3ae9dc95af98',
     database: {
       instanceClass: cdk.aws_ec2.InstanceType.of(cdk.aws_ec2.InstanceClass.T3, cdk.aws_ec2.InstanceSize.MEDIUM),
-      allocatedStorage: 100,
     },
+    domainName: 'is-mood.com',
     ecs: {
       cpu: 1024,
       memoryLimitMiB: 2048,
-      desiredCount: 3,
+      desiredCount: 1,
     },
   },
   env: {

@@ -69,7 +69,7 @@ const KEYCLOAK_CONFIG = {
       },
     }),
     KeycloakConnectModule.register({
-      authServerUrl: 'http://auth.localhost:8080',
+      authServerUrl: KEYCLOAK_CONFIG.authServerUrl,
       realm: KEYCLOAK_CONFIG.realm,
       clientId: KEYCLOAK_CONFIG.clientId,
       secret: KEYCLOAK_CONFIG.secret,

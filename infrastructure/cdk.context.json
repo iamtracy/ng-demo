@@ -6,5 +6,9 @@
     "us-east-1d",
     "us-east-1e",
     "us-east-1f"
-  ]
+  ],
+  "hosted-zone:account=273354628963:domainName=is-mood.com:region=us-east-1": {
+    "Id": "/hostedzone/Z021195828MEA9I30OTLM",
+    "Name": "is-mood.com."
+  }
 }
