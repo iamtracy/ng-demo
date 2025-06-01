@@ -41,4 +41,16 @@ Dockerfile
 **/*.swp
 **/*.swo
 **/tmp
-**/temp 
+**/temp
+
+# CDK and infrastructure
+infrastructure/
+**/cdk.out/
+**/cdk.context.json
+**/.cdk.staging
+
+# Angular cache and build artifacts
+**/.angular/
+**/cypress/
+**/e2e/
+**/scripts/ 

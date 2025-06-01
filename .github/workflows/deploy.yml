@@ -9,6 +9,13 @@ on:
       - completed
     branches: [ main ]
 
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  AWS_PROFILE: default
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
 jobs:
   deploy-staging:
     name: Deploy to Staging
@@ -48,46 +55,12 @@ jobs:
           docker build -t ng-demo:${{ github.sha }} .
           docker tag ng-demo:${{ github.sha }} ng-demo:latest
 
-      # - name: 🧪 Test Docker image
-      #   run: |
-      #     # Start the container in background for testing
-      #     docker run -d --name test-container \
-      #       -p 3000:3000 \
-      #       -e DATABASE_URL="postgresql://test:test@localhost:5432/test" \
-      #       -e NODE_ENV="production" \
-      #       -e KEYCLOAK_CLIENT_SECRET="test-secret" \
-      #       ng-demo:${{ github.sha }}
-          
-      #     # Wait a moment for startup
-      #     sleep 10
-          
-      #     # Basic health check
-      #     curl -f http://localhost:3000/health || exit 1
-          
-      #     # Cleanup
-      #     docker stop test-container
-      #     docker rm test-container
-
-      # - name: 📦 Save Docker image
-      #   run: |
-      #     docker save ng-demo:${{ github.sha }} | gzip > ng-demo-${{ github.sha }}.tar.gz
-
-      # - name: 📤 Upload Docker image artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: docker-image-${{ github.sha }}
-      #     path: ng-demo-${{ github.sha }}.tar.gz
-      #     retention-days: 7
-
-      # Placeholder for actual deployment steps
       - name: 🚀 Deploy to staging
         run: |
           echo "🚀 Deploying to staging environment..."
           echo "Docker image: ng-demo:${{ github.sha }}"
           echo "This is where you would deploy to your staging environment"
-          # Example deployment commands:
-          # kubectl set image deployment/ng-demo ng-demo=ng-demo:${{ github.sha }}
-          # docker-compose -f docker-compose.staging.yml up -d
+          npm run deploy -- --environment=staging
 
   deploy-production:
     name: Deploy to Production

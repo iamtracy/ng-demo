@@ -1,47 +1,47 @@
 {
-    "realm": "ng-demo",
-    "enabled": true,
-    "registrationAllowed": true,
-    "registrationEmailAsUsername": false,
-    "rememberMe": true,
-    "verifyEmail": false,
-    "loginWithEmailAllowed": true,
-    "duplicateEmailsAllowed": false,
-    "resetPasswordAllowed": true,
-    "editUsernameAllowed": false,
-    "bruteForceProtected": true,
-    "clients": [
-      {
-        "clientId": "ng-demo-client",
-        "enabled": true,
-        "publicClient": true,
-        "redirectUris": [],
-        "webOrigins": [],
-        "protocol": "openid-connect",
-        "directAccessGrantsEnabled": true,
-        "standardFlowEnabled": true,
-        "implicitFlowEnabled": false,
-        "serviceAccountsEnabled": false,
-        "authorizationServicesEnabled": false,
-        "frontchannelLogout": true,
-        "attributes": {
-          "pkce.code.challenge.method": "S256"
-        }
+  "realm": "ng-demo",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "ng-demo-client",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": ["https://app.is-mood.com/*"],
+      "webOrigins": ["https://app.is-mood.com"],
+      "protocol": "openid-connect",
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
       }
-    ],
-    "roles": {
-      "realm": [
-        {
-          "name": "user",
-          "description": "Regular user role"
-        },
-        {
-          "name": "admin",
-          "description": "Administrator role"
-        }
-      ]
-    },
-    "defaultRoles": [
-      "user"
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Regular user role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
     ]
-  }
+  },
+  "defaultRoles": [
+    "user"
+  ]
+}

@@ -134,9 +134,6 @@ services:
       - KEYCLOAK_REALM=ng-demo
       - KEYCLOAK_CLIENT_ID=ng-demo-client
       - KEYCLOAK_CLIENT_SECRET=ng-demo-secret
-      
-      # Ensure Prisma uses the correct database URL
-      - PRISMA_DATABASE_URL=postgresql://postgres:postgres@postgres-test:5432/ng_demo_db
     depends_on:
       postgres-test:
         condition: service_healthy

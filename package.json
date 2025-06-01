@@ -23,7 +23,13 @@
     "setup:hosts": "tsx scripts/setup-hosts.ts",
     "setup:hosts:add": "tsx scripts/setup-hosts.ts add",
     "setup:hosts:remove": "tsx scripts/setup-hosts.ts remove",
-    "setup:hosts:check": "tsx scripts/setup-hosts.ts check"
+    "setup:hosts:check": "tsx scripts/setup-hosts.ts check",
+    "deploy": "tsx scripts/deploy.ts",
+    "deploy:dev": "tsx scripts/deploy.ts -e dev",
+    "deploy:staging": "tsx scripts/deploy.ts -e staging",
+    "deploy:prod": "tsx scripts/deploy.ts -e prod",
+    "destroy:dev": "tsx scripts/deploy.ts --destroy -e dev",
+    "destroy:staging": "tsx scripts/deploy.ts --destroy -e staging"
   },
   "dependencies": {
     "dotenv": "^16.5.0",
