@@ -126,6 +126,13 @@ async function deployInfrastructure(options: DeployOptions): Promise<void> {
   const env = buildEnvironment(options)
   
   try {
+    printInfo('Installing CDK dependencies...')
+    execSync('npm ci', {
+      cwd: INFRA_DIR,
+      stdio: 'pipe',
+      env
+    })
+
     printInfo('Bootstrapping CDK...')
     execSync('npx cdk bootstrap', {
       cwd: INFRA_DIR,
