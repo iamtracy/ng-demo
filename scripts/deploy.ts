@@ -60,6 +60,8 @@ function printHeader(options: DeployOptions): void {
   printInfo(`Environment: ${options.environment}`)
   printInfo(`Region: ${options.region || 'default'}`)
   printInfo(`Action: ${options.destroy ? 'DESTROY' : 'DEPLOY'}`)
+  printInfo(`AWS Account ID: ${process.env.AWS_ACCOUNT_ID}`)
+  printInfo(`AWS Region: ${process.env.AWS_DEFAULT_REGION}`)
   console.log()
 }
 
