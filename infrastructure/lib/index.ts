@@ -4,13 +4,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as rds from 'aws-cdk-lib/aws-rds'
 import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns'
-import * as s3 from 'aws-cdk-lib/aws-s3'
-import * as cloudfront from 'aws-cdk-lib/aws-cloudfront'
-import * as origins from 'aws-cdk-lib/aws-cloudfront-origins'
-import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment'
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2'
-import * as route53 from 'aws-cdk-lib/aws-route53'
-import * as certificateManager from 'aws-cdk-lib/aws-certificatemanager'
+import * as logs from 'aws-cdk-lib/aws-logs'
 
 export interface NgDemoInfrastructureProps {
   domainName?: string
@@ -31,8 +26,6 @@ export class NgDemoInfrastructure extends Construct {
   public readonly database: rds.DatabaseInstance
   public readonly cluster: ecs.Cluster
   public readonly backendService: ecsPatterns.ApplicationLoadBalancedFargateService
-  public readonly frontendBucket: s3.Bucket
-  public readonly distribution: cloudfront.Distribution
   public readonly loadBalancer: elbv2.ApplicationLoadBalancer
 
   constructor(scope: Construct, id: string, props: NgDemoInfrastructureProps) {
@@ -69,13 +62,16 @@ export class NgDemoInfrastructure extends Construct {
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
-      credentials: rds.Credentials.fromGeneratedSecret('postgres'),
+      credentials: {
+        username: 'postgres',
+        password: cdk.SecretValue.unsafePlainText('postgres'),
+      },
       databaseName: 'ng_demo_db',
       allocatedStorage: props.database?.allocatedStorage || 20,
       storageEncrypted: true,
       backupRetention: cdk.Duration.days(7),
-      deletionProtection: props.environment === 'prod',
-      removalPolicy: props.environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      deletionProtection: props.environment === 'production',
+      removalPolicy: props.environment === 'production' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
     })
 
     this.cluster = new ecs.Cluster(this, 'NgDemoCluster', {
@@ -83,24 +79,59 @@ export class NgDemoInfrastructure extends Construct {
       containerInsights: true,
     })
 
-    this.backendService = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'NgDemoBackend', {
-      cluster: this.cluster,
-      cpu: props.ecs?.cpu || 256,
+    const taskDefinition = new ecs.FargateTaskDefinition(this, 'NgDemoTaskDefinition', {
       memoryLimitMiB: props.ecs?.memoryLimitMiB || 512,
-      desiredCount: props.ecs?.desiredCount || 1,
-      taskImageOptions: {
-        image: ecs.ContainerImage.fromAsset('../', {
-          file: 'Dockerfile',
-        }),
-        containerPort: 3000,
-        environment: {
-          NODE_ENV: 'production',
-          PORT: '3000',
-        },
-        secrets: {
-          DATABASE_URL: ecs.Secret.fromSecretsManager(this.database.secret!, 'DATABASE_URL'),
-        },
+      cpu: props.ecs?.cpu || 256,
+    })
+
+    const container = taskDefinition.addContainer('NgDemoContainer', {
+      image: ecs.ContainerImage.fromAsset('../', {
+        file: 'Dockerfile',
+        exclude: [
+          'infrastructure/',
+          '**/cdk.out/',
+          '**/cdk.context.json',
+          '**/.cdk.staging/',
+          '**/node_modules/',
+          '**/.git/',
+          '**/.angular/',
+          '**/cypress/',
+          '**/e2e/',
+          '**/scripts/',
+          '**/*.log',
+          '**/.env*',
+          '!**/.env.example',
+        ],
+      }),
+      environment: {
+        NODE_ENV: 'production',
+        PORT: '3000',
+        DB_HOST: this.database.instanceEndpoint.hostname,
+        DB_PORT: this.database.instanceEndpoint.port.toString(),
+        DB_NAME: 'ng_demo_db',
+        DB_USERNAME: 'postgres',
+        DB_PASSWORD: 'postgres',
+        DATABASE_URL: `postgresql://postgres:postgres@${this.database.instanceEndpoint.hostname}:${this.database.instanceEndpoint.port.toString()}/ng_demo_db?sslmode=no-verify`,
       },
+      logging: ecs.LogDrivers.awsLogs({
+        streamPrefix: 'ng-demo-app',
+        logGroup: new logs.LogGroup(this, 'NgDemoAppLogGroup', {
+          logGroupName: `/aws/ecs/ng-demo-${props.environment}`,
+          retention: logs.RetentionDays.ONE_WEEK,
+          removalPolicy: cdk.RemovalPolicy.DESTROY,
+        }),
+      })
+    })
+
+    container.addPortMappings({
+      containerPort: 3000,
+      protocol: ecs.Protocol.TCP,
+    })
+
+    this.backendService = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'NgDemoApp', {
+      cluster: this.cluster,
+      taskDefinition: taskDefinition,
+      desiredCount: props.ecs?.desiredCount || 1,
       publicLoadBalancer: true,
       listenerPort: 80,
     })
@@ -109,61 +140,14 @@ export class NgDemoInfrastructure extends Construct {
 
     this.loadBalancer = this.backendService.loadBalancer
 
-    this.frontendBucket = new s3.Bucket(this, 'NgDemoFrontend', {
-      bucketName: `ng-demo-frontend-${props.environment}-${cdk.Aws.ACCOUNT_ID}`,
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'index.html',
-      publicReadAccess: false,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: props.environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: props.environment !== 'prod',
-    })
-
-    this.distribution = new cloudfront.Distribution(this, 'NgDemoDistribution', {
-      defaultBehavior: {
-        origin: new origins.S3Origin(this.frontendBucket),
-        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-        cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-      },
-      additionalBehaviors: {
-        '/api/*': {
-          origin: new origins.LoadBalancerV2Origin(this.loadBalancer, {
-            protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-          }),
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
-          originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER,
-        },
-      },
-      defaultRootObject: 'index.html',
-      errorResponses: [
-        {
-          httpStatus: 404,
-          responseHttpStatus: 200,
-          responsePagePath: '/index.html',
-        },
-      ],
-    })
-
     new cdk.CfnOutput(this, 'DatabaseEndpoint', {
       value: this.database.instanceEndpoint.hostname,
       description: 'RDS PostgreSQL endpoint',
     })
 
-    new cdk.CfnOutput(this, 'BackendUrl', {
+    new cdk.CfnOutput(this, 'ApplicationUrl', {
       value: `http://${this.backendService.loadBalancer.loadBalancerDnsName}`,
-      description: 'Backend API URL',
-    })
-
-    new cdk.CfnOutput(this, 'FrontendUrl', {
-      value: `https://${this.distribution.distributionDomainName}`,
-      description: 'Frontend CloudFront URL',
-    })
-
-    new cdk.CfnOutput(this, 'FrontendBucketName', {
-      value: this.frontendBucket.bucketName,
-      description: 'S3 bucket for frontend deployment',
+      description: 'Application URL (serves both frontend and API)',
     })
   }
 }

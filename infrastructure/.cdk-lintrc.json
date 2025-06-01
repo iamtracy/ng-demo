@@ -1,0 +1,83 @@
+{
+  "rules": {
+    "stack-description": {
+      "level": "warning",
+      "description": "Stack should have a description"
+    },
+    "construct-props-interface": {
+      "level": "error", 
+      "description": "Construct props should be defined as interfaces ending with 'Props'"
+    },
+    "no-hardcoded-credentials": {
+      "level": "error",
+      "description": "Avoid hardcoded credentials in CDK code"
+    },
+    "explicit-environment": {
+      "level": "warning",
+      "description": "Stack should explicitly define environment"
+    },
+    "removal-policy-production": {
+      "level": "error",
+      "description": "Production resources should have RETAIN removal policy"
+    },
+    "encrypted-storage": {
+      "level": "error",
+      "description": "Storage resources should be encrypted"
+    },
+    "public-access-block": {
+      "level": "error",
+      "description": "S3 buckets should block public access unless explicitly needed"
+    },
+    "backup-enabled": {
+      "level": "warning",
+      "description": "Database resources should have backup enabled"
+    },
+    "monitoring-enabled": {
+      "level": "warning", 
+      "description": "Production resources should have monitoring enabled"
+    },
+    "least-privilege": {
+      "level": "error",
+      "description": "IAM policies should follow least privilege principle"
+    },
+    "vpc-isolation": {
+      "level": "warning",
+      "description": "Resources should be deployed in VPC for isolation"
+    },
+    "multi-az": {
+      "level": "warning",
+      "description": "Production databases should be multi-AZ"
+    },
+    "logging-enabled": {
+      "level": "warning",
+      "description": "Resources should have logging enabled"
+    },
+    "cost-optimization": {
+      "level": "info",
+      "description": "Consider cost optimization opportunities"
+    }
+  },
+  "environments": {
+    "dev": {
+      "rules": {
+        "removal-policy-production": "off",
+        "multi-az": "off",
+        "cost-optimization": "warning"
+      }
+    },
+    "staging": {
+      "rules": {
+        "removal-policy-production": "warning",
+        "multi-az": "warning"
+      }
+    },
+    "prod": {
+      "rules": {
+        "removal-policy-production": "error",
+        "multi-az": "error",
+        "backup-enabled": "error",
+        "monitoring-enabled": "error"
+      }
+    }
+  }
+} 

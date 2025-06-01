@@ -5,30 +5,6 @@ import { NgDemoStack } from '../lib/ng-demo-stack'
 
 const app = new cdk.App()
 
-new NgDemoStack(app, 'NgDemo-Dev', {
-  environment: 'dev',
-  includeKeycloak: true,
-  infrastructure: {
-    database: {
-      instanceClass: cdk.aws_ec2.InstanceType.of(cdk.aws_ec2.InstanceClass.T3, cdk.aws_ec2.InstanceSize.MICRO),
-      allocatedStorage: 20,
-    },
-    ecs: {
-      cpu: 256,
-      memoryLimitMiB: 512,
-      desiredCount: 1,
-    },
-  },
-  env: {
-    account: process.env.CDK_DEFAULT_ACCOUNT,
-    region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
-  },
-  tags: {
-    Environment: 'dev',
-    Project: 'ng-demo',
-  },
-})
-
 new NgDemoStack(app, 'NgDemo-Staging', {
   environment: 'staging',
   includeKeycloak: true,

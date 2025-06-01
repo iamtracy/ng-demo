@@ -51,14 +51,13 @@ export class NgDemoStack extends cdk.Stack {
 
   private getDeploymentInstructions(): string {
     const instructions = [
-      '1. Build and push Docker image for backend',
+      '1. Build and push Docker image for application',
       '2. Update ECS service with new image',
-      `3. Deploy frontend to S3: aws s3 sync client/dist s3://${this.infrastructure.frontendBucket.bucketName}`,
-      `4. Invalidate CloudFront: aws cloudfront create-invalidation --distribution-id ${this.infrastructure.distribution.distributionId} --paths "/*"`,
+      '3. Application will be available at the load balancer URL',
     ]
 
     if (this.keycloak) {
-      instructions.push('5. Configure Keycloak realm and client settings')
+      instructions.push('4. Configure Keycloak realm and client settings')
     }
 
     return instructions.join(' | ')

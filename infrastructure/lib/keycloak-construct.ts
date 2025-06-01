@@ -57,8 +57,8 @@ export class KeycloakConstruct extends Construct {
       allocatedStorage: props.database?.allocatedStorage || 20,
       storageEncrypted: true,
       backupRetention: cdk.Duration.days(7),
-      deletionProtection: props.environment === 'prod',
-      removalPolicy: props.environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      deletionProtection: props.environment === 'production',
+      removalPolicy: props.environment === 'production' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
     })
 
     this.service = new ecsPatterns.ApplicationLoadBalancedFargateService(this, 'KeycloakService', {
@@ -95,9 +95,10 @@ export class KeycloakConstruct extends Construct {
       port: '8080',
       protocol: elbv2.Protocol.HTTP,
       healthyThresholdCount: 2,
-      unhealthyThresholdCount: 5,
-      timeout: cdk.Duration.seconds(30),
-      interval: cdk.Duration.seconds(60),
+      unhealthyThresholdCount: 10,
+      timeout: cdk.Duration.seconds(60),
+      interval: cdk.Duration.seconds(120),
+      healthyHttpCodes: '200-499'
     })
 
     this.database.connections.allowFrom(this.service.service, ec2.Port.tcp(5432))
