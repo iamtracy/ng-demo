@@ -386,9 +386,6 @@ async function main(): Promise<void> {
   }
 }
 
-// Run script when called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error)
-}
+main().catch(console.error)
 
 export { deploy, type DeployOptions } 
