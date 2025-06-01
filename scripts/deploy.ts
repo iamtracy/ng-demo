@@ -37,10 +37,6 @@ async function deploy(options: DeployOptions): Promise<void> {
       return
     }
 
-    if (!options.skipBuild) {
-      await buildApplication()
-    }
-
     await deployInfrastructure(options)
     await printSummary(options)
 
@@ -93,29 +89,6 @@ async function validatePrerequisites(): Promise<void> {
     throw new Error('CDK not found. Please install dependencies in infrastructure/')
   }
 
-  console.log()
-}
-
-async function buildApplication(): Promise<void> {
-  printInfo('🏗️  Building application Docker image...')
-  
-  try {
-    const buildCmd = 'docker build -t ng-demo-app:latest .'
-    
-    if (process.stdout.isTTY) {
-      await runCommand(buildCmd, PROJECT_ROOT)
-    } else {
-      execSync(buildCmd, { 
-        cwd: PROJECT_ROOT,
-        stdio: 'pipe'
-      })
-    }
-    
-    printSuccess('Docker image built successfully')
-  } catch (error) {
-    throw new Error(`Failed to build Docker image: ${(error as Error).message}`)
-  }
-  
   console.log()
 }
 
