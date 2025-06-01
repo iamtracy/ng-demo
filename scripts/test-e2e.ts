@@ -80,7 +80,6 @@ async function start(): Promise<void> {
       stdio: 'inherit',
       env: {
         ...process.env,
-        KEYCLOAK_CLIENT_SECRET: ENV.KEYCLOAK_CLIENT_SECRET
       }
     })
 
@@ -97,9 +96,6 @@ async function start(): Promise<void> {
       stdio: 'inherit',
       env: {
         ...process.env,
-        CYPRESS_baseUrl: ENV.CYPRESS_BASE_URL,
-        CYPRESS_keycloakUrl: ENV.CYPRESS_KEYCLOAK_URL,
-        KEYCLOAK_CLIENT_SECRET: ENV.KEYCLOAK_CLIENT_SECRET
       }
     })
 

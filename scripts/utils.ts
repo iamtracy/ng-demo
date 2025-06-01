@@ -36,16 +36,6 @@ export const COLORS: Colors = {
 // 🔧 ENVIRONMENT CONFIGURATION
 // =============================================================================
 
-function getRequiredEnvVar(name: string): string {
-  const value = process.env[name]
-  if (!value) {
-    console.error(`${COLORS.ERROR}[ERROR] Missing required environment variable: ${name}${COLORS.NC}`)
-    console.error(`${COLORS.ERROR}        Please check your .env file and ensure all required variables are set.${COLORS.NC}`)
-    process.exit(1)
-  }
-  return value
-}
-
 function getEnvVar(name: string, defaultValue: string): string {
   return process.env[name] ?? defaultValue
 }
@@ -64,7 +54,7 @@ export const ENV = {
   KEYCLOAK_AUTH_SERVER_URL: getEnvVar('KEYCLOAK_AUTH_SERVER_URL', `http://${DOMAINS.KEYCLOAK}:8080`),
   KEYCLOAK_REALM: getEnvVar('KEYCLOAK_REALM', 'ng-demo'),
   KEYCLOAK_CLIENT_ID: getEnvVar('KEYCLOAK_CLIENT_ID', 'ng-demo-client'),
-  KEYCLOAK_CLIENT_SECRET: getRequiredEnvVar('KEYCLOAK_CLIENT_SECRET'),
+  KEYCLOAK_CLIENT_SECRET: getEnvVar('KEYCLOAK_CLIENT_SECRET', 'ng-demo-secret'),
   KEYCLOAK_PORT: getEnvVar('KEYCLOAK_PORT', '8080'),
   KC_BOOTSTRAP_ADMIN_USERNAME: getEnvVar('KC_BOOTSTRAP_ADMIN_USERNAME', 'admin'),
   KC_BOOTSTRAP_ADMIN_PASSWORD: getEnvVar('KC_BOOTSTRAP_ADMIN_PASSWORD', 'admin'),
