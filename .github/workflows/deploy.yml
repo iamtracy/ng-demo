@@ -31,36 +31,18 @@ jobs:
       - name: 🛒 Checkout code
         uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-          cache-dependency-path: |
-            client/package-lock.json
-            server/package-lock.json
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: 📦 Install dependencies
-        run: |
-          cd client && npm ci
-          cd ../server && npm ci --force
-
-      - name: 🏗️ Build applications
-        run: |
-          cd client && npm run build
-          cd ../server && npm run build
-
-      - name: 🐳 Build Docker image
-        run: |
-          docker build -t ng-demo:${{ github.sha }} .
-          docker tag ng-demo:${{ github.sha }} ng-demo:latest
+      - name: 📦 Install root dependencies
+        run: npm ci
 
       - name: 🚀 Deploy to staging
-        run: |
-          echo "🚀 Deploying to staging environment..."
-          echo "Docker image: ng-demo:${{ github.sha }}"
-          echo "This is where you would deploy to your staging environment"
-          npm run deploy -- --environment=staging
+        run: npm run deploy:staging
 
   deploy-production:
     name: Deploy to Production
