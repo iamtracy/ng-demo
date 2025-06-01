@@ -55,7 +55,7 @@ export const ENV = {
   CLIENT_PORT: getEnvVar('CLIENT_PORT', '4200'),
   NODE_ENV: getEnvVar('NODE_ENV', 'development'),
   
-  DATABASE_URL: getRequiredEnvVar('DATABASE_URL'),
+  DATABASE_URL: getEnvVar('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/ng_demo_db?sslmode=no-verify'),
   POSTGRES_USER: getEnvVar('POSTGRES_USER', 'postgres'),
   POSTGRES_PASSWORD: getEnvVar('POSTGRES_PASSWORD', 'postgres'),
   POSTGRES_DB: getEnvVar('POSTGRES_DB', 'ng_demo_db'),
