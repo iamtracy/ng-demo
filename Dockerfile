@@ -32,6 +32,9 @@ RUN addgroup --system appgroup && \
     mkdir -p /home/appuser/.npm && \
     chown -R appuser:appgroup /app /home/appuser
 
+COPY start.application.sh /start.application.sh
+RUN chmod +x /start.application.sh
+
 USER appuser
 
 ENV NODE_ENV=production \
@@ -43,4 +46,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/main.js"]
+CMD ["/start.application.sh"]
