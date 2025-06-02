@@ -1,0 +1,88 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['20.x']
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: ng_demo_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: 📦 Install client dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: 📦 Install server dependencies
+        working-directory: ./server
+        run: npm ci --force
+
+      - name: 🗄️ Setup test database
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
+        run: |
+          npm run prisma:generate
+          npm run prisma:migrate
+
+      - name: 🧪 Run client tests
+        working-directory: ./client
+        run: npm run test:ci
+
+      - name: 🧪 Run server unit tests
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
+          NODE_ENV: test
+          KEYCLOAK_CLIENT_SECRET: test-secret
+        run: npm run test:ci
+
+      - name: 📈 Upload client coverage
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./client/coverage
+          flags: client
+          name: client-coverage
+        continue-on-error: true
+
+      - name: 📈 Upload server coverage
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./server/coverage
+          flags: server
+          name: server-coverage
+        continue-on-error: true 
