@@ -9,7 +9,12 @@ USER keycloak
 
 RUN /opt/keycloak/bin/kc.sh build
 
-ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m"
+ENV KC_JAVA_OPTS_MIN_MEMORY="256m" \
+    KC_JAVA_OPTS_MAX_MEMORY="512m" \
+    KC_JAVA_OPTS_METASPACE_SIZE="96M" \
+    KC_JAVA_OPTS_MAX_METASPACE_SIZE="256m"
+
+ENV JAVA_OPTS="-Xms${KC_JAVA_OPTS_MIN_MEMORY} -Xmx${KC_JAVA_OPTS_MAX_MEMORY} -XX:MetaspaceSize=${KC_JAVA_OPTS_METASPACE_SIZE} -XX:MaxMetaspaceSize=${KC_JAVA_OPTS_MAX_METASPACE_SIZE}"
 
 HEALTHCHECK --interval=15s --timeout=2s --retries=15 \
     CMD curl -f http://localhost:${PORT:-8080}/health/ready || exit 1

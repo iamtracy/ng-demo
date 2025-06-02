@@ -42,8 +42,8 @@ ENV NODE_ENV=production \
     HOME=/home/appuser
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s \
-    CMD curl --fail http://localhost:${PORT}/api/docs-json || exit 1
+    CMD curl --fail http://localhost:${PORT:-3000}/api/docs-json || exit 1
 
-EXPOSE 3000
+EXPOSE ${PORT:-3000}
 
 CMD ["/start.application.sh"]
