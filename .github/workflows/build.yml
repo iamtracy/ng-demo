@@ -12,44 +12,27 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    name: Build Applications
+  build-client:
+    name: Build Client
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
-
     strategy:
       matrix:
-        node-version: ['20.x']
-
+        node-version: ['22.x']
     steps:
       - name: 🛒 Checkout code
         uses: actions/checkout@v4
-
       - name: 🟢 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: |
-            client/package-lock.json
-            server/package-lock.json
-
+          cache-dependency-path: client/package-lock.json
       - name: 📦 Install client dependencies
         working-directory: ./client
         run: npm ci
-
-      - name: 📦 Install server dependencies
-        working-directory: ./server
-        run: npm ci --force
-
       - name: 🏗️ Build client
         working-directory: ./client
         run: npx ng build
-
-      - name: 🏗️ Build server
-        working-directory: ./server
-        run: npm run build
-
       - name: 📦 Upload client build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -57,6 +40,27 @@ jobs:
           path: client/dist/
           retention-days: 1
 
+  build-server:
+    name: Build Server
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['22.x']
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v4
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - name: 📦 Install server dependencies
+        working-directory: ./server
+        run: npm ci --force
+      - name: 🏗️ Build server
+        working-directory: ./server
+        run: npm run build
       - name: 📦 Upload server build artifacts
         uses: actions/upload-artifact@v4
         with:
