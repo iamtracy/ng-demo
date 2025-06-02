@@ -88,8 +88,8 @@ export class KeycloakConstruct extends Construct {
       taskImageOptions: {
         containerPort: 8080,
         environment: {
-          KC_DB_URL: `jdbc:postgresql://${this.database.instanceEndpoint.hostname}:5432/keycloak`,
           KC_DB_SCHEMA: 'public',
+          KC_DB_URL: `jdbc:postgresql://${this.database.instanceEndpoint.hostname}:5432/keycloak`,
           KC_DB: 'postgres',
           KC_FEATURES: 'preview',
           KC_HEALTH_ENABLED: 'true',
@@ -97,7 +97,11 @@ export class KeycloakConstruct extends Construct {
           KC_HOSTNAME: `auth.${props.domainName}`,
           KC_HTTP_ENABLED: 'true',
           KC_HTTP_PORT: '8080',
-          KC_LOG_LEVEL: 'INFO'
+          KC_JAVA_OPTS_MAX_MEMORY: '1024m',
+          KC_JAVA_OPTS_MAX_METASPACE_SIZE: '512m',
+          KC_JAVA_OPTS_METASPACE_SIZE: '128M',
+          KC_JAVA_OPTS_MIN_MEMORY: '512m',
+          KC_LOG_LEVEL: 'INFO',
         },
         image: ecs.ContainerImage.fromAsset(path.join(__dirname, '..', '..', 'keycloak')),
         secrets: {
