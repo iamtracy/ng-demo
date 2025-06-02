@@ -1,0 +1,60 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  client-tests:
+    name: Client Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['22.x']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+        working-directory: ./client
+      - run: npm run test:ci
+        working-directory: ./client
+      - uses: codecov/codecov-action@v4
+        with:
+          directory: ./client/coverage
+          flags: client
+          name: client-coverage
+        if: always()
+
+  server-tests:
+    name: Server Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['22.x']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --force
+        working-directory: ./server
+      - run: npm run test:ci
+        working-directory: ./server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ng_demo_test
+          NODE_ENV: test
+          KEYCLOAK_CLIENT_SECRET: test-secret
+      - uses: codecov/codecov-action@v4
+        with:
+          directory: ./server/coverage
+          flags: server
+          name: server-coverage
+        if: always()

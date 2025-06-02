@@ -4,32 +4,28 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: ["CI - Code Quality & Unit Tests", "E2E Tests"]
+    workflows: ["Code Quality", "Unit Tests", "E2E Tests"]
     types:
       - completed
     branches: [ main ]
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: us-east-1
-  AWS_DEFAULT_OUTPUT: json
+  AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
 jobs:
-  deploy-staging:
-    name: Deploy to Staging
+  deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
-    environment: staging
-    
-    strategy:
-      matrix:
-        node-version: ['22.x']
-
     steps:
       - name: 🛒 Checkout code
         uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
       - name: 📦 Install root dependencies
         run: npm ci
