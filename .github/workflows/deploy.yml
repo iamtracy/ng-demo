@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   workflow_run:
-    workflows: ["CI - Code Quality & Unit Tests", "E2E Tests"]
+    workflows: ["Code Quality", "Unit Tests", "E2E Tests"]
     types:
       - completed
     branches: [ main ]

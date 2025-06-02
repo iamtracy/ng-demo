@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   workflow_run:
-    workflows: ["CI - Code Quality & Unit Tests"]
+    workflows: ["Code Quality", "Unit Tests"]
     types:
       - completed
     branches: [ main ]
