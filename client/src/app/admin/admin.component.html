@@ -1,45 +1,55 @@
-<div class="container">
-  <div>
-    <h2>User Management</h2>
-    <nz-table [nzData]="(users$ | async) || []" nzSize="middle" [nzPageSize]="10">
-      <thead>
-        <tr>
-          <th nzWidth="120px">ID</th>
-          <th>Username</th>
-          <th>Email</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Roles</th>
-          <th nzWidth="120px">Email Verified</th>
-          <th nzWidth="150px">Last Login</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of (users$ | async) || []">
-          <td>{{user.id.substring(0, 8)}}...</td>
-          <td>{{user.username}}</td>
-          <td>{{user.email}}</td>
-          <td>{{user.firstName || 'N/A'}}</td>
-          <td>{{user.lastName || 'N/A'}}</td>
-          <td>
-            <nz-tag 
-              *ngFor="let role of user.roles" 
-              [nzColor]="role.includes('admin') ? 'gold' : 'blue'"
-            >
-              <nz-icon [nzType]="role.includes('admin') ? 'crown' : 'user'" />
-              {{role}}
-            </nz-tag>
-            <span *ngIf="user.roles.length === 0" class="no-roles">No roles</span>
-          </td>
-          <td>
-            <nz-icon 
-              [nzType]="user.emailVerified ? 'check-circle' : 'close-circle'"
-              [style.color]="user.emailVerified ? '#52c41a' : '#ff4d4f'"
-            />
-          </td>
-          <td>{{user.lastLoginAt | date:'dd/MM/yyyy HH:mm'}}</td>
-        </tr>
-      </tbody>
-    </nz-table>
-  </div>
-</div>
+@if (query.isPending()) {
+  Loading users...
+}
+
+@if (query.error()) {
+  An error has occurred: {{ query.error()?.message }}
+}
+
+@if (query.data(); as data) {
+  <div class="container">
+    <div>
+      <h2>User Management</h2>
+      <nz-table [nzData]="data" nzSize="middle" [nzPageSize]="10">
+        <thead>
+          <tr>
+            <th nzWidth="120px">ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Roles</th>
+            <th nzWidth="120px">Email Verified</th>
+            <th nzWidth="150px">Last Login</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of data">
+            <td>{{user.id.substring(0, 8)}}...</td> 
+            <td>{{user.username}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.firstName || 'N/A'}}</td>
+            <td>{{user.lastName || 'N/A'}}</td>
+            <td>
+              <nz-tag 
+                *ngFor="let role of user.roles" 
+                [nzColor]="role.includes('admin') ? 'gold' : 'blue'"
+              >
+                <nz-icon [nzType]="role.includes('admin') ? 'crown' : 'user'" />
+                {{role}}
+              </nz-tag>
+              <span *ngIf="user.roles.length === 0" class="no-roles">No roles</span>
+            </td>
+            <td>
+              <nz-icon 
+                [nzType]="user.emailVerified ? 'check-circle' : 'close-circle'"
+                [style.color]="user.emailVerified ? '#52c41a' : '#ff4d4f'"
+              />
+            </td>
+            <td>{{user.lastLoginAt | date:'dd/MM/yyyy HH:mm'}}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>  
+}

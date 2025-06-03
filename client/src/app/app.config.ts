@@ -18,6 +18,10 @@ import {
   CloseOutline
 } from '@ant-design/icons-angular/icons'
 import {
+  provideTanStackQuery,
+  QueryClient,
+} from '@tanstack/angular-query-experimental'
+import {
   AutoRefreshTokenService,
   INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
   includeBearerTokenInterceptor,
@@ -68,6 +72,7 @@ export const appConfig: ApplicationConfig = {
     },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    provideTanStackQuery(new QueryClient()),
     provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
     provideNzI18n(en_US),
     provideNzIcons([
