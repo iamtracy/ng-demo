@@ -1,24 +1,15 @@
 import { inject, Injectable } from '@angular/core'
-import { BehaviorSubject, Observable, tap } from 'rxjs'
+import { lastValueFrom } from 'rxjs'
 
 import { UserDto, UsersService } from '../api'
 
 @Injectable({
   providedIn: 'root'
 })
-export class AdminService {
-  private readonly _users$ = new BehaviorSubject<UserDto[]>([])
-  readonly users$ = this._users$.asObservable()
-  private _initialized = false
-  readonly usersService = inject(UsersService)
-  
-  get usersWithAutoLoad$(): Observable<UserDto[]> {
-    if (!this._initialized) {
-      this._initialized = true
-      this.usersService.userControllerGetAllUsers().pipe(
-        tap((users: UserDto[]) => this._users$.next(users))
-      ).subscribe()
-    }
-    return this.users$
+export class AdminService { 
+  private readonly usersService = inject(UsersService)
+
+  getUsers(): Promise<UserDto[]> {    
+    return lastValueFrom(this.usersService.userControllerGetAllUsers())
   }
 }
